@@ -115,7 +115,7 @@ let util = {
         return hash;
     },
     getMappedPath(path){
-        return `P${Math.abs(util.hashCode(path.replace(/\\/g,"/")))}`;
+        return `P${Math.abs(util.hashCode(path.replace(/\\/g, "/")))}`;
     }
 };
 
@@ -301,7 +301,7 @@ let base = {
             });
             return {
                 code: result,
-                key:util.getMappedPath("package-" + key.replace(/\//g, "-").replace(/\\/g, "-"))
+                key: util.getMappedPath("package-" + key.replace(/\//g, "-").replace(/\\/g, "-"))
             };
         });
         let basefile = files[0];
@@ -332,7 +332,7 @@ let base = {
             let c = `Ada.unpack(${JSON.stringify(file.code)})`;
             file.hash = hash.md5(c).substring(0, 8);
             map[p] = file.hash;
-            return new File(Path.resolve(distPath, p)).write(c);
+            return new File(Path.resolve(distPath, p) + ".js").write(c);
         }).concat(pages.map(page => () => {
             let path = Path.resolve(basePath, page);
             let content = new File(path).readSync();
