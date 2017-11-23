@@ -264,7 +264,6 @@ let base = {
                     b = map[util.getMappedPath(a)];
                     if (!b) {
                         b = map[a.split(".").shift()];
-                        console.log(a.split(".").shift(), b)
                     }
                 }
                 if (b) {
