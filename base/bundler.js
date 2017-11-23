@@ -261,13 +261,30 @@ let base = {
                 let a = path.substring(config.distPath.length).replace(/\\/g, "/");
                 let b = "";
                 if (!isbinaryfile.sync(path)) {
-                    b = map[a];
+                    b = map[util.getMappedPath(a)];
+                    if (!b) {
+                        b = map[a.split(".").shift()];
+                        console.log(a.split(".").shift(), b)
+                    }
                 }
                 if (b) {
                     new File(path).renameSync(Path.resolve(config.distPath, Util.getHashPath(a, b)));
                 }
             });
-            console.log(`[BUILT DONE]`.green);
+            let adapath = Path.resolve(config.distPath, "./ada.js");
+            let adahash = new File(adapath).hash().substring(0, 10);
+            let newname = `ada${adahash}.js`;
+            new File(adapath).renameSync(Path.resolve(config.distPath, newname));
+            return queue(config.pages.map(page => () => {
+                let path = Path.resolve(config.basePath, page);
+                let content = new File(path).readSync();
+                content = content.replace(/ada[a-z0-9]*.js/g, function (a) {
+                    return newname;
+                });
+                return new File(path).write(content);
+            })).then(() => {
+                console.log(`[BUILT DONE]`.green);
+            });
         });
     },
     bundle() {
@@ -342,6 +359,8 @@ let base = {
                 obj.map = map;
                 obj.develop = config.develop;
                 return `Ada.boot(${JSON.stringify(obj)})`;
+            }).replace(/ada[a-z0-9]*.js/g, function (a) {
+                return "ada.js";
             });
             return new File(path).write(content);
         }))).then(() => {
