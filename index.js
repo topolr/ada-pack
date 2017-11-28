@@ -44,7 +44,7 @@ let waiter = {
 
 module.exports = {
     develop(fn) {
-        let configPath = path.resolve(basePath + "/", "./.adaboot");
+        let configPath = path.resolve(basePath + "/", "./.ada");
         if (new File(configPath).isExists()) {
             config = JSON.parse(new File(configPath).readSync());
         }
@@ -75,7 +75,7 @@ module.exports = {
         });
     },
     publish() {
-        let configPath = path.resolve(basePath + "/", "./.adaboot");
+        let configPath = path.resolve(basePath + "/", "./.ada");
         if (new File(configPath).isExists()) {
             config = JSON.parse(new File(configPath).readSync());
         }

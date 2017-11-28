@@ -105,7 +105,7 @@ let util = {
         }
         return content;
     },
-    hashCode(str){
+    hashCode(str) {
         let hash = 0;
         for (let i = 0; i < str.length; i++) {
             var character = str.charCodeAt(i);
@@ -114,7 +114,7 @@ let util = {
         }
         return hash;
     },
-    getMappedPath(path){
+    getMappedPath(path) {
         return `P${Math.abs(util.hashCode(path.replace(/\\/g, "/")))}`;
     }
 };
@@ -161,12 +161,14 @@ class AdaBundler {
 
     bundle(path, output, develop) {
         this.getCodeMap(path);
+        let veison = require(Path.resolve(path, "./../package.json")).version;
         let result = this.resultmap.map(path => {
             return this.resultmapcode[path];
         }).map(code => {
             return `function(module,exports,require){${code}}`;
         });
-        let code = `(function (map,moduleName) {var Installed={};var requireModule = function (index) {if (Installed[index]) {return Installed[index].exports;}var module = Installed[index] = {exports: {}};map[index].call(module.exports, module, module.exports, requireModule);return module.exports;};var mod=requireModule(0);window&&window.Ada.installModule(moduleName,mod);})([${result.join(",")}],"adajs");`;
+        let commet = `/*! adajs ${veison} https://github.com/topolr/ada | https://github.com/topolr/ada/blob/master/LICENSE */\n`;
+        let code = `${commet}(function (map,moduleName) {var Installed={};var requireModule = function (index) {if (Installed[index]) {return Installed[index].exports;}var module = Installed[index] = {exports: {}};map[index].call(module.exports, module, module.exports, requireModule);return module.exports;};var mod=requireModule(0);window&&window.Ada.installModule(moduleName,mod);})([${result.join(",")}],"adajs");`;
         return new File(output).write(code);
     }
 }
