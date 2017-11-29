@@ -236,7 +236,7 @@ let base = {
         }
     },
     parseFiles(files) {
-        console.log(`+ BUILT:${Util.formatDate()} +`.cyan);
+        console.log(`+ ${Util.formatDate()} +`.cyan);
         let success = [], error = {};
         return Promise.all(files.map(_path => {
             return this.parseFile(_path).then(() => {

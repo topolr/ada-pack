@@ -3,8 +3,9 @@ let path = require("path");
 let chokidar = require('chokidar');
 let File = require("./base/util/file");
 let basePath = path.resolve(__dirname, "./../../");
-let Path=require("path");
+let Path = require("path");
 let config = null;
+let package = require("./package.json");
 
 let waiter = {
     _data: {},
@@ -42,8 +43,13 @@ let waiter = {
     }
 };
 
+function showTips() {
+    console.log(`[ ada-pack:${package.version} ]`);
+}
+
 module.exports = {
     develop(fn) {
+        showTips();
         let configPath = path.resolve(basePath + "/", "./.ada");
         if (new File(configPath).isExists()) {
             config = JSON.parse(new File(configPath).readSync());
@@ -58,16 +64,28 @@ module.exports = {
         }).on("ready", function () {
             waiter.setHandler(function (a, times) {
                 if (a.add) {
-                    _bundler.parseFiles(a.add).then(r=>{
-                        fn && fn({type: "add", files: a.add.map(a=>a.substring(Path.resolve(basePath,config.sourcePath).length+1).replace(/\\/g,"/")), map: r});
+                    _bundler.parseFiles(a.add).then(r => {
+                        fn && fn({
+                            type: "add",
+                            files: a.add.map(a => a.substring(Path.resolve(basePath, config.sourcePath).length + 1).replace(/\\/g, "/")),
+                            map: r
+                        });
                     });
                 } else if (a.edit) {
-                    _bundler.parseFiles(a.edit).then(r=>{
-                        fn && fn({type: "edit", files: a.edit.map(a=>a.substring(Path.resolve(basePath,config.sourcePath).length+1).replace(/\\/g,"/")), map: r});
+                    _bundler.parseFiles(a.edit).then(r => {
+                        fn && fn({
+                            type: "edit",
+                            files: a.edit.map(a => a.substring(Path.resolve(basePath, config.sourcePath).length + 1).replace(/\\/g, "/")),
+                            map: r
+                        });
                     });
                 } else if (a.remove) {
-                    _bundler.bundle().then(r=>{
-                        fn && fn({type: "remove", files: a.remove.map(a=>a.substring(Path.resolve(basePath,config.sourcePath).length+1).replace(/\\/g,"/")), map: r});
+                    _bundler.bundle().then(r => {
+                        fn && fn({
+                            type: "remove",
+                            files: a.remove.map(a => a.substring(Path.resolve(basePath, config.sourcePath).length + 1).replace(/\\/g, "/")),
+                            map: r
+                        });
                     });
                 }
             });
@@ -75,6 +93,7 @@ module.exports = {
         });
     },
     publish() {
+        showTips();
         let configPath = path.resolve(basePath + "/", "./.ada");
         if (new File(configPath).isExists()) {
             config = JSON.parse(new File(configPath).readSync());
