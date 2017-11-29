@@ -222,7 +222,7 @@ let base = {
             this.map[distpath.substring(config.distPath.length).replace(/\\/g, "/")] = info.map;
             return maker.parse("js", "", content, config).then(content => {
                 return new File(distpath).write(content);
-            }).catch(e => console.log(e));
+            });
         } else {
             if (!isbinaryfile.sync(filepath)) {
                 let _file = new File(filepath);
@@ -237,12 +237,26 @@ let base = {
     },
     parseFiles(files) {
         console.log(`[BUILT] ${Util.formatDate()}`.yellow);
+        let success = [], error = {};
         return Promise.all(files.map(_path => {
             return this.parseFile(_path).then(() => {
-                console.log(` [-]`.cyan + ` ${_path.substring(config.sourcePath.length)}`.grey);
+                success.push(_path);
+            }).catch(e => {
+                error[_path] = e;
             });
         })).then(() => {
             return this.bundle();
+        }).then(() => {
+            success.reverse().splice(0, 5).forEach(path => {
+                console.log(` - ${path}`.green);
+            });
+            if (success.length > 5) {
+                console.log(` [+] ${success.length - 5} more`.green);
+            }
+            Reflect.ownKeys(error).forEach(key => {
+                console.log(` - ${key}:`.grey);
+                console.log(`   ${error[key]}`);
+            });
         }).catch(e => console.log(e));
     },
     removeFile() {
