@@ -236,7 +236,7 @@ let base = {
         }
     },
     parseFiles(files) {
-        console.log(`[BUILT] ${Util.formatDate()}`.yellow);
+        console.log(`+ BUILT:${Util.formatDate()} +`.cyan);
         let success = [], error = {};
         return Promise.all(files.map(_path => {
             return this.parseFile(_path).then(() => {
@@ -247,16 +247,23 @@ let base = {
         })).then(() => {
             return this.bundle();
         }).then(() => {
-            success.reverse().splice(0, 5).forEach(path => {
-                console.log(` - ${path}`.green);
-            });
-            if (success.length > 5) {
-                console.log(` [+] ${success.length - 5} more`.green);
+            if (success.length > 0) {
+                console.log(` [done]`.yellow);
+                success.splice(0, 5).forEach((path, index) => {
+                    console.log(` - [${index + 1}] ${path.substring(config.sourcePath.length)}`.grey);
+                });
+                if (success.length > 5) {
+                    console.log(` + [${success.length}]...`.grey);
+                }
             }
-            Reflect.ownKeys(error).forEach(key => {
-                console.log(` - ${key}:`.grey);
-                console.log(`   ${error[key]}`);
-            });
+            let et = Reflect.ownKeys(error);
+            if (et.length > 0) {
+                console.log(` [error]`.red);
+                et.forEach((key, index) => {
+                    console.log(` - [${index + 1}] ${key.substring(config.sourcePath.length)}:`.grey);
+                    console.log(`   ${error[key]}`.red);
+                });
+            }
         }).catch(e => console.log(e));
     },
     removeFile() {
