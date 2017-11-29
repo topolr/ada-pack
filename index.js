@@ -6,6 +6,7 @@ let basePath = path.resolve(__dirname, "./../../");
 let Path = require("path");
 let config = null;
 let package = require("./package.json");
+let colors = require("colors");
 
 let waiter = {
     _data: {},
@@ -44,7 +45,7 @@ let waiter = {
 };
 
 function showTips() {
-    console.log(`[ ada-pack:${package.version} ]`);
+    console.log(`[ ada-pack:${package.version} ]`.magenta);
 }
 
 module.exports = {
