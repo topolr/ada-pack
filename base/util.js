@@ -310,6 +310,7 @@ let util = {
         let a = registCode.substring(start, registCode.length - 1);
         let c = a.substring(a.indexOf("."));
         let workerRegistCode = `if ('serviceWorker' in navigator) {navigator.serviceWorker.register('/serviceworker.js', { scope: '${worker.scope}' })${c}}`;
+
         let codes = Reflect.ownKeys(worker).filter(key => ["scope", "regist"].indexOf(key) === -1).map(key => {
             let code = worker[key].toString();
             return `self.addEventListener('${key.substring(2)}', function${code.substring(code.indexOf("("))});`;
@@ -328,7 +329,7 @@ let util = {
         let content = `<!DOCTYPE html><html><head><link rel="manifest" href="/manifest.json"><meta charset="${page.charset}"><title>${config.name}</title>${metaContent}${styleContent}${scriptContent}<script src="${config._adaPath}"></script><script>${workerRegistCode}</script><script>Ada.boot(${JSON.stringify(config.ada)});</script></head><body></body></html>`;
         return Promise.all([
             new File(Path.resolve(config.dist_path, "./manifest.json")).write(JSON.stringify(manifest)),
-            new File(Path.resolve(config.dist_path, "./serviceworker.js")).write(`'use strict';${util.minifyCode(codes.join(""))}`),
+            new File(Path.resolve(config.dist_path, "./serviceworker.js")).write(`'use strict';${util.minifyCode(config, codes.join(""))}`),
             new File(Path.resolve(config.dist_path, "./index.html")).write(content)
         ]);
     }
