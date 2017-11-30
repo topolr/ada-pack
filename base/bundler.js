@@ -148,8 +148,8 @@ let util = {
         }).join("");
         let content = `<!DOCTYPE html><html><head><link rel="manifest" href="/manifest.json"><meta charset="${page.charset}"><title>${info.name}</title>${metaContent}${styleContent}${scriptContent}<script src="${info._adaPath}"></script><script>${workerRegistCode}</script><script>Ada.boot(${JSON.stringify(page.ada)});</script></head><body></body></html>`;
         return Promise.all([
-            new File(Path.resolve(config.distPath, "./manifest.json")).write(`'use strict';${JSON.stringify(manifest)}`),
-            new File(Path.resolve(config.distPath, "./serviceworker.js")).write(codes.join("")),
+            new File(Path.resolve(config.distPath, "./manifest.json")).write(JSON.stringify(manifest)),
+            new File(Path.resolve(config.distPath, "./serviceworker.js")).write(`'use strict';${codes.join("")}`),
             new File(Path.resolve(config.distPath, "./index.html")).write(content)
         ]);
     }
