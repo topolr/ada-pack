@@ -265,12 +265,12 @@ let util = {
         return filelist;
     },
     babelCode(config, code) {
-        let content = babel.transform(code, config.babel).code;
+        let content = babel.transform(code, config.compiler.babel).code;
         try {
             content = uglify.minify(content, Object.assign({
                 fromString: true,
                 mangle: true
-            }, config.uglify)).code;
+            }, config.compiler.uglify)).code;
         } catch (e) {
         }
         return content;
@@ -281,7 +281,7 @@ let util = {
             content = uglify.minify(content, Object.assign({
                 fromString: true,
                 mangle: true
-            }, config.uglify)).code;
+            }, config.compiler.uglify)).code;
         } catch (e) {
         }
         return content;
