@@ -1,5 +1,5 @@
 let pack = require("./base/mpacker");
-let file = require("./base/util/file");
+let file = require("./base/lib/file");
 
 // pack("bootstrap", `G:/testjs/`);
 pack("autoprefixer").then(info => {

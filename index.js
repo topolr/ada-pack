@@ -1,12 +1,12 @@
 let bundler = require("./base/bundler");
 let path = require("path");
 let chokidar = require('chokidar');
-let File = require("./base/util/file");
+let File = require("./base/lib/file");
 let basePath = path.resolve(__dirname, "./../../");
 let Path = require("path");
-let config = null;
 let package = require("./package.json");
 let colors = require("colors");
+let util = require("./base/util");
 
 let waiter = {
     _data: {},
@@ -48,15 +48,26 @@ function showTips() {
     console.log(`[ ada-pack:${package.version} ]`.magenta);
 }
 
+function getAppInfo(appPath) {
+    let info = {};
+    let content = new File(appPath).readSync();
+    content = util.babelCode(content);
+    let module = {exports: {}};
+    new Function("module", "exports", content)(module, module.exports);
+    if (module.exports.default) {
+        info = module.exports.default;
+    } else {
+        info = module.exports;
+    }
+    return info;
+}
+
 module.exports = {
-    develop(fn) {
+    develop(appPath = "", fn) {
         showTips();
-        let configPath = path.resolve(basePath + "/", "./.ada");
-        if (new File(configPath).isExists()) {
-            config = JSON.parse(new File(configPath).readSync());
-        }
-        let _bundler = bundler(Object.assign({basePath, develop: true}, config));
-        chokidar.watch(path.resolve(basePath, config.sourcePath), {ignored: /[\/\\]\./}).on('change', function (path) {
+        let config = getAppInfo(appPath);
+        let _bundler = bundler(Object.assign({base_path: basePath, develop: true}, config));
+        chokidar.watch(path.resolve(basePath, config.source_path), {ignored: /[\/\\]\./}).on('change', function (path) {
             waiter.add("edit", path);
         }).on('add', function (path) {
             waiter.add("add", path);
@@ -68,7 +79,7 @@ module.exports = {
                     _bundler.parseFiles(a.add).then(r => {
                         fn && fn({
                             type: "add",
-                            files: a.add.map(a => a.substring(Path.resolve(basePath, config.sourcePath).length + 1).replace(/\\/g, "/")),
+                            files: a.add.map(a => a.substring(Path.resolve(basePath, config.source_path).length + 1).replace(/\\/g, "/")),
                             map: r
                         });
                     });
@@ -76,7 +87,7 @@ module.exports = {
                     _bundler.parseFiles(a.edit).then(r => {
                         fn && fn({
                             type: "edit",
-                            files: a.edit.map(a => a.substring(Path.resolve(basePath, config.sourcePath).length + 1).replace(/\\/g, "/")),
+                            files: a.edit.map(a => a.substring(Path.resolve(basePath, config.source_path).length + 1).replace(/\\/g, "/")),
                             map: r
                         });
                     });
@@ -84,7 +95,7 @@ module.exports = {
                     _bundler.bundle().then(r => {
                         fn && fn({
                             type: "remove",
-                            files: a.remove.map(a => a.substring(Path.resolve(basePath, config.sourcePath).length + 1).replace(/\\/g, "/")),
+                            files: a.remove.map(a => a.substring(Path.resolve(basePath, config.source_path).length + 1).replace(/\\/g, "/")),
                             map: r
                         });
                     });
@@ -93,13 +104,10 @@ module.exports = {
         }).on("error", function () {
         });
     },
-    publish() {
+    publish(appPath = "") {
         showTips();
-        let configPath = path.resolve(basePath + "/", "./.ada");
-        if (new File(configPath).isExists()) {
-            config = JSON.parse(new File(configPath).readSync());
-        }
-        let _bundler = bundler(Object.assign({basePath, develop: false}, config));
+        let config = getAppInfo(appPath);
+        let _bundler = bundler(Object.assign({base_path: basePath, develop: false}, config));
         return _bundler.bundleAll();
     }
 };

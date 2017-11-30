@@ -3,7 +3,7 @@ let util = require("./../base/util");
 let postcss = require('postcss');
 let autoprefixer = require('autoprefixer');
 let Path = require("path");
-let File = require("./../base/util/file");
+let File = require("../base/lib/file");
 
 module.exports = function (content, path, option) {
     return new Promise((resolve, reject) => {

@@ -1,170 +1,12 @@
 let colors = require("colors");
-let Util = require("./util");
-let File = require("./util/file");
+let util = require("./util");
+let File = require("./lib/file");
 let Path = require("path");
 let maker = require("./../maker/maker");
-let uglify = require("uglify-js");
-let babel = require("babel-core");
-let hash = require("./util/md5");
+let hash = require("./lib/md5");
 let isbinaryfile = require("isbinaryfile");
-let queue = require("./util/queue");
-let md5 = require("./util/md5");
-
-let config = {
-    "sourcePath": "./src/",
-    "distPath": "./dist/",
-    "entry": ["./root.js"],
-    "pages": ["./index.html"],
-    "rootPath": "dist/",
-    "develop": true,
-    "babel": {
-        "presets": [["env", {
-            "targets": {
-                "chrome": 50
-            }
-        }]],
-        "plugins": ["transform-decorators-legacy", "transform-async-to-generator", "syntax-dynamic-import"]
-    },
-    "uglify": {},
-    "uglifycss": {},
-    "autoprefixer": {},
-    "sass": {},
-    "minifier": {},
-    adaHash: ""
-};
-
-let util = {
-    isPathOf(path) {
-        return !(!path.includes("./") && !path.includes("/") && !path.includes("."));
-    },
-    getPathOf(_path, path) {
-        path = path.trim();
-        if (util.isPathOf(path)) {
-            let a = path.split("/").pop();
-            let b = a.split(".");
-            let c = "";
-            if (b.length > 1) {
-                c = `${Path.join(_path, "./../", path).replace(/\\/g, "/")}`;
-            } else {
-                c = `${Path.join(_path, "./../", path).replace(/\\/g, "/")}.js`;
-            }
-            return {
-                name: c,
-                ispath: true
-            }
-        } else {
-            return {
-                name: path,
-                ispath: false
-            };
-        }
-    },
-    getRequireInfo(basePath, path) {
-        let _path = Path.resolve(basePath, path).replace(/\\/g, "/");
-        let result = new File(_path).readSync().match(/require\(.*?\)/g);
-        let at = new Set();
-        if (result) {
-            at.add(_path.substring(basePath.length));
-            let ct = result.map(one => {
-                let a = one.substring(8, one.length - 1).replace(/['|"|`]/g, "").trim();
-                let b = util.getPathOf(_path, a);
-                let name = b.ispath ? b.name.substring(basePath.length) : b.name;
-                return {name: name, ispath: b.ispath};
-            }).map(a => {
-                at.add(a.name);
-                return a;
-            });
-            ct.forEach(_p => {
-                if (_p.ispath) {
-                    let b = util.getRequireInfo(basePath, `./${_p.name}`);
-                    for (let c of b.values()) {
-                        at.add(c);
-                    }
-                }
-            });
-        }
-        // console.log(at)
-        return at;
-    },
-    getAllSourcePaths(path) {
-        let file = new File(path);
-        let filelist = [];
-        file.scan((path, isfile) => {
-            if (isfile) {
-                filelist.push(path);
-            }
-        });
-        return filelist;
-    },
-    babelCode(code) {
-        let content = babel.transform(code, config.babel).code;
-        try {
-            content = uglify.minify(content, Object.assign({
-                fromString: true,
-                mangle: true
-            }, config.uglify)).code;
-        } catch (e) {
-        }
-        return content;
-    },
-    minifyCode(code){
-        let content = code;
-        try {
-            content = uglify.minify(content, Object.assign({
-                fromString: true,
-                mangle: true
-            }, config.uglify)).code;
-        } catch (e) {
-        }
-        return content;
-    },
-    hashCode(str) {
-        let hash = 0;
-        for (let i = 0; i < str.length; i++) {
-            var character = str.charCodeAt(i);
-            hash = ((hash << 5) - hash) + character;
-            hash = hash & hash;
-        }
-        return hash;
-    },
-    getMappedPath(path) {
-        return `P${Math.abs(util.hashCode(path.replace(/\\/g, "/")))}`;
-    },
-    outputPWAFile(info) {
-        let manifest = {};
-        Reflect.ownKeys(info).filter(key => ["page", "worker", "base_path", "root", "_adaPath","pack"].indexOf(key) === -1).forEach(key => {
-            manifest[key] = info[key];
-        });
-
-        let worker = info.worker;
-        let registCode = worker.regist.toString().trim();
-        let start = registCode.indexOf("{") + 1;
-        let a = registCode.substring(start, registCode.length - 1);
-        let c = a.substring(a.indexOf("."));
-        let workerRegistCode = `if ('serviceWorker' in navigator) {navigator.serviceWorker.register('/serviceworker.js', { scope: '${worker.scope}' })${c}}`;
-        let codes = Reflect.ownKeys(worker).filter(key => ["scope", "regist"].indexOf(key) === -1).map(key => {
-            let code = worker[key].toString();
-            return `self.addEventListener('${key.substring(2)}', function${code.substring(code.indexOf("("))});`;
-        });
-
-        let page = info.page;
-        let metaContent = Reflect.ownKeys(page.meta).map(key => {
-            return `<meta name="${key.replace(/_/g, "-")}" content="${page.meta[key]}">`;
-        }).join("");
-        let styleContent = page.style.map(path => {
-            return `<link rel="stylesheet" href="${path}">`;
-        }).join("");
-        let scriptContent = page.script.map(path => {
-            return `<script src="${path}"></script>`;
-        }).join("");
-        let content = `<!DOCTYPE html><html><head><link rel="manifest" href="/manifest.json"><meta charset="${page.charset}"><title>${info.name}</title>${metaContent}${styleContent}${scriptContent}<script src="${info._adaPath}"></script><script>${workerRegistCode}</script><script>Ada.boot(${JSON.stringify(page.ada)});</script></head><body></body></html>`;
-        return Promise.all([
-            new File(Path.resolve(config.distPath, "./manifest.json")).write(JSON.stringify(manifest)),
-            new File(Path.resolve(config.distPath, "./serviceworker.js")).write(`'use strict';${util.minifyCode(codes.join(""))}`),
-            new File(Path.resolve(config.distPath, "./index.html")).write(content)
-        ]);
-    }
-};
+let queue = require("./lib/queue");
+let config = require("./config");
 
 class AdaBundler {
     constructor() {
@@ -193,7 +35,7 @@ class AdaBundler {
             }
         });
         try {
-            code = util.minifyCode(code);
+            code = util.minifyCode(config, code);
         } catch (e) {
         }
         this.resultmapcode[path] = code;
@@ -201,7 +43,7 @@ class AdaBundler {
     }
 
     getCodeMap(path) {
-        this.getDependenceInfo(path, util.babelCode(new File(path).readSync())).forEach(path => {
+        this.getDependenceInfo(path, util.babelCode(config, new File(path).readSync())).forEach(path => {
             this.getCodeMap(path);
         });
     }
@@ -216,7 +58,7 @@ class AdaBundler {
         });
         let commet = `/*! adajs ${veison} https://github.com/topolr/ada | https://github.com/topolr/ada/blob/master/LICENSE */\n`;
         let code = `${commet}(function (map,moduleName) {var Installed={};var requireModule = function (index) {if (Installed[index]) {return Installed[index].exports;}var module = Installed[index] = {exports: {}};map[index].call(module.exports, module, module.exports, requireModule);return module.exports;};var mod=requireModule(0);window&&window.Ada.installModule(moduleName,mod);})([${result.join(",")}],"adajs");`;
-        config.adaHash = md5.md5(code).substring(0, 10);
+        config.adaHash = hash.md5(code).substring(0, 10);
         return new File(output).write(code);
     }
 }
@@ -252,22 +94,22 @@ let base = {
         return {code, map: set};
     },
     parseFile(filepath) {
-        let distpath = config.distPath + filepath.substring(config.sourcePath.length);
+        let distpath = config.dist_path + filepath.substring(config.source_path.length);
         if (new File(filepath).suffix() === "js") {
             let content = new File(filepath).readSync();
-            let info = this.parseViewAnnotationPaths(distpath.substring(config.distPath.length), content);
+            let info = this.parseViewAnnotationPaths(distpath.substring(config.dist_path.length), content);
             content = info.code;
             content = content.replace(/imports\(.*?\)/g, (one) => {
                 let _a = one.substring(8, one.length - 1);
                 if (_a[0] === "'" || _a[0] == "\"") {
                     let a = _a.replace(/['|"|`]/g, "").trim();
-                    let b = `${Path.join(filepath, "./../", a).replace(/\\/g, "/")}.js`.substring(config.sourcePath.length);
+                    let b = `${Path.join(filepath, "./../", a).replace(/\\/g, "/")}.js`.substring(config.source_path.length);
                     return `imports("${b}")`;
                 } else {
                     return one;
                 }
             });
-            this.map[distpath.substring(config.distPath.length).replace(/\\/g, "/")] = info.map;
+            this.map[distpath.substring(config.dist_path.length).replace(/\\/g, "/")] = info.map;
             return maker.parse("js", "", content, config).then(content => {
                 return new File(distpath).write(content);
             });
@@ -284,7 +126,7 @@ let base = {
         }
     },
     parseFiles(files) {
-        console.log(`+ ${Util.formatDate()} +`.cyan);
+        console.log(`+ ${util.formatDate()} +`.cyan);
         let success = [], error = {};
         return Promise.all(files.map(_path => {
             return this.parseFile(_path).then(() => {
@@ -298,7 +140,7 @@ let base = {
             if (success.length > 0) {
                 console.log(` [done]`.yellow);
                 success.splice(0, 5).forEach((path, index) => {
-                    console.log(` - [${index + 1}] ${path.substring(config.sourcePath.length)}`.grey);
+                    console.log(` - [${index + 1}] ${path.substring(config.source_path.length)}`.grey);
                 });
                 if (success.length > 5) {
                     console.log(` + [${success.length}]...`.grey);
@@ -308,7 +150,7 @@ let base = {
             if (et.length > 0) {
                 console.log(` [error]`.red);
                 et.forEach((key, index) => {
-                    console.log(` - [${index + 1}] ${key.substring(config.sourcePath.length)}:`.grey);
+                    console.log(` - [${index + 1}] ${key.substring(config.source_path.length)}:`.grey);
                     console.log(`   ${error[key]}`.red);
                 });
             }
@@ -319,16 +161,16 @@ let base = {
         return Promise.resolve();
     },
     bundleAda(develop = false) {
-        new AdaBundler().bundle(Path.resolve(config.basePath, `./node_modules/adajs/${develop ? "develop" : "index"}.js`), Path.resolve(config.distPath, "./ada.js"), develop);
+        new AdaBundler().bundle(Path.resolve(config.base_path, `./node_modules/adajs/${develop ? "develop" : "index"}.js`), Path.resolve(config.dist_path, "./ada.js"), develop);
     },
     bundleAll() {
         config.develop = false;
         this.bundleAda();
-        return this.parseFiles(util.getAllSourcePaths(config.sourcePath)).then((map) => {
-            let paths = util.getAllSourcePaths(config.distPath);
+        return this.parseFiles(util.getAllSourcePaths(config.source_path)).then((map) => {
+            let paths = util.getAllSourcePaths(config.dist_path);
             paths.forEach(path => {
                 let suffix = new File(path).suffix();
-                let a = path.substring(config.distPath.length).replace(/\\/g, "/");
+                let a = path.substring(config.dist_path.length).replace(/\\/g, "/");
                 let b = "";
                 if (!isbinaryfile.sync(path)) {
                     b = map[util.getMappedPath(a)];
@@ -337,16 +179,16 @@ let base = {
                     }
                 }
                 if (b) {
-                    new File(path).renameSync(Path.resolve(config.distPath, Util.getHashPath(a, b)));
+                    new File(path).renameSync(Path.resolve(config.dist_path, util.getHashPath(a, b)));
                 }
             });
-            let adapath = Path.resolve(config.distPath, "./ada.js");
+            let adapath = Path.resolve(config.dist_path, "./ada.js");
             // let adahash = new File(adapath).hash().substring(0, 10);
             let adahash = config.adaHash;
             let newname = `ada${adahash}.js`;
-            new File(adapath).renameSync(Path.resolve(config.distPath, newname));
+            new File(adapath).renameSync(Path.resolve(config.dist_path, newname));
             return queue(config.pages.map(page => () => {
-                let path = Path.resolve(config.basePath, page);
+                let path = Path.resolve(config.base_path, page);
                 let content = new File(path).readSync();
                 content = content.replace(/ada[a-z0-9]*.js/g, function (a) {
                     return newname;
@@ -358,15 +200,10 @@ let base = {
         });
     },
     bundle() {
-        let basePath = config.basePath,
-            sourcePath = config.sourcePath,
-            distPath = config.distPath,
-            entry = config.entry,
-            pages = config.pages;
         let info = {};
-        entry.forEach(entry => {
-            let keyname = Path.resolve(basePath, entry).substring(basePath.length + 1);
-            info[keyname] = util.getRequireInfo(distPath, entry);
+        config.entry.forEach(entry => {
+            let keyname = Path.resolve(config.base_path, entry).substring(config.base_path.length + 1);
+            info[keyname] = util.getRequireInfo(config.dist_path, entry);
             for (let a of info[keyname]) {
                 if (this.map[a]) {
                     for (let b of this.map[a]) {
@@ -379,10 +216,10 @@ let base = {
             let result = {};
             [...info[key]].forEach(path => {
                 if (util.isPathOf(path)) {
-                    let _hash = (new File(Path.resolve(distPath, path)).hash()).substring(0, 8);
+                    let _hash = (new File(Path.resolve(config.dist_path, path)).hash()).substring(0, 8);
                     result[util.getMappedPath(path)] = {
                         hash: _hash,
-                        code: new File(Path.resolve(distPath, path)).readSync()
+                        code: new File(Path.resolve(config.dist_path, path)).readSync()
                     };
                 }
             });
@@ -419,9 +256,9 @@ let base = {
             let c = `Ada.unpack(${JSON.stringify(file.code)})`;
             file.hash = hash.md5(c).substring(0, 8);
             map[p] = file.hash;
-            return new File(Path.resolve(distPath, p) + ".js").write(c);
-        }).concat(pages.map(page => () => {
-            let path = Path.resolve(basePath, page);
+            return new File(Path.resolve(config.dist_path, p) + ".js").write(c);
+        }).concat(config.pages.map(page => () => {
+            let path = Path.resolve(config.base_path, page);
             let content = new File(path).readSync();
             content = content.replace(/Ada\.boot\(\{[\w\W]*?\}\)/g, function (a) {
                 let q = a.substring(9, a.length - 1);
@@ -435,39 +272,18 @@ let base = {
             return new File(path).write(content);
         }));
         tasks.push(() => {
-            let info = null;
-            try {
-                let appPath = Path.resolve(config.sourcePath, "./../app.js");
-                if (new File(appPath).isExists()) {
-                    let content = new File(appPath).readSync();
-                    content = util.babelCode(content);
-                    let module = {exports: {}};
-                    new Function("module", "exports", content)(module, module.exports);
-                    if (module.exports.default) {
-                        info = module.exports.default;
-                    } else {
-                        info = module.exports;
-                    }
-                }
-            } catch (e) {
-            }
-            if (info) {
-                if (config.develop) {
-                    info._adaPath = info.base_path + "/ada.js";
-                } else {
-                    info._adaPath = `${info.base_path}/ada${config.adaHash}.js`;
-                }
-                if (!info.page.ada) {
-                    info.page.ada = {};
-                }
-                info.page.ada.basePath = info.base_path;
-                info.page.ada.root = info.root;
-                info.page.ada.map = map;
-                info.page.ada.develop = config.develop;
-                return util.outputPWAFile(info);
+            if (config.develop) {
+                config._adaPath = info.site_path + "/ada.js";
             } else {
-                return Promise.resolve();
+                config._adaPath = `${info.site_path}/ada${config.adaHash}.js`;
             }
+            config.ada = {
+                basePath: config.site_path,
+                root: config.entry[0],
+                map: map,
+                develop: config.develop
+            };
+            return util.outputPWAFile(config);
         });
         return queue(tasks).then(() => {
             return map;
@@ -477,9 +293,9 @@ let base = {
 
 module.exports = function (option) {
     Object.assign(config, option);
-    config.basePath = config.basePath.replace(/\\/g, "/");
-    config.distPath = Path.join(config.basePath, config.distPath).replace(/\\/g, "/");
-    config.sourcePath = Path.join(config.basePath, config.sourcePath).replace(/\\/g, "/");
+    config.base_path = config.base_path.replace(/\\/g, "/");
+    config.dist_path = Path.join(config.base_path, config.dist_path).replace(/\\/g, "/");
+    config.source_path = Path.join(config.base_path, config.source_path).replace(/\\/g, "/");
     base.bundleAda(config.develop);
     return base;
 };

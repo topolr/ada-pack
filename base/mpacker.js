@@ -2,9 +2,9 @@ let Path = require("path");
 let uglify = require("uglify-js");
 let babel = require("babel-core");
 let isbinaryfile = require("isbinaryfile");
-let File = require("./util/file");
+let File = require("./lib/file");
 let config = require("../config.json");
-let queue = require("./util/queue");
+let queue = require("./lib/queue");
 
 let util = {
     isPathOf(path){
