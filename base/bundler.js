@@ -146,14 +146,11 @@ let util = {
         let scriptContent = page.script.map(path => {
             return `<script src="${path}"></script>`;
         }).join("");
-        let content = `<!DOCTYPE html><html><head><link rel="manifest" href="/manifest.json"><meta charset="${page.charset}"><title>${info.name}</title>
-    ${metaContent}${styleContent}${scriptContent}
-    <script src="${info._adaPath}"></script><script>${workerRegistCode}</script>
-    <script>Ada.boot(${JSON.stringify(page.ada)});</script></head><body></body></html>`;
+        let content = `<!DOCTYPE html><html><head><link rel="manifest" href="/manifest.json"><meta charset="${page.charset}"><title>${info.name}</title>${metaContent}${styleContent}${scriptContent}<script src="${info._adaPath}"></script><script>${workerRegistCode}</script><script>Ada.boot(${JSON.stringify(page.ada)});</script></head><body></body></html>`;
         return Promise.all([
-            new File(Path.resolve(config.distPath, "./app/dist/manifest.json")).write(JSON.stringify(manifest)),
-            new File(Path.resolve(config.distPath, "./app/dist/serviceworker.js")).write(codes.join("")),
-            new File(Path.resolve(config.distPath, "./app/dist/index.html")).write(content)
+            new File(Path.resolve(config.distPath, "./manifest.json")).write(JSON.stringify(manifest)),
+            new File(Path.resolve(config.distPath, "./serviceworker.js")).write(codes.join("")),
+            new File(Path.resolve(config.distPath, "./index.html")).write(content)
         ]);
     }
 };
@@ -406,7 +403,7 @@ let base = {
             packages[file.key] = inp.join("|");
         });
         map.packages = packages;
-        return queue(files.map(file => () => {
+        let tasks = files.map(file => () => {
             let p = file.key;
             let c = `Ada.unpack(${JSON.stringify(file.code)})`;
             file.hash = hash.md5(c).substring(0, 8);
@@ -425,10 +422,11 @@ let base = {
                 return "ada.js";
             });
             return new File(path).write(content);
-        })).push(() => {
+        }));
+        tasks.push(() => {
             let info = null;
             try {
-                let appPath = Path.resolve(config.sourcePath, "./app.js");
+                let appPath = Path.resolve(config.sourcePath, "./../app.js");
                 if (new File(appPath).isExists()) {
                     let content = new File(appPath).readSync();
                     content = util.babelCode(content);
@@ -442,12 +440,12 @@ let base = {
                 }
             } catch (e) {
             }
-            if (config.develop) {
-                info._adaPath = info.base_path + "/ada.js";
-            } else {
-                info._adaPath = `${info.base_path}/ada${config.adaHash}.js`;
-            }
             if (info) {
+                if (config.develop) {
+                    info._adaPath = info.base_path + "/ada.js";
+                } else {
+                    info._adaPath = `${info.base_path}/ada${config.adaHash}.js`;
+                }
                 if (!info.page.ada) {
                     info.page.ada = {};
                 }
@@ -459,7 +457,8 @@ let base = {
             } else {
                 return Promise.resolve();
             }
-        })).then(() => {
+        });
+        return queue(tasks).then(() => {
             return map;
         });
     }
