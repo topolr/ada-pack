@@ -8,6 +8,7 @@ let babel = require("babel-core");
 let hash = require("./util/md5");
 let isbinaryfile = require("isbinaryfile");
 let queue = require("./util/queue");
+let md5 = require("./util/md5");
 
 let config = {
     "sourcePath": "./src/",
@@ -28,7 +29,8 @@ let config = {
     "uglifycss": {},
     "autoprefixer": {},
     "sass": {},
-    "minifier": {}
+    "minifier": {},
+    adaHash: ""
 };
 
 let util = {
@@ -116,6 +118,43 @@ let util = {
     },
     getMappedPath(path) {
         return `P${Math.abs(util.hashCode(path.replace(/\\/g, "/")))}`;
+    },
+    outputPWAFile(info) {
+        let manifest = {};
+        Reflect.ownKeys(info).filter(key => ["page", "worker", "base_path", "root"].indexOf(key) === -1).forEach(key => {
+            manifest[key] = info[key];
+        });
+
+        let worker = info.worker;
+        let registCode = worker.regist.toString().trim();
+        let start = registCode.indexOf("{") + 1;
+        let a = registCode.substring(start, registCode.length - 1);
+        let c = a.substring(a.indexOf("."));
+        let workerRegistCode = `if ('serviceWorker' in navigator) {navigator.serviceWorker.register('/serviceworker.js', { scope: '${worker.scope}' })${c}}`;
+        let codes = Reflect.ownKeys(worker).filter(key => ["scope", "regist"].indexOf(key) === -1).map(key => {
+            let code = worker[key].toString();
+            return `self.addEventListener('${key.substring(2)}', function${code.substring(code.indexOf("("))});`;
+        });
+
+        let page = info.page;
+        let metaContent = Reflect.ownKeys(page.meta).map(key => {
+            return `<meta name="${key.replace(/_/g, "-")}" content="${page.meta[key]}">`;
+        }).join("");
+        let styleContent = page.style.map(path => {
+            return `<link rel="stylesheet" href="${path}">`;
+        }).join("");
+        let scriptContent = page.script.map(path => {
+            return `<script src="${path}"></script>`;
+        }).join("");
+        let content = `<!DOCTYPE html><html><head><link rel="manifest" href="/manifest.json"><meta charset="${page.charset}"><title>${info.name}</title>
+    ${metaContent}${styleContent}${scriptContent}
+    <script src="${info._adaPath}"></script><script>${workerRegistCode}</script>
+    <script>Ada.boot(${JSON.stringify(page.ada)});</script></head><body></body></html>`;
+        return Promise.all([
+            new File(Path.resolve(config.distPath, "./app/dist/manifest.json")).write(JSON.stringify(manifest))
+            new File(Path.resolve(config.distPath, "./app/dist/serviceworker.js")).write(codes.join("")),
+            new File(Path.resolve(config.distPath, "./app/dist/index.html")).write(content)
+        ]);
     }
 };
 
@@ -169,6 +208,7 @@ class AdaBundler {
         });
         let commet = `/*! adajs ${veison} https://github.com/topolr/ada | https://github.com/topolr/ada/blob/master/LICENSE */\n`;
         let code = `${commet}(function (map,moduleName) {var Installed={};var requireModule = function (index) {if (Installed[index]) {return Installed[index].exports;}var module = Installed[index] = {exports: {}};map[index].call(module.exports, module, module.exports, requireModule);return module.exports;};var mod=requireModule(0);window&&window.Ada.installModule(moduleName,mod);})([${result.join(",")}],"adajs");`;
+        config.adaHash = md5.md5(code).substring(0, 10);
         return new File(output).write(code);
     }
 }
@@ -293,7 +333,8 @@ let base = {
                 }
             });
             let adapath = Path.resolve(config.distPath, "./ada.js");
-            let adahash = new File(adapath).hash().substring(0, 10);
+            // let adahash = new File(adapath).hash().substring(0, 10);
+            let adahash = config.adaHash;
             let newname = `ada${adahash}.js`;
             new File(adapath).renameSync(Path.resolve(config.distPath, newname));
             return queue(config.pages.map(page => () => {
@@ -384,7 +425,41 @@ let base = {
                 return "ada.js";
             });
             return new File(path).write(content);
-        }))).then(() => {
+        })).push(() => {
+            let info = null;
+            try {
+                let appPath = Path.resolve(config.sourcePath, "./app.js");
+                if (new File(appPath).isExists()) {
+                    let content = new File(appPath).readSync();
+                    content = util.babelCode(content);
+                    let module = {exports: {}};
+                    new Function("module", "exports", content)(module, module.exports);
+                    if (module.__esModule) {
+                        info = module.exports.default;
+                    } else {
+                        info = module.exports;
+                    }
+                }
+            } catch (e) {
+            }
+            if (config.develop) {
+                info._adaPath = info.base_path + "/ada.js";
+            } else {
+                info._adaPath = `${info.base_path}/ada${config.adaHash}.js`;
+            }
+            if (info) {
+                if (!info.page.ada) {
+                    info.page.ada = {};
+                }
+                info.page.ada.basePath = info.base_path;
+                info.page.ada.root = info.root;
+                info.page.ada.map = map;
+                info.page.ada.develop = config.develop;
+                return util.outputPWAFile(info);
+            } else {
+                return Promise.resolve();
+            }
+        })).then(() => {
             return map;
         });
     }
