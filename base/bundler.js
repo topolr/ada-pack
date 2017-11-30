@@ -132,7 +132,7 @@ let util = {
     },
     outputPWAFile(info) {
         let manifest = {};
-        Reflect.ownKeys(info).filter(key => ["page", "worker", "base_path", "root", "_adaPath"].indexOf(key) === -1).forEach(key => {
+        Reflect.ownKeys(info).filter(key => ["page", "worker", "base_path", "root", "_adaPath","pack"].indexOf(key) === -1).forEach(key => {
             manifest[key] = info[key];
         });
 
