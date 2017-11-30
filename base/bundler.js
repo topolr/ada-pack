@@ -110,14 +110,14 @@ let base = {
                 }
             });
             this.map[distpath.substring(config.dist_path.length).replace(/\\/g, "/")] = info.map;
-            return maker.parse("js", "", content, config.compiler).then(content => {
+            return maker.parse("js", "", content, config).then(content => {
                 return new File(distpath).write(content);
             });
         } else {
             if (!isbinaryfile.sync(filepath)) {
                 let _file = new File(filepath);
                 let suffix = _file.suffix();
-                return maker.parse(_file.suffix(), filepath, _file.readSync(), config.compiler).then(content => {
+                return maker.parse(_file.suffix(), filepath, _file.readSync(), config).then(content => {
                     return new File(distpath).write(content);
                 });
             } else {

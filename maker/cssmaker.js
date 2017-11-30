@@ -8,24 +8,24 @@ let File = require("../base/lib/file");
 module.exports = function (content, path, option) {
     return new Promise((resolve, reject) => {
         let r = util.replacePaths(content, function (_path) {
-            let r = Path.resolve(path, "./../", _path).substring(option.sourcePath.length).replace(/\\/g, "/");
+            let r = Path.resolve(path, "./../", _path).substring(option.source_path.length).replace(/\\/g, "/");
             let o = Path.resolve(path, "./../", _path).replace(/\\/g, "/");
-            let d = Path.resolve(option.distPath, r).replace(/\\/g, "/");
+            let d = Path.resolve(option.dist_path, r).replace(/\\/g, "/");
             if (option.develop) {
                 new File(o).copyTo(d);
-                return option.rootPath + r;
+                return option.site_path + r;
             } else {
                 let hash = new File(o).hash().substring(0, 8);
                 new File(o).copyTo(util.getHashPath(d, hash));
-                return option.rootPath + util.getHashPath(r, hash);
+                return option.site_path + util.getHashPath(r, hash);
             }
         });
         r = uglifycss.processString(r, Object.assign({
             uglyComments: true,
             cuteComments: true
-        }, option.uglifycss));
+        }, option.compiler.uglifycss));
         postcss([
-            autoprefixer(Object.assign({browsers: ['> 1%', 'IE 7']}, option.autoprefixer))
+            autoprefixer(Object.assign({browsers: ['> 1%', 'IE 7']}, option.compiler.autoprefixer))
         ]).process(r).then(result => {
             resolve(result.css);
         });
