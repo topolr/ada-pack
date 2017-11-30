@@ -151,7 +151,7 @@ let util = {
     <script src="${info._adaPath}"></script><script>${workerRegistCode}</script>
     <script>Ada.boot(${JSON.stringify(page.ada)});</script></head><body></body></html>`;
         return Promise.all([
-            new File(Path.resolve(config.distPath, "./app/dist/manifest.json")).write(JSON.stringify(manifest))
+            new File(Path.resolve(config.distPath, "./app/dist/manifest.json")).write(JSON.stringify(manifest)),
             new File(Path.resolve(config.distPath, "./app/dist/serviceworker.js")).write(codes.join("")),
             new File(Path.resolve(config.distPath, "./app/dist/index.html")).write(content)
         ]);
