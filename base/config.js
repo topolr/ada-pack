@@ -3,7 +3,7 @@ module.exports = {
     base_path: "/",
     source_path: "./src/",
     dist_path: "./dist/",
-    site_path: "/dist/",
+    site_path: "/dist",
     short_name: "HackerWeb",
     start_url: ".",
     display: "standalone",
@@ -12,7 +12,7 @@ module.exports = {
     scope: "",
     description: "A simply readable Hacker News app.",
     entry: ["./pages/root.js", "./pages/movielist.js", "./pages/syncmovie.js", "./pages/addmovie.js", "./pages/playlist.js"],
-    pages: ["./app/index.html"],
+    pages: ["./index.html"],
     icons: [
         {"src": "images/touch/homescreen48.png", "sizes": "48x48", "type": "image/png"},
         {"src": "images/touch/homescreen72.png", "sizes": "72x72", "type": "image/png"},
