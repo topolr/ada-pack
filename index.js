@@ -2,7 +2,6 @@ let bundler = require("./base/bundler");
 let path = require("path");
 let chokidar = require('chokidar');
 let File = require("./base/lib/file");
-let basePath = path.resolve(__dirname, "./../../");
 let Path = require("path");
 let package = require("./package.json");
 let colors = require("colors");
@@ -66,6 +65,7 @@ module.exports = {
     develop(appPath = "", fn) {
         showTips();
         let config = getAppInfo(appPath);
+        let basePath = path.resolve(appPath, "./../");
         let _bundler = bundler(Object.assign({base_path: basePath, develop: true}, config));
         chokidar.watch(path.resolve(basePath, config.source_path), {ignored: /[\/\\]\./}).on('change', function (path) {
             waiter.add("edit", path);
@@ -107,6 +107,7 @@ module.exports = {
     publish(appPath = "") {
         showTips();
         let config = getAppInfo(appPath);
+        let basePath = path.resolve(appPath, "./../");
         let _bundler = bundler(Object.assign({base_path: basePath, develop: false}, config));
         return _bundler.bundleAll();
     }
