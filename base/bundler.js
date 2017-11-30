@@ -161,7 +161,7 @@ let base = {
         return Promise.resolve();
     },
     bundleAda(develop = false) {
-        new AdaBundler().bundle(Path.resolve(config.base_path, `./node_modules/adajs/${develop ? "develop" : "index"}.js`), Path.resolve(config.dist_path, "./ada.js"), develop);
+        new AdaBundler().bundle(Path.resolve(config.projectPath, `./node_modules/adajs/${develop ? "develop" : "index"}.js`), Path.resolve(config.dist_path, "./ada.js"), develop);
     },
     bundleAll() {
         config.develop = false;

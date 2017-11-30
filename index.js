@@ -80,8 +80,12 @@ module.exports = {
     develop(appPath = "", fn) {
         showTips();
         let config = getAppInfo(appPath);
-        let basePath = path.resolve(__dirname, "./../../");
-        let _bundler = bundler(Object.assign({base_path: basePath, develop: true}, config));
+        let basePath = path.resolve(appPath, "./../");
+        let _bundler = bundler(Object.assign({
+            base_path: basePath,
+            develop: true,
+            projectPath: path.resolve(__dirname, "./../../")
+        }, config));
         chokidar.watch(path.resolve(basePath, config.source_path), {ignored: /[\/\\]\./}).on('change', function (path) {
             waiter.add("edit", path);
         }).on('add', function (path) {
@@ -122,8 +126,12 @@ module.exports = {
     publish(appPath = "") {
         showTips();
         let config = getAppInfo(appPath);
-        let basePath = path.resolve(__dirname, "./../../");
-        let _bundler = bundler(Object.assign({base_path: basePath, develop: false}, config));
+        let basePath = path.resolve(appPath, "./../");
+        let _bundler = bundler(Object.assign({
+            base_path: basePath,
+            develop: false,
+            projectPath: path.resolve(__dirname, "./../../")
+        }, config));
         return _bundler.bundleAll();
     }
 };
