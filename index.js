@@ -5,7 +5,8 @@ let File = require("./base/lib/file");
 let Path = require("path");
 let package = require("./package.json");
 let colors = require("colors");
-let util = require("./base/util");
+let uglify = require("uglify-js");
+let babel = require("babel-core");
 
 let waiter = {
     _data: {},
@@ -50,7 +51,21 @@ function showTips() {
 function getAppInfo(appPath) {
     let info = {};
     let content = new File(appPath).readSync();
-    content = util.babelCode(content);
+    content = babel.transform(content, {
+        presets: [["env", {
+            targets: {
+                chrome: 29
+            }
+        }]],
+        plugins: ["transform-decorators-legacy", "transform-async-to-generator", "syntax-dynamic-import"]
+    }).code;
+    try {
+        content = uglify.minify(content, {
+            fromString: true,
+            mangle: true
+        }).code;
+    } catch (e) {
+    }
     let module = {exports: {}};
     new Function("module", "exports", content)(module, module.exports);
     if (module.exports.default) {
