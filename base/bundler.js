@@ -432,7 +432,7 @@ let base = {
                     content = util.babelCode(content);
                     let module = {exports: {}};
                     new Function("module", "exports", content)(module, module.exports);
-                    if (module.__esModule) {
+                    if (module.exports.default) {
                         info = module.exports.default;
                     } else {
                         info = module.exports;
