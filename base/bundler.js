@@ -107,6 +107,17 @@ let util = {
         }
         return content;
     },
+    minifyCode(code){
+        let content = code;
+        try {
+            content = uglify.minify(content, Object.assign({
+                fromString: true,
+                mangle: true
+            }, config.uglify)).code;
+        } catch (e) {
+        }
+        return content;
+    },
     hashCode(str) {
         let hash = 0;
         for (let i = 0; i < str.length; i++) {
@@ -149,7 +160,7 @@ let util = {
         let content = `<!DOCTYPE html><html><head><link rel="manifest" href="/manifest.json"><meta charset="${page.charset}"><title>${info.name}</title>${metaContent}${styleContent}${scriptContent}<script src="${info._adaPath}"></script><script>${workerRegistCode}</script><script>Ada.boot(${JSON.stringify(page.ada)});</script></head><body></body></html>`;
         return Promise.all([
             new File(Path.resolve(config.distPath, "./manifest.json")).write(JSON.stringify(manifest)),
-            new File(Path.resolve(config.distPath, "./serviceworker.js")).write(`'use strict';${codes.join("")}`),
+            new File(Path.resolve(config.distPath, "./serviceworker.js")).write(`'use strict';${util.minifyCode(codes.join(""))}`),
             new File(Path.resolve(config.distPath, "./index.html")).write(content)
         ]);
     }
