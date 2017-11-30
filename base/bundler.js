@@ -273,9 +273,9 @@ let base = {
         }));
         tasks.push(() => {
             if (config.develop) {
-                config._adaPath = info.site_path + "/ada.js";
+                config._adaPath = config.site_path + "/ada.js";
             } else {
-                config._adaPath = `${info.site_path}/ada${config.adaHash}.js`;
+                config._adaPath = `${config.site_path}/ada${config.adaHash}.js`;
             }
             config.ada = {
                 basePath: config.site_path,
