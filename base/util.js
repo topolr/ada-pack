@@ -317,21 +317,35 @@ let util = {
         });
 
         let page = config.page;
+        page.meta.theme_color = config.theme_color;
+        page.meta.description = config.description;
+        page.meta.keywords = config.keywords;
         let metaContent = Reflect.ownKeys(page.meta).map(key => {
             return `<meta name="${key.replace(/_/g, "-")}" content="${page.meta[key]}">`;
         }).join("");
+
+        let iconsContent = config.icons.map(info => {
+            return `<link rel="apple-touch-icon-precomposed" sizes="${info.sizes}" href="${config.site_url + info.src}">`;
+        }).join("");
+        if (config.icons.length > 0) {
+            iconsContent += `<link rel="shortcut icon" href="${config.site_url + config.icons[0].src}">`;
+        }
         let styleContent = page.style.map(path => {
             return `<link rel="stylesheet" href="${path}">`;
         }).join("");
         let scriptContent = page.script.map(path => {
             return `<script src="${path}"></script>`;
         }).join("");
-        let content = `<!DOCTYPE html><html><head><link rel="manifest" href="/manifest.json"><meta charset="${page.charset}"><title>${config.name}</title>${metaContent}${styleContent}${scriptContent}<script src="${config._adaPath}"></script><script>${config.regist_service ? workerRegistCode : ""}</script><script>Ada.boot(${JSON.stringify(config.ada)});</script></head><body></body></html>`;
-        return Promise.all([
-            new File(Path.resolve(config.dist_path, "./manifest.json")).write(JSON.stringify(manifest)),
-            new File(Path.resolve(config.dist_path, "./serviceworker.js")).write(`'use strict';${util.minifyCode(config, codes.join(""))}`),
-            new File(Path.resolve(config.dist_path, "./index.html")).write(content)
-        ]);
+        let content = `<!DOCTYPE html><html><head><link rel="manifest" href="${config.site_url}manifest.json"><meta charset="${page.charset}"><title>${config.name}</title>${metaContent}${iconsContent}${styleContent}${scriptContent}<script src="${config._adaPath}"></script><script>${config.regist_service ? workerRegistCode : ""}</script><script>Ada.boot(${JSON.stringify(config.ada)});</script></head><body></body></html>`;
+        return Promise.all(config.icons.map(icon => {
+            return new File(Path.resolve(config.source_path, icon.src)).copyTo(Path.resolve(config.dist_path, icon.src));
+        })).then(() => {
+            return Promise.all([
+                new File(Path.resolve(config.dist_path, "./manifest.json")).write(JSON.stringify(manifest)),
+                new File(Path.resolve(config.dist_path, "./serviceworker.js")).write(`'use strict';${util.minifyCode(config, codes.join(""))}`),
+                new File(Path.resolve(config.dist_path, "./index.html")).write(content)
+            ]);
+        }).catch(e => console.log(e));
     }
 };
 
