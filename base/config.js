@@ -3,7 +3,7 @@ module.exports = {
     base_path: "/",
     source_path: "./src/",
     dist_path: "./dist/",
-    site_path: "/dist",
+    site_url: "/dist",
     short_name: "HackerWeb",
     start_url: ".",
     display: "standalone",

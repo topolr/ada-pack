@@ -13,11 +13,11 @@ module.exports = function (content, path, option) {
                 let d = Path.resolve(option.dist_path, r).replace(/\\/g, "/");
                 if (option.develop) {
                     new File(o).copyTo(d);
-                    return option.site_path + r;
+                    return option.site_url + r;
                 } else {
                     let hash = new File(o).hash().substring(0, 8);
                     new File(o).copyTo(util.getHashPath(d, hash));
-                    return option.site_path + util.getHashPath(r, hash);
+                    return option.site_url + util.getHashPath(r, hash);
                 }
             });
             // resolve(minify(content, Object.assign({

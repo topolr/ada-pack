@@ -273,12 +273,12 @@ let base = {
         }));
         tasks.push(() => {
             if (config.develop) {
-                config._adaPath = config.site_path + "ada.js";
+                config._adaPath = config.site_url + "ada.js";
             } else {
-                config._adaPath = `${config.site_path}ada${config.adaHash}.js`;
+                config._adaPath = `${config.site_url}ada${config.adaHash}.js`;
             }
             config.ada = {
-                basePath: config.site_path,
+                basePath: config.site_url,
                 root: config.entry[0],
                 map: map,
                 develop: config.develop
@@ -296,8 +296,8 @@ module.exports = function (option) {
     config.base_path = config.base_path.replace(/\\/g, "/");
     config.dist_path = Path.join(config.base_path, config.dist_path).replace(/\\/g, "/");
     config.source_path = Path.join(config.base_path, config.source_path).replace(/\\/g, "/");
-    if (config.site_path[config.site_path.length - 1] !== "/") {
-        config.site_path = config.site_path + "/";
+    if (config.site_url[config.site_url.length - 1] !== "/") {
+        config.site_url = config.site_url + "/";
     }
     base.bundleAda(config.develop);
     return base;
