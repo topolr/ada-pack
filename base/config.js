@@ -12,7 +12,7 @@ module.exports = {
     theme_color: "#fff",
     description: "ada web framework.",
     entry: ["./root.js"],
-    keywords:["ada"],
+    keywords: ["ada"],
     pages: [],
     icons: [
         {"src": "icons/48@2x.png", "sizes": "48x48", "type": "image/png"},
