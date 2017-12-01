@@ -3,7 +3,8 @@ module.exports = {
     base_path: "/",
     source_path: "./src/",
     dist_path: "./dist/",
-    site_url: "/dist",
+    site_url: "/",
+    regist_service: true,
     short_name: "HackerWeb",
     start_url: ".",
     display: "standalone",
@@ -40,8 +41,8 @@ module.exports = {
     },
     worker: {
         scope: "/",
-        regist(done) {
-            done.then(reg => {
+        beforeregist(regist) {
+            regist().then(reg => {
                 if (reg.installing) {
                     console.log('Service worker installing');
                 } else if (reg.waiting) {
