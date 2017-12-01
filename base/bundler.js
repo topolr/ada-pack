@@ -136,7 +136,7 @@ let base = {
             });
         })).then(() => {
             return this.bundle();
-        }).then(() => {
+        }).then((data) => {
             if (success.length > 0) {
                 console.log(` [done]`.yellow);
                 success.splice(0, 5).forEach((path, index) => {
@@ -154,6 +154,7 @@ let base = {
                     console.log(`   ${error[key]}`.red);
                 });
             }
+            return data;
         }).catch(e => console.log(e));
     },
     removeFile() {
