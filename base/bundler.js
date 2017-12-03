@@ -167,7 +167,7 @@ let base = {
                     path: Path.resolve(config.dist_path, info.path.substring(config.source_path.length)),
                     content: info.content
                 });
-                at[info.path.substring(config.dist_path.length)] = info.content;
+                at[info.path.substring(config.source_path.length)] = info.content;
             }
             return Promise.all(parseTasks.map(({path, current, content, value}) => {
                 let _file = new File(path);
