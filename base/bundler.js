@@ -172,7 +172,7 @@ let base = {
                 at[info.path.substring(config.source_path.length)] = info.content;
             }
             return Promise.all(parseTasks.map(({path, current, content, value}) => {
-                let _file = new File(path);
+                let _file = new File(current);
                 return maker.parse(_file.suffix(), current, content, config).then(content => {
                     at[value] = content;
                     return new File(path).write(content);
