@@ -4,7 +4,6 @@ let File = require("./lib/file");
 let Path = require("path");
 let maker = require("./../maker/maker");
 let hash = require("./lib/md5");
-let isbinaryfile = require("isbinaryfile");
 let queue = require("./lib/queue");
 let config = require("./config");
 let THRIDPARTFOLDER = "node_modules";
