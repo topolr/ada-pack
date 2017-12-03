@@ -212,16 +212,20 @@ let base = {
                                 let path = Path.join(info.path, "./../", value).replace(/\\/g, "/");
                                 let content = new File(path).readSync();
                                 if (path.indexOf("node_modules") === -1) {
+                                    value = path.substring(config.source_path.length);
                                     parseTasks.push({
                                         path: Path.resolve(config.dist_path, path.substring(config.source_path.length)),
                                         current: path,
-                                        content: new File(path).readSync()
+                                        content: new File(path).readSync(),
+                                        value
                                     });
                                 } else {
+                                    value = `${THRIDPARTFOLDER}/${path.substring(config.nmodule_path.length)}`;
                                     parseTasks.push({
                                         path: Path.resolve(config.dist_path, `./${THRIDPARTFOLDER}/${path.substring(config.nmodule_path.length)}`),
                                         current: path,
-                                        content: new File(path).readSync()
+                                        content: new File(path).readSync(),
+                                        value
                                     });
                                 }
                             }
@@ -240,7 +244,7 @@ let base = {
                         }
                     });
                 }
-                return Promise.all(parseTasks.map(({path, current, content}) => {
+                return Promise.all(parseTasks.map(({path, current, content, value}) => {
                     let _file = new File(current);
                     if (this.cache[path] && this.cache[path].before === content) {
                         return Promise.resolve(this.cache[path].after);
@@ -249,13 +253,18 @@ let base = {
                         return maker.parse(_file.suffix(), current, content, config).then(content => {
                             this.logs[path] = "done";
                             this.cache[path].after = content;
+                            this.cache[info.path].at[value] = content;
                             return new File(path).write(content);
                         }).catch(e => {
                             this.logs[path] = e.message;
                         });
                     }
                 }).concat(infoTasks.map(({filePath, path}) => {
-                    return this.getRequireInfo(config, filePath, path);
+                    return this.getRequireInfo(config, filePath, path).then(b => {
+                        Reflect.ownKeys(b).forEach(key => {
+                            this.cache[info.path][key] = b[key];
+                        });
+                    });
                 }))).then(() => {
                     return this.cache[info.path].at;
                 });
