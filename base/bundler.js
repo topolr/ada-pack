@@ -304,7 +304,6 @@ let base = {
                 return this.outputPWAFile(config);
             });
             return queue(tasks).then(() => {
-                console.log(this.logs);
                 let success = [], error = {};
                 Reflect.ownKeys(this.logs).forEach(key => {
                     if (this.logs[key] === "done") {
