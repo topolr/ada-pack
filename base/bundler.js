@@ -67,7 +67,7 @@ class AdaBundler {
 }
 
 let base = {
-    map: {},
+    logs: {},
     getFilePath(config, filePath, path) {
         let _path = "";
         if (path.startsWith("./") || path.startsWith("../") || path.startsWith("/")) {
@@ -98,7 +98,10 @@ let base = {
         let _path = this.getFilePath(config, filePath, path);
         let _file = new File(_path);
         return maker.parse(_file.suffix(), _path, _file.readSync(), config).then(content => {
+            this.logs[_path] = "done";
             return {path: _path, content};
+        }).catch(e => {
+            this.logs[_path] = e.message;
         });
     },
     getRequireInfo(config, filePath, path) {
@@ -301,6 +304,32 @@ let base = {
                 return this.outputPWAFile(config);
             });
             return queue(tasks).then(() => {
+                console.log(this.logs);
+                let success = [], error = {};
+                Reflect.ownKeys(this.logs).forEach(key => {
+                    if (this.logs[key] === "done") {
+                        success.push(key);
+                    } else {
+                        error[key] = this.logs[key];
+                    }
+                });
+                if (success.length > 0) {
+                    console.log(` [done]`.yellow);
+                    success.splice(0, 5).forEach((path, index) => {
+                        console.log(` - [${index + 1}] ${path.substring(config.source_path.length)}`.grey);
+                    });
+                    if (success.length > 5) {
+                        console.log(` + [${success.length}]...`.grey);
+                    }
+                }
+                let et = Reflect.ownKeys(error);
+                if (et.length > 0) {
+                    console.log(` [error]`.red);
+                    et.forEach((key, index) => {
+                        console.log(` - [${index + 1}] ${key.substring(config.source_path.length)}:`.grey);
+                        console.log(`   ${error[key]}`.red);
+                    });
+                }
                 return map;
             });
         });
