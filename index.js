@@ -95,7 +95,7 @@ module.exports = {
         }).on("ready", function () {
             waiter.setHandler(function (a, times) {
                 if (a.add) {
-                    _bundler.bundle(a.add).then(r => {
+                    _bundler.addFiles(a.add).then(r => {
                         fn && fn({
                             type: "add",
                             files: a.add.map(a => a.substring(Path.resolve(basePath, config.source_path).length + 1).replace(/\\/g, "/")),
@@ -103,7 +103,7 @@ module.exports = {
                         });
                     });
                 } else if (a.edit) {
-                    _bundler.bundle(a.edit).then(r => {
+                    _bundler.editFiles(a.edit).then(r => {
                         fn && fn({
                             type: "edit",
                             files: a.edit.map(a => a.substring(Path.resolve(basePath, config.source_path).length + 1).replace(/\\/g, "/")),
@@ -111,7 +111,7 @@ module.exports = {
                         });
                     });
                 } else if (a.remove) {
-                    _bundler.bundle().then(r => {
+                    _bundler.editFiles(a.remove).then(r => {
                         fn && fn({
                             type: "remove",
                             files: a.remove.map(a => a.substring(Path.resolve(basePath, config.source_path).length + 1).replace(/\\/g, "/")),
