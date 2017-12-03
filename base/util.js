@@ -2,7 +2,6 @@ let uglify = require("uglify-js");
 let babel = require("babel-core");
 let Path = require("path");
 let File = require("./lib/file");
-let manifestKeys = ["theme_color", "start_url", "short_name", "scope", "related_applications", "prefer_related_applications", "orientation", "name", "lang", "icons", "display", "dir", "description", "background_color"];
 
 let util = {
     replacePaths(content, fn) {
@@ -201,9 +200,6 @@ let util = {
                 return c;
             }
         });
-    },
-    babelCodeOnly(config, code) {
-        return babel.transform(code, config.compiler.babel).code;
     },
     babelCode(config, code) {
         let content = babel.transform(code, config.compiler.babel).code;

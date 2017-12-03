@@ -9,6 +9,7 @@ let queue = require("./lib/queue");
 let config = require("./config");
 let THRIDPARTFOLDER = "node_modules";
 const IGNOREMODULES = ["fs", "path", "util", "http", "events", "crypto", "adajs"];
+const MANIFESTKEYS = ["theme_color", "start_url", "short_name", "scope", "related_applications", "prefer_related_applications", "orientation", "name", "lang", "icons", "display", "dir", "description", "background_color"];
 
 class AdaBundler {
     constructor() {
@@ -95,14 +96,14 @@ let base = {
     },
     getFileContent(config, filePath, path) {
         let _path = this.getFilePath(config, filePath, path);
-        let _file = new File(_path).readSync();
+        let _file = new File(_path);
         return maker.parse(_file.suffix(), _path, _file.readSync(), config).then(content => {
             return {path: _path, content};
         });
     },
     getRequireInfo(config, filePath, path) {
         return this.getFileContent(config, filePath, path).then(info => {
-            let at = {}, disPath = config.dist_path;
+            let at = {}, tasks = [], parseTasks = [], infoTasks = [];
             info.content = info.content.replace(/_adajs.view\)\(\{[\d\D]*?\)/g, str => {
                 let map = str.substring(13, str.length - 1);
                 let mapj = new Function(`return ${map};`)();
@@ -112,11 +113,21 @@ let base = {
                         let path = Path.join(info.path, "./../", value).replace(/\\/g, "/");
                         let content = new File(path).readSync();
                         if (path.indexOf("node_modules") === -1) {
-                            new File(path).copyTo(Path.resolve(config.dist_path, path.substring(config.source_path.length)));
                             value = path.substring(config.source_path.length);
+                            parseTasks.push({
+                                path: Path.resolve(config.dist_path, path.substring(config.source_path.length)),
+                                current: path,
+                                content: new File(path).readSync(),
+                                value
+                            });
                         } else {
-                            new File(path).copyTo(Path.resolve(config.dist_path, `./${THRIDPARTFOLDER}/${path.substring(config.nmodule_path.length)}`));
                             value = `${THRIDPARTFOLDER}/${path.substring(config.nmodule_path.length)}`;
+                            parseTasks.push({
+                                path: Path.resolve(config.dist_path, `./${THRIDPARTFOLDER}/${path.substring(config.nmodule_path.length)}`),
+                                current: path,
+                                content: new File(path).readSync(),
+                                value
+                            });
                         }
                         mapj[key] = value;
                         at[value] = content;
@@ -126,19 +137,18 @@ let base = {
                     return `${key}:"${mapj[key]}"`;
                 });
                 return `_adajs.view)({${result.join(",")}})`;
-            });
-            info.content = info.content.replace(/require\(.*?\)/g, (str) => {
+            }).replace(/require\(.*?\)/g, (str) => {
                 let a = str.substring(8, str.length - 1).replace(/['|"|`]/g, "").trim();
                 if (IGNOREMODULES.indexOf(a) === -1) {
                     let m = this.getFilePath(config, Path.resolve(info.path, "./../"), a);
-                    let b = this.getRequireInfo(config, Path.resolve(info.path, "./../"), a);
-                    Reflect.ownKeys(b).forEach(key => {
-                        at[key] = b[key];
+                    infoTasks.push({
+                        filePath: Path.resolve(info.path, "./../"),
+                        path: a
                     });
-                    if (m.path.indexOf("node_modules") === -1) {
-                        return str;
+                    if (m.indexOf("node_modules") === -1) {
+                        return `require("${m.substring(config.source_path.length)}")`;
                     } else {
-                        let name = `${THRIDPARTFOLDER}/${m.path.substring(config.nmodule_path.length)}`;
+                        let name = `${THRIDPARTFOLDER}/${m.substring(config.nmodule_path.length)}`;
                         return `require("${name}")`;
                     }
                 } else {
@@ -147,21 +157,41 @@ let base = {
             });
             if (info.path.indexOf("node_modules") !== -1) {
                 let name = `${THRIDPARTFOLDER}/${info.path.substring(config.nmodule_path.length)}`;
-                new File(Path.resolve(disPath, `./${name}`)).write(info.content);
+                tasks.push({
+                    path: Path.resolve(config.dist_path, `./${name}`),
+                    content: info.content
+                });
                 at[name] = info.content;
             } else {
-                at[info.path.substring(disPath.length)] = info.content;
-                new File(Path.resolve(config.dist_path, info.path.substring(config.source_path.length))).write(info.content);
+                tasks.push({
+                    path: Path.resolve(config.dist_path, info.path.substring(config.source_path.length)),
+                    content: info.content
+                });
+                at[info.path.substring(config.dist_path.length)] = info.content;
             }
-            return at;
-        });
+            return Promise.all(parseTasks.map(({path, current, content, value}) => {
+                let _file = new File(path);
+                return maker.parse(_file.suffix(), current, content, config).then(content => {
+                    at[value] = content;
+                    return new File(path).write(content);
+                });
+            }).concat(tasks.map(({path, content}) => {
+                return new File(path).write(content);
+            })).concat(infoTasks.map(({filePath, path}) => {
+                return this.getRequireInfo(config, filePath, path).then(b => {
+                    Reflect.ownKeys(b).forEach(key => {
+                        at[key] = b[key];
+                    });
+                });
+            }))).then(() => at);
+        }).catch(e => console.log(e));
     },
     bundleAda(develop = false) {
         new AdaBundler().bundle(Path.resolve(config.projectPath, `./node_modules/adajs/${develop ? "develop" : "index"}.js`), Path.resolve(config.dist_path, "./ada.js"), develop);
     },
     outputPWAFile(config) {
         let manifest = {};
-        Reflect.ownKeys(config).filter(key => manifestKeys.indexOf(key) !== -1).forEach(key => {
+        Reflect.ownKeys(config).filter(key => MANIFESTKEYS.indexOf(key) !== -1).forEach(key => {
             manifest[key] = config[key];
         });
 
@@ -178,25 +208,38 @@ let base = {
         });
 
         let page = config.page;
+        page.meta.theme_color = config.theme_color;
+        page.meta.description = config.description;
+        page.meta.keywords = config.keywords;
         let metaContent = Reflect.ownKeys(page.meta).map(key => {
             return `<meta name="${key.replace(/_/g, "-")}" content="${page.meta[key]}">`;
         }).join("");
+        let iconsContent = config.icons.map(info => {
+            return `<link rel="apple-touch-icon-precomposed" sizes="${info.sizes}" href="${config.site_url + info.src}">`;
+        }).join("");
+        if (config.icons.length > 0) {
+            iconsContent += `<link rel="shortcut icon" href="${config.site_url + config.icons[0].src}">`;
+        }
         let styleContent = page.style.map(path => {
             return `<link rel="stylesheet" href="${path}">`;
         }).join("");
         let scriptContent = page.script.map(path => {
             return `<script src="${path}"></script>`;
         }).join("");
-        let content = `<!DOCTYPE html><html><head><link rel="manifest" href="/manifest.json"><meta charset="${page.charset}"><title>${config.name}</title>${metaContent}${styleContent}${scriptContent}<script src="${config._adaPath}"></script><script>${config.regist_service ? workerRegistCode : ""}</script><script>Ada.boot(${JSON.stringify(config.ada)});</script></head><body></body></html>`;
-        return Promise.all([
-            new File(Path.resolve(config.dist_path, "./manifest.json")).write(JSON.stringify(manifest)),
-            new File(Path.resolve(config.dist_path, "./serviceworker.js")).write(`'use strict';${util.minifyCode(config, codes.join(""))}`),
-            new File(Path.resolve(config.dist_path, "./index.html")).write(content)
-        ]);
+        let content = `<!DOCTYPE html><html><head><link rel="manifest" href="${config.site_url}manifest.json"><meta charset="${page.charset}"><title>${config.name}</title>${metaContent}${iconsContent}${styleContent}${scriptContent}<script src="${config._adaPath}"></script><script>${config.regist_service ? workerRegistCode : ""}</script><script>Ada.boot(${JSON.stringify(config.ada)});</script></head><body></body></html>`;
+        return Promise.all(config.icons.map(icon => {
+            return new File(Path.resolve(config.source_path, icon.src)).copyTo(Path.resolve(config.dist_path, icon.src));
+        })).then(() => {
+            Promise.all([
+                new File(Path.resolve(config.dist_path, "./manifest.json")).write(JSON.stringify(manifest)),
+                new File(Path.resolve(config.dist_path, "./serviceworker.js")).write(`'use strict';${util.minifyCode(config, codes.join(""))}`),
+                new File(Path.resolve(config.dist_path, "./index.html")).write(content)
+            ]);
+        });
     },
     bundle() {
         let info = {};
-        return Promise.all(config.entry.map(entry => {
+        return queue(config.entry.map(entry => () => {
             return this.getRequireInfo(config, config.source_path, entry).then(_info => {
                 let keyname = Path.resolve(config.base_path, entry).substring(config.base_path.length + 1);
                 info[keyname] = _info;
