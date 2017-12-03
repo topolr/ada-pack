@@ -6,7 +6,8 @@ let maker = require("./../maker/maker");
 let hash = require("./lib/md5");
 let queue = require("./lib/queue");
 let config = require("./config");
-let THRIDPARTFOLDER = "node_modules";
+
+const THRIDPARTFOLDER = "node_modules";
 const IGNOREMODULES = ["fs", "path", "util", "http", "events", "crypto", "adajs"];
 const MANIFESTKEYS = ["theme_color", "start_url", "short_name", "scope", "related_applications", "prefer_related_applications", "orientation", "name", "lang", "icons", "display", "dir", "description", "background_color"];
 
