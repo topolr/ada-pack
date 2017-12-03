@@ -234,7 +234,7 @@ let util = {
     },
     getMappedPath(path) {
         return `P${Math.abs(util.hashCode(path.replace(/\\/g, "/")))}`;
-    },
+    }
 };
 
 module.exports = util;
