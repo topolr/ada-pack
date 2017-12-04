@@ -367,7 +367,7 @@ let base = {
                     _nm += 1;
                 }
             });
-            console.log(`   LOCAL`.yellow, `[${_ll}]`.grey, "▪", `NODE-MODULES`.yellow, `[${_nm}]`.grey);
+            console.log(`   LOCAL`.yellow, `[${_ll}]`.grey, "▪".yellow, `NODE-MODULES`.yellow, `[${_nm}]`.grey);
             success.splice(0, maxLine).forEach((path, index) => {
                 if (path.indexOf("node_modules") === -1) {
                     console.log(` - [${index + 1}]`.green, `${path.substring(config.source_path.length)}`.cyan, `[local]`.grey);
@@ -390,7 +390,7 @@ let base = {
                 }
                 console.log(`   ${error[key]}`.red);
             });
-            console.log(` ✪ LOCAL`.red, `[${_ll}]`.grey, `NODE-MODULES`.red, `[${_nm}]`.grey);
+            console.log(` ✪ LOCAL`.red, `[${_ll}]`.grey, "▪".red, `NODE-MODULES`.red, `[${_nm}]`.grey);
             et.forEach((key, index) => {
                 if (path.indexOf("node_modules") === -1) {
                     console.log(` - [${index + 1}] ${path.substring(config.source_path.length)}`.grey);
