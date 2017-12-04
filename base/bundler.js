@@ -5,6 +5,7 @@ let Path = require("path");
 let maker = require("./../maker/maker");
 let hash = require("../lib/md5");
 let queue = require("../lib/queue");
+let isbinaryfile = require("isbinaryfile");
 let config = require("./config");
 
 const THRIDPARTFOLDER = "node_modules";
@@ -287,6 +288,22 @@ let base = {
                 new File(Path.resolve(config.dist_path, "./serviceworker.js")).write(`'use strict';${util.minifyCode(config, codes.join(""))}`),
                 new File(Path.resolve(config.dist_path, "./index.html")).write(content)
             ]);
+        });
+    },
+    hashFiles(map) {
+        util.getAllSourcePaths(config.dist_path).forEach(path => {
+            let suffix = new File(path).suffix();
+            let a = path.substring(config.dist_path.length).replace(/\\/g, "/");
+            let b = "";
+            if (!isbinaryfile.sync(path)) {
+                b = map[util.getMappedPath(a)];
+                if (!b) {
+                    b = map[a.split(".").shift()];
+                }
+            }
+            if (b) {
+                new File(path).renameSync(Path.resolve(config.dist_path, util.getHashPath(a, b)));
+            }
         });
     },
     logResult(){

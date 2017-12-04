@@ -103,6 +103,16 @@ let util = {
         }
         return r;
     },
+    getAllSourcePaths(path) {
+        let file = new File(path);
+        let filelist = [];
+        file.scan((path, isfile) => {
+            if (isfile) {
+                filelist.push(path);
+            }
+        });
+        return filelist;
+    },
     findPathsMap(content) {
         let r = {
             url: [],
