@@ -348,7 +348,7 @@ let base = {
     },
     logResult() {
         console.log("");
-        console.log(`+ ${util.formatDate()} +`.cyan);
+        console.log(` ✪ ${util.formatDate()}`.cyan);
         let success = [], error = {};
         let maxLine = 10;
         Reflect.ownKeys(this.logs).forEach(key => {
@@ -359,12 +359,20 @@ let base = {
             }
         });
         if (success.length > 0) {
-            console.log(`[- DONE -]`.yellow);
+            let _nm = 0, _ll = 0;
+            success.forEach((path, index) => {
+                if (path.indexOf("node_modules") === -1) {
+                    _ll += 1;
+                } else {
+                    _nm += 1;
+                }
+            });
+            console.log(`   LOCAL`.yellow, `[${_ll}]`.grey,"▪", `NODE-MODULES`.yellow, `[${_nm}]`.grey);
             success.splice(0, maxLine).forEach((path, index) => {
                 if (path.indexOf("node_modules") === -1) {
-                    console.log(` - [${index + 1}]`.green,`${path.substring(config.source_path.length)}`.cyan,`[local]`.grey);
+                    console.log(` - [${index + 1}]`.green, `${path.substring(config.source_path.length)}`.cyan, `[local]`.grey);
                 } else {
-                    console.log(` - [${index + 1}]`.green,`${path.substring(config.nmodule_path.length)}`.cyan,`[node_module]`.grey);
+                    console.log(` - [${index + 1}]`.green, `${path.substring(config.nmodule_path.length)}`.cyan, `[node_module]`.grey);
                 }
             });
             if (success.length > maxLine) {
@@ -373,7 +381,16 @@ let base = {
         }
         let et = Reflect.ownKeys(error);
         if (et.length > 0) {
-            console.log(`[- ERROR -]`.red);
+            let _nm = 0, _ll = 0;
+            et.forEach((key, index) => {
+                if (path.indexOf("node_modules") === -1) {
+                    _ll += 1;
+                } else {
+                    _nm += 1;
+                }
+                console.log(`   ${error[key]}`.red);
+            });
+            console.log(` ✪ LOCAL`.red, `[${_ll}]`.grey, `NODE-MODULES`.red, `[${_nm}]`.grey);
             et.forEach((key, index) => {
                 if (path.indexOf("node_modules") === -1) {
                     console.log(` - [${index + 1}] ${path.substring(config.source_path.length)}`.grey);
