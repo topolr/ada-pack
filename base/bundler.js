@@ -168,23 +168,28 @@ let base = {
                 }
             });
             info.content = info.content.replace(/imports\(.*?\)/g, (str) => {
-                let a = str.substring(8, str.length - 1).replace(/['|"|`]/g, "").trim();
-                if (IGNOREMODULES.indexOf(a) === -1) {
-                    let m = this.getFilePath(config, Path.resolve(info.path, "./../"), a);
-                    let name = "", value = "";
-                    if (m.indexOf("node_modules") === -1) {
-                        name = m.substring(config.source_path.length);
-                        value = `imports("${name}")`;
+                let a = str.substring(8, str.length - 1);
+                if (a.startsWith("\"") || a.startsWith("'") || a.startsWith("`")) {
+                    a = a.replace(/['|"|`]/g, "").trim();
+                    if (IGNOREMODULES.indexOf(a) === -1) {
+                        let m = this.getFilePath(config, Path.resolve(info.path, "./../"), a);
+                        let name = "", value = "";
+                        if (m.indexOf("node_modules") === -1) {
+                            name = m.substring(config.source_path.length);
+                            value = `imports("${name}")`;
+                        } else {
+                            let name = `${THRIDPARTFOLDER}/${m.substring(config.nmodule_path.length)}`;
+                            value = `imports("${name}")`;
+                        }
+                        importsTasks.push({
+                            filePath: Path.resolve(info.path, "./../"),
+                            path: a,
+                            name
+                        });
+                        return value;
                     } else {
-                        let name = `${THRIDPARTFOLDER}/${m.substring(config.nmodule_path.length)}`;
-                        value = `imports("${name}")`;
+                        return str;
                     }
-                    importsTasks.push({
-                        filePath: Path.resolve(info.path, "./../"),
-                        path: a,
-                        name
-                    });
-                    return value;
                 } else {
                     return str;
                 }
@@ -240,7 +245,42 @@ let base = {
         }).catch(e => console.log(e));
     },
     bundleAda(develop = false) {
-        new AdaBundler().bundle(Path.resolve(config.projectPath, `./node_modules/adajs/${develop ? "develop" : "index"}.js`), Path.resolve(config.dist_path, "./ada.js"), develop);
+        new AdaBundler().bundle(Path.resolve(config.nmodule_path, `./adajs/${develop ? "develop" : "index"}.js`), Path.resolve(config.dist_path, "./ada.js"), develop);
+    },
+    getAppSourceInfo() {
+        let main = Path.resolve(config.base_path, config.main);
+        let info = {};
+        return queue([main, ...util.getAllSourcePaths(Path.resolve(config.base_path, config.entry_path) + "/")].map(path => {
+            return "./" + path.substring(config.source_path.length);
+        }).map(entry => () => {
+            return this.getRequireInfo(config, config.source_path, entry).then(_info => {
+                Object.keys(_info).forEach(key => {
+                    info[key] = _info[key];
+                });
+            });
+        })).then(() => {
+            let mainEntry = null, otherEnteries = [];
+            let _mainEntry = main.substring(config.source_path.length);
+            Object.keys(info).forEach(key => {
+                let result = {};
+                Reflect.ownKeys(info[key]).forEach(path => {
+                    result[util.getMappedPath(path)] = {
+                        hash: hash.md5(info[key][path]).substring(0, 8),
+                        code: info[key][path]
+                    }
+                });
+                let _result = {
+                    code: result,
+                    key: util.getMappedPath("package-" + key.replace(/\//g, "-").replace(/\\/g, "-"))
+                };
+                if (key === _mainEntry) {
+                    mainEntry = _result;
+                } else {
+                    otherEnteries.push(_result);
+                }
+            });
+            return {mainEntry, otherEnteries};
+        });
     },
     outputPWAFile(config) {
         let manifest = {};
@@ -306,10 +346,11 @@ let base = {
             }
         });
     },
-    logResult(){
+    logResult() {
         console.log("");
         console.log(`+ ${util.formatDate()} +`.cyan);
         let success = [], error = {};
+        let maxLine = 10;
         Reflect.ownKeys(this.logs).forEach(key => {
             if (this.logs[key] === "done") {
                 success.push(key);
@@ -318,21 +359,21 @@ let base = {
             }
         });
         if (success.length > 0) {
-            console.log(` [done]`.yellow);
-            success.splice(0, 5).forEach((path, index) => {
+            console.log(`[- DONE -]`.yellow);
+            success.splice(0, maxLine).forEach((path, index) => {
                 if (path.indexOf("node_modules") === -1) {
-                    console.log(` - [${index + 1}] ${path.substring(config.source_path.length)}`.grey);
+                    console.log(` - [${index + 1}]`.green,`${path.substring(config.source_path.length)}`.cyan,`[local]`.grey);
                 } else {
-                    console.log(` - [${index + 1}] ${path.substring(config.nmodule_path.length)}`.grey);
+                    console.log(` - [${index + 1}]`.green,`${path.substring(config.nmodule_path.length)}`.cyan,`[node_module]`.grey);
                 }
             });
-            if (success.length > 5) {
-                console.log(` + [${success.length}]...`.grey);
+            if (success.length > maxLine) {
+                console.log(` + [${success.length}]...`.green);
             }
         }
         let et = Reflect.ownKeys(error);
         if (et.length > 0) {
-            console.log(` [error]`.red);
+            console.log(`[- ERROR -]`.red);
             et.forEach((key, index) => {
                 if (path.indexOf("node_modules") === -1) {
                     console.log(` - [${index + 1}] ${path.substring(config.source_path.length)}`.grey);
@@ -345,26 +386,7 @@ let base = {
     },
     bundle() {
         this.logs = {};
-        return this.getRequireInfo(config, config.source_path, config.entry).then((info) => {
-            let mainEntry = null, otherEnteries = [];
-            Object.keys(info).forEach(key => {
-                let result = {};
-                Reflect.ownKeys(info[key]).forEach(path => {
-                    result[util.getMappedPath(path)] = {
-                        hash: hash.md5(info[key][path]).substring(0, 8),
-                        code: info[key][path]
-                    }
-                });
-                let _result = {
-                    code: result,
-                    key: util.getMappedPath("package-" + key.replace(/\//g, "-").replace(/\\/g, "-"))
-                };
-                if (key === info.__name__) {
-                    mainEntry = _result;
-                } else {
-                    otherEnteries.push(_result);
-                }
-            });
+        return this.getAppSourceInfo().then(({mainEntry, otherEnteries}) => {
             otherEnteries.forEach(file => {
                 let r = {};
                 Reflect.ownKeys(file.code).forEach(key => {
