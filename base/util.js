@@ -1,7 +1,5 @@
 let uglify = require("uglify-js");
 let babel = require("babel-core");
-let Path = require("path");
-let File = require("./lib/file");
 
 let util = {
     replacePaths(content, fn) {

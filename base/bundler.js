@@ -212,10 +212,10 @@ let base = {
             })).concat(infoTasks.map(({filePath, path}) => {
                 return this.getRequireInfo(config, filePath, path).then(b => {
                     let name = b.__name__;
-                    Reflect.ownKeys(b[name]).forEach(key => {
+                    Object.keys(b[name]).forEach(key => {
                         at[key] = b[name][key];
                     });
-                    Reflect.ownKeys(b).forEach(key => {
+                    Object.keys(b).forEach(key => {
                         if (key !== name) {
                             result[key] = b[key];
                         }
@@ -225,7 +225,7 @@ let base = {
                 return this.getRequireInfo(config, filePath, path).then(b => {
                     let name = b.__name__;
                     result[name] = b[name];
-                    Reflect.ownKeys(b).forEach(key => {
+                    Object.keys(b).forEach(key => {
                         if (key !== name) {
                             result[key] = b[key];
                         }
@@ -289,14 +289,46 @@ let base = {
             ]);
         });
     },
-    getAppRequireInfo() {
-        return this.getRequireInfo(config, config.source_path, config.entry);
+    logResult(){
+        let success = [], error = {};
+        Reflect.ownKeys(this.logs).forEach(key => {
+            if (this.logs[key] === "done") {
+                success.push(key);
+            } else {
+                error[key] = this.logs[key];
+            }
+        });
+        if (success.length > 0) {
+            console.log(` [done]`.yellow);
+            success.splice(0, 5).forEach((path, index) => {
+                if (path.indexOf("node_modules") === -1) {
+                    console.log(` - [${index + 1}] ${path.substring(config.source_path.length)}`.grey);
+                } else {
+                    console.log(` - [${index + 1}] ${path.substring(config.nmodule_path.length)}`.grey);
+                }
+            });
+            if (success.length > 5) {
+                console.log(` + [${success.length}]...`.grey);
+            }
+        }
+        let et = Reflect.ownKeys(error);
+        if (et.length > 0) {
+            console.log(` [error]`.red);
+            et.forEach((key, index) => {
+                if (path.indexOf("node_modules") === -1) {
+                    console.log(` - [${index + 1}] ${path.substring(config.source_path.length)}`.grey);
+                } else {
+                    console.log(` - [${index + 1}] ${path.substring(config.nmodule_path.length)}`.grey);
+                }
+                console.log(`   ${error[key]}`.red);
+            });
+        }
     },
     bundle() {
         this.logs = {};
-        return this.getAppRequireInfo().then((info) => {
+        return this.getRequireInfo(config, config.source_path, config.entry).then((info) => {
             let mainEntry = null, otherEnteries = [];
-            Reflect.ownKeys(info).forEach(key => {
+            Object.keys(info).forEach(key => {
                 let result = {};
                 Reflect.ownKeys(info[key]).forEach(path => {
                     result[util.getMappedPath(path)] = {
@@ -356,39 +388,7 @@ let base = {
                 return this.outputPWAFile(config);
             });
             return queue(tasks).then(() => {
-                let success = [], error = {};
-                Reflect.ownKeys(this.logs).forEach(key => {
-                    if (this.logs[key] === "done") {
-                        success.push(key);
-                    } else {
-                        error[key] = this.logs[key];
-                    }
-                });
-                if (success.length > 0) {
-                    console.log(` [done]`.yellow);
-                    success.splice(0, 5).forEach((path, index) => {
-                        if (path.indexOf("node_modules") === -1) {
-                            console.log(` - [${index + 1}] ${path.substring(config.source_path.length)}`.grey);
-                        } else {
-                            console.log(` - [${index + 1}] ${path.substring(config.nmodule_path.length)}`.grey);
-                        }
-                    });
-                    if (success.length > 5) {
-                        console.log(` + [${success.length}]...`.grey);
-                    }
-                }
-                let et = Reflect.ownKeys(error);
-                if (et.length > 0) {
-                    console.log(` [error]`.red);
-                    et.forEach((key, index) => {
-                        if (path.indexOf("node_modules") === -1) {
-                            console.log(` - [${index + 1}] ${path.substring(config.source_path.length)}`.grey);
-                        } else {
-                            console.log(` - [${index + 1}] ${path.substring(config.nmodule_path.length)}`.grey);
-                        }
-                        console.log(`   ${error[key]}`.red);
-                    });
-                }
+                this.logResult();
                 return map;
             });
         }).catch(e => console.log(e));
