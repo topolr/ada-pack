@@ -290,6 +290,8 @@ let base = {
         });
     },
     logResult(){
+        console.log("");
+        console.log(`+ ${util.formatDate()} +`.cyan);
         let success = [], error = {};
         Reflect.ownKeys(this.logs).forEach(key => {
             if (this.logs[key] === "done") {

@@ -45,7 +45,8 @@ let waiter = {
 };
 
 function showTips() {
-    console.log(`[ ada-pack:${package.version} ]`.magenta);
+    console.log(colors.blue.bold(` # ADA-PACK : ${package.version} #`));
+    console.log("");
 }
 
 function getAppInfo(appPath) {
