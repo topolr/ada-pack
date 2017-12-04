@@ -367,7 +367,7 @@ let base = {
                     _nm += 1;
                 }
             });
-            console.log(`   LOCAL`.yellow, `[${_ll}]`.grey,"▪", `NODE-MODULES`.yellow, `[${_nm}]`.grey);
+            console.log(`   LOCAL`.yellow, `[${_ll}]`.grey, "▪", `NODE-MODULES`.yellow, `[${_nm}]`.grey);
             success.splice(0, maxLine).forEach((path, index) => {
                 if (path.indexOf("node_modules") === -1) {
                     console.log(` - [${index + 1}]`.green, `${path.substring(config.source_path.length)}`.cyan, `[local]`.grey);
@@ -376,7 +376,7 @@ let base = {
                 }
             });
             if (success.length > maxLine) {
-                console.log(` + [${success.length}]...`.green);
+                console.log(` + [${success.length + maxLine}]...`.green);
             }
         }
         let et = Reflect.ownKeys(error);
