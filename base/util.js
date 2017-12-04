@@ -234,6 +234,14 @@ let util = {
     },
     getMappedPath(path) {
         return `P${Math.abs(util.hashCode(path.replace(/\\/g, "/")))}`;
+    },
+    setProp(target, key, value) {
+        Reflect.defineProperty(target, key, {
+            enumerable: false,
+            configurable: false,
+            writable: false,
+            value: value
+        });
     }
 };
 

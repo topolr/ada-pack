@@ -11,7 +11,7 @@ module.exports = {
     background_color: "#fff",
     theme_color: "#fff",
     description: "ada web framework.",
-    entry: ["./root.js"],
+    entry: "./root.js",
     keywords: ["ada"],
     pages: [],
     icons: [
