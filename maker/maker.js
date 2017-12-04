@@ -4,7 +4,8 @@ const Map = {
     scss: require("./sassmaker"),
     less: require("./lessmaker"),
     json: require("./jsonmaker"),
-    html: require("./htmlmaker")
+    html: require("./htmlmaker"),
+    icon: require("./iconmaker")
 };
 
 module.exports = {

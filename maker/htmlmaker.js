@@ -1,7 +1,7 @@
 let minify = require('html-minifier').minify;
 let util = require("./../base/util");
 let Path = require("path");
-let File = require("../base/lib/file");
+let File = require("../lib/file");
 
 module.exports = function (content, path, option) {
     return new Promise((resolve, reject) => {
