@@ -1,12 +1,12 @@
 let bundler = require("./base/bundler");
 let path = require("path");
 let chokidar = require('chokidar');
-let File = require("./lib/file");
 let Path = require("path");
 let package = require("./package.json");
 let colors = require("colors");
 let uglify = require("uglify-js");
 let babel = require("babel-core");
+let util = require("./base/util");
 
 let waiter = {
     _data: {},
@@ -48,38 +48,10 @@ function showTips() {
     console.log(colors.blue.bold(` ☰ ADA-PACK ${package.version} ☰`));
 }
 
-function getAppInfo(appPath) {
-    let info = {};
-    let content = new File(appPath).readSync();
-    content = babel.transform(content, {
-        presets: [["env", {
-            targets: {
-                chrome: 29
-            }
-        }]],
-        plugins: ["transform-decorators-legacy", "transform-async-to-generator", "syntax-dynamic-import"]
-    }).code;
-    try {
-        content = uglify.minify(content, {
-            fromString: true,
-            mangle: true
-        }).code;
-    } catch (e) {
-    }
-    let module = {exports: {}};
-    new Function("module", "exports", content)(module, module.exports);
-    if (module.exports.default) {
-        info = module.exports.default;
-    } else {
-        info = module.exports;
-    }
-    return info;
-}
-
 module.exports = {
     develop(appPath = "", fn) {
         showTips();
-        let config = getAppInfo(appPath);
+        let config = util.getAppInfo(appPath);
         let basePath = path.resolve(appPath, "./../");
         let _bundler = bundler(Object.assign({
             base_path: basePath,
@@ -125,7 +97,7 @@ module.exports = {
     },
     publish(appPath = "") {
         showTips();
-        let config = getAppInfo(appPath);
+        let config = util.getAppInfo(appPath);
         let basePath = path.resolve(appPath, "./../");
         let _bundler = bundler(Object.assign({
             base_path: basePath,

@@ -1,6 +1,6 @@
 let uglify = require("uglify-js");
 let babel = require("babel-core");
-let File=require("./../lib/file");
+let File = require("./../lib/file");
 
 let util = {
     replacePaths(content, fn) {
@@ -251,6 +251,33 @@ let util = {
             writable: false,
             value: value
         });
+    },
+    getAppInfo(appPath) {
+        let info = {};
+        let content = new File(appPath).readSync();
+        content = babel.transform(content, {
+            presets: [["env", {
+                targets: {
+                    chrome: 29
+                }
+            }]],
+            plugins: ["transform-decorators-legacy", "transform-async-to-generator", "syntax-dynamic-import"]
+        }).code;
+        try {
+            content = uglify.minify(content, {
+                fromString: true,
+                mangle: true
+            }).code;
+        } catch (e) {
+        }
+        let module = {exports: {}};
+        new Function("module", "exports", content)(module, module.exports);
+        if (module.exports.default) {
+            info = module.exports.default;
+        } else {
+            info = module.exports;
+        }
+        return info;
     }
 };
 
