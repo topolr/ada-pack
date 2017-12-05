@@ -346,10 +346,11 @@ let base = {
                 new File(path).renameSync(Path.resolve(config.dist_path, util.getHashPath(a, b)));
             }
         });
+        new File(Path.resolve(config.dist_path, "./ada.js")).renameSync(Path.resolve(config.dist_path, `./ada-${config.adaHash}.js`));
     },
     logResult() {
         console.log("");
-        console.log(` ✪ ${util.formatDate()}`.cyan);
+        console.log(` ✪ ${util.formatDate()}`.yellow);
         let success = [], error = {};
         let maxLine = 10;
         Reflect.ownKeys(this.logs).forEach(key => {
@@ -368,7 +369,7 @@ let base = {
                     _nm += 1;
                 }
             });
-            console.log(`   LOCAL`.yellow, `[${_ll}]`.grey, "▪".yellow, `NODE-MODULES`.yellow, `[${_nm}]`.grey);
+            console.log(`   LOCAL`.grey, `[${_ll}]`.gray, "▪".grey, `NODE-MODULES`.grey, `[${_nm}]`.gray);
             success.splice(0, maxLine).forEach((path, index) => {
                 if (path.indexOf("node_modules") === -1) {
                     console.log(` - [${index + 1}]`.green, `${path.substring(config.source_path.length)}`.cyan, `[local]`.grey);
@@ -436,14 +437,20 @@ let base = {
                 if (config.develop) {
                     config._adaPath = config.site_url + "ada.js";
                 } else {
-                    config._adaPath = `${config.site_url}ada${config.adaHash}.js`;
+                    config._adaPath = `${config.site_url}ada-${config.adaHash}.js`;
                 }
                 config.ada = {
                     basePath: config.site_url,
-                    root: Path.resolve(config.source_path, config.main).substring(config.source_path.length),
+                    root: Path.resolve(config.base_path, config.main).replace(/\\/g, "/").substring(config.source_path.length),
                     map: map,
                     develop: config.develop
                 };
+                if (!config.develop) {
+                    this.hashFiles(map);
+                }
+                return Promise.resolve();
+            });
+            tasks.push(() => {
                 return this.outputPWAFile(config);
             });
             return queue(tasks).then(() => {
@@ -462,6 +469,10 @@ let action = {
         return base.bundle();
     },
     removeFiles(files) {
+        return base.bundle();
+    },
+    publish(){
+        base.bundleAda(config.develop);
         return base.bundle();
     }
 };

@@ -132,6 +132,6 @@ module.exports = {
             develop: false,
             projectPath: path.resolve(__dirname, "./../../")
         }, config));
-        return _bundler.bundle();
+        return _bundler.publish();
     }
 };
