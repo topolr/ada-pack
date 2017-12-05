@@ -17,10 +17,11 @@ let messageQueue = {
     }
 };
 
-function openIndex(path, url) {
+function openIndex(path, url, fn) {
     setTimeout(() => {
         if (new File(path).isExists()) {
             opn(url);
+            fn && fn();
         } else {
             openIndex(path, url);
         }
@@ -29,20 +30,25 @@ function openIndex(path, url) {
 
 module.exports = function (app) {
     app.listenDev = function () {
-        let paras = arguments;
+        let paras = [...arguments];
         let appPath = paras.shift();
-        let fn = paras.pop();
         let server = null;
+        let fn = null;
+        if (typeof paras[paras.length - 1] === "function") {
+            fn = paras.pop();
+        }
         paras.push(function () {
             let host = "localhost", port = server.address().port;
             let info = util.getAppInfo(appPath);
-            let distPath = Path.resolve(appPath, info.dist_path);
-            openIndex(distPath, `http://${host}:${port}`);
+            let distPath = Path.resolve(appPath, "./../", info.dist_path, "./index.html");
+            require("./../index").develop(appPath, ({type, files, map}) => {
+                messageQueue.add({type, files, map});
+            });
+            openIndex(distPath, `http://${host}:${port}`, function () {
+                fn && fn();
+            });
         });
         server = app.listen(...paras);
-        require("./../index").develop(appPath, ({type, files, map}) => {
-            messageQueue.add({type, files, map});
-        });
         return server;
     };
     app.use("/ada/sse", (req, res) => {
