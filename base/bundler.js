@@ -74,7 +74,8 @@ let base = {
         let _path = "";
         if (path.startsWith("./") || path.startsWith("../") || path.startsWith("/")) {
             _path = Path.resolve(filePath, path).replace(/\\/g, "/");
-            if (!new File(_path).isExists()) {
+            let _file = new File(_path);
+            if (!_file.isExists() || _file.isFolder()) {
                 _path = _path + ".js";
             }
         } else {
@@ -439,7 +440,7 @@ let base = {
                 }
                 config.ada = {
                     basePath: config.site_url,
-                    root: Path.resolve(config.source_path, config.entry).substring(config.source_path.length),
+                    root: Path.resolve(config.source_path, config.main).substring(config.source_path.length),
                     map: map,
                     develop: config.develop
                 };
