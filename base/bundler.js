@@ -429,7 +429,7 @@ let base = {
             let tasks = otherEnteries.map(file => () => {
                 let p = file.key;
                 let c = `Ada.unpack(${JSON.stringify(file.code)})`;
-                file.hash = hash.md5(c).substring(0, 8);
+                file.hash = hash.md5(map.packages[p].split("|").sort().join("|")).substring(0, 8);
                 map[p] = file.hash;
                 return new File(Path.resolve(config.dist_path, p) + ".js").write(c);
             });
