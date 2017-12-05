@@ -19,7 +19,6 @@ function runDev() {
     if (!new File(appPath).isExists()) {
         appPath = Path.resolve(projectPath, "./app.js");
     }
-    console.log("--->", appPath)
     let appInfo = util.getAppInfo(appPath);
     let distPath = Path.resolve(appPath, "./../", appInfo.dist_path);
     let app = new express();
