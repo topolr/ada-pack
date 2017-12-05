@@ -376,13 +376,13 @@ let base = {
             console.log(`   LOCAL`.grey, `[${_ll}]`.gray, "▪".grey, `NODE-MODULES`.grey, `[${_nm}]`.gray);
             success.splice(0, maxLine).forEach((path, index) => {
                 if (path.indexOf("node_modules") === -1) {
-                    console.log(` - [${index + 1}]`.green, `${path.substring(config.source_path.length)}`.cyan, `[local]`.grey);
+                    console.log(` - [${index + 1}]`.grey, `${path.substring(config.source_path.length)}`.cyan, `[local]`.grey);
                 } else {
-                    console.log(` - [${index + 1}]`.green, `${path.substring(config.nmodule_path.length)}`.cyan, `[node_module]`.grey);
+                    console.log(` - [${index + 1}]`.grey, `${path.substring(config.nmodule_path.length)}`.cyan, `[node_module]`.grey);
                 }
             });
             if (success.length > maxLine) {
-                console.log(` + [${success.length + maxLine}]...`.green);
+                console.log(` + [${success.length + maxLine}]...`.grey);
             }
         }
         let et = Reflect.ownKeys(error);
