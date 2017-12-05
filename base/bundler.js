@@ -251,7 +251,11 @@ let base = {
     getAppSourceInfo() {
         let main = Path.resolve(config.base_path, config.main);
         let info = {};
-        return queue([main, ...util.getAllSourcePaths(Path.resolve(config.base_path, config.entry_path) + "/")].map(path => {
+        let entries = [];
+        if (config.entry_path) {
+            entries = util.getAllSourcePaths(Path.resolve(config.base_path, config.entry_path) + "/");
+        }
+        return queue([main, ...entries].map(path => {
             return "./" + path.substring(config.source_path.length);
         }).map(entry => () => {
             return this.getRequireInfo(config, config.source_path, entry).then(_info => {
