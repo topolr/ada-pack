@@ -406,6 +406,9 @@ let base = {
                 console.log(`   ${error[key]}`.red);
             });
         }
+        if (success.length === 0 && et.length === 0) {
+            console.log(` - [NOTHING TO DISPLAY] -`.grey);
+        }
     },
     bundle() {
         this.logs = {};
@@ -481,7 +484,7 @@ let action = {
     removeFiles(files) {
         return base.bundle();
     },
-    publish(){
+    publish() {
         base.bundleAda(config.develop);
         return base.bundle();
     }
