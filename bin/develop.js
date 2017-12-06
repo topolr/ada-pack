@@ -1,7 +1,6 @@
-let opn = require('opn');
-let util = require("./../base/util");
-let Path = require("path");
 let File = require("../base/lib/file");
+let Path = require("path");
+let util = require("./../base/util");
 
 let messageQueue = {
     listeners: [],
@@ -28,7 +27,7 @@ function openIndex(path, url, fn) {
     }, 500);
 }
 
-module.exports = function (app) {
+function handle(app) {
     app.listenDev = function () {
         let paras = [...arguments];
         let appPath = paras.shift();
@@ -64,3 +63,38 @@ module.exports = function (app) {
     });
     return app;
 };
+
+function runDev() {
+    let projectPath = Path.resolve(__dirname, "./../../../");
+    let express = require(Path.resolve(projectPath, "./node_modules/express"));
+    let packagePath = Path.resolve(projectPath, "./package.json");
+    let package = JSON.parse(new File(packagePath).readSync());
+    if (!package.adaDev) {
+        package.adaDev = {
+            port: 8080,
+            appPath: "./app/app.js",
+            serverPath: "./server.js"
+        };
+    }
+    let port = package.adaDev.port;
+    let appPath = Path.resolve(packagePath, "./../", package.adaDev.appPath);
+    if (!new File(appPath).isExists()) {
+        appPath = Path.resolve(projectPath, "./app.js");
+    }
+    let appInfo = util.getAppInfo(appPath);
+    let distPath = Path.resolve(appPath, "./../", appInfo.dist_path);
+    let serverPath = Path.resolve(projectPath, package.adaDev.serverPath);
+    let app = null;
+    if (!new FIle(serverPath).isExists()) {
+        app = new express();
+    } else {
+        app = require(serverPath);
+    }
+    app.use(express.static(distPath));
+    app.get("/", (req, res) => {
+        res.send(require("fs").readFileSync(Path.resolve(distPath, "./index.html"), "utf-8"));
+    });
+    app = handle(app);
+    app.listenDev(appPath, port);
+}
+runDev();
