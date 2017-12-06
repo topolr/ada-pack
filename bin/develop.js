@@ -3,6 +3,7 @@ let Path = require("path");
 let util = require("./../base/util");
 let opn = require("opn");
 
+let connected = false;
 let messageQueue = {
     listeners: [],
     subscribe(fn) {
@@ -18,6 +19,7 @@ let messageQueue = {
 };
 
 function runDev() {
+    let waitTime = 5000;
     let projectPath = Path.resolve(__dirname, "./../../../");
     let express = require(Path.resolve(projectPath, "./node_modules/express"));
     let packagePath = Path.resolve(projectPath, "./package.json");
@@ -49,12 +51,13 @@ function runDev() {
         res.send(require("fs").readFileSync(Path.resolve(distPath, "./index.html"), "utf-8"));
     });
     app.use("/ada/sse", (req, res) => {
+        connected = true;
         res.writeHead(200, {
             'Connection': 'keep-alive',
             'Content-Type': 'text/event-stream',
             'Cache-Control': 'no-cache'
         });
-        res.write("retry: 10000\n");
+        res.write(`retry: ${waitTime}\n`);
         messageQueue.subscribe((info) => {
             res.write("id: " + Date.now() + "\ndata: " + JSON.stringify(info) + "\n\n");
         });
@@ -65,7 +68,35 @@ function runDev() {
         app.listen(port, () => {
             console.log("");
             console.log(` SERVER RUNNING LOCALHOST PORT [: ${port}] ▶`.yellow);
-            opn(`http://${host}:${port}`);
+            let desc = ` now try to open the page...`;
+            process.stderr.write(desc.grey);
+            process.stderr.cursorTo(desc.length);
+            let count = waitTime / 1000;
+            for (let i = 1; i <= count; i++) {
+                (function (num) {
+                    setTimeout(() => {
+                        process.stderr.clearLine();
+                        process.stderr.cursorTo(0);
+                        if (num === count) {
+                            if (connected) {
+                                process.stderr.write(` page is opened,reload it`.grey);
+                                messageQueue.add({type: "reload"});
+                            } else {
+                                process.stderr.write(` can not found opened page,open it`.grey);
+                                opn(`http://${host}:${port}`);
+                            }
+                            process.stderr.write(`\n`);
+                        } else {
+                            let rdesc = ` now check [${num}] times ...`;
+                            process.stderr.write(rdesc.grey);
+                            process.stderr.cursorTo(rdesc.length);
+                        }
+                    }, i * 1000);
+                })(i);
+            }
+            setTimeout(() => {
+
+            }, waitTime);
         });
     });
 }
