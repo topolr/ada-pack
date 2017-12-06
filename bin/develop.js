@@ -64,7 +64,7 @@ function runDev() {
     }).then(() => {
         app.listen(port, () => {
             console.log("");
-            console.log(` ▶ SERVER RUNNING LOCALHOST PORT [: ${port}]`.yellow);
+            console.log(` SERVER RUNNING LOCALHOST PORT [: ${port}] ▶`.yellow);
             opn(`http://${host}:${port}`);
         });
     });
