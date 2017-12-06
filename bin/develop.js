@@ -63,7 +63,8 @@ function runDev() {
         messageQueue.add({type, files, map});
     }).then(() => {
         app.listen(port, () => {
-            console.log(`Server running port : ${port}`.yellow);
+            console.log("");
+            console.log(` ▶ SERVER RUNNING LOCALHOST PORT [: ${port}]`.yellow);
             opn(`http://${host}:${port}`);
         });
     });
