@@ -354,7 +354,7 @@ let base = {
     },
     logResult() {
         console.log("");
-        console.log(` ➲ ${util.formatDate()}`.yellow);
+        console.log(` ➲ ${util.formatDate()}`.cyan);
         let success = [], error = {};
         let maxLine = 10;
         Reflect.ownKeys(this.logs).forEach(key => {
