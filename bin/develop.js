@@ -94,9 +94,6 @@ function runDev() {
                     }, i * 1000);
                 })(i);
             }
-            setTimeout(() => {
-
-            }, waitTime);
         });
     });
 }
