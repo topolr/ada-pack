@@ -461,6 +461,12 @@ let base = {
                 this.logResult();
                 return map;
             });
+        }).then(map => {
+            if (config.complete) {
+                config.complete();
+                config.complete = null;
+            }
+            return map;
         }).catch(e => console.log(e));
     }
 };

@@ -17,17 +17,6 @@ let messageQueue = {
     }
 };
 
-function openIndex(path, url, fn) {
-    setTimeout(() => {
-        if (new File(path).isExists()) {
-            opn(url);
-            fn && fn();
-        } else {
-            openIndex(path, url);
-        }
-    }, 500);
-}
-
 function runDev() {
     let projectPath = Path.resolve(__dirname, "./../../../");
     let express = require(Path.resolve(projectPath, "./node_modules/express"));
@@ -41,6 +30,7 @@ function runDev() {
         };
     }
     let port = packageInfo.adaDev.port;
+    let host = "localhost";
     let appPath = Path.resolve(packagePath, "./../", packageInfo.adaDev.appPath);
     if (!new File(appPath).isExists()) {
         appPath = Path.resolve(projectPath, "./app.js");
@@ -69,13 +59,12 @@ function runDev() {
             res.write("id: " + Date.now() + "\ndata: " + JSON.stringify(info) + "\n\n");
         });
     });
-    app.listen(port, () => {
-        let host = "localhost";
-        require("./../index").develop(appPath, ({type, files, map}) => {
-            messageQueue.add({type, files, map});
-        });
-        openIndex(distPath, `http://${host}:${port}`, function () {
+    require("./../index").develop(appPath, ({type, files, map}) => {
+        messageQueue.add({type, files, map});
+    }).then(() => {
+        app.listen(port, () => {
             console.log(`Server running port : ${port}`.yellow);
+            opn(`http://${host}:${port}`);
         });
     });
 }
