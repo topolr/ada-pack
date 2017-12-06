@@ -1,7 +1,7 @@
 let opn = require('opn');
 let util = require("./../base/util");
 let Path = require("path");
-let File = require("./../lib/file");
+let File = require("../base/lib/file");
 
 let messageQueue = {
     listeners: [],

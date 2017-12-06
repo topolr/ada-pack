@@ -1,10 +1,10 @@
 let colors = require("colors");
 let util = require("./util");
-let File = require("../lib/file");
+let File = require("./lib/file");
 let Path = require("path");
-let maker = require("./../maker/maker");
-let hash = require("../lib/md5");
-let queue = require("../lib/queue");
+let maker = require("./maker/maker");
+let hash = require("./lib/md5");
+let queue = require("./lib/queue");
 let isbinaryfile = require("isbinaryfile");
 let config = require("./config");
 

@@ -1,4 +1,4 @@
-let File = require("./../lib/file");
+let File = require("../base/lib/file");
 let Path = require("path");
 let adaSSE = require("./../sse/index");
 let util = require("./../base/util");
