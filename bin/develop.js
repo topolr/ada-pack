@@ -67,8 +67,8 @@ function runDev() {
     }).then(() => {
         app.listen(port, () => {
             console.log("");
-            console.log(` SERVER RUNNING LOCALHOST PORT [: ${port}] ▶`.yellow);
-            let desc = ` now try to open the page...`;
+            console.log(` ▶ SERVER RUNNING LOCALHOST PORT [: ${port}] `.yellow);
+            let desc = `  now try to open the page...`;
             process.stderr.write(desc.grey);
             process.stderr.cursorTo(desc.length);
             let count = waitTime / 1000;
@@ -79,15 +79,15 @@ function runDev() {
                         process.stderr.cursorTo(0);
                         if (num === count) {
                             if (connected) {
-                                process.stderr.write(` page is opened,reload it`.grey);
+                                process.stderr.write(`  page is opened,reload it`.grey);
                                 messageQueue.add({type: "reload"});
                             } else {
-                                process.stderr.write(` can not found opened page,open it`.grey);
+                                process.stderr.write(`  can not found opened page,open it`.grey);
                                 opn(`http://${host}:${port}`);
                             }
                             process.stderr.write(`\n`);
                         } else {
-                            let rdesc = ` now check [${num}] times ...`;
+                            let rdesc = `  now check [${num}] times ...`;
                             process.stderr.write(rdesc.grey);
                             process.stderr.cursorTo(rdesc.length);
                         }
