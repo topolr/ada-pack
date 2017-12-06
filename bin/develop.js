@@ -72,28 +72,27 @@ function runDev() {
             process.stderr.write(desc.grey);
             process.stderr.cursorTo(desc.length);
             let count = waitTime / 1000;
-            for (let i = 1; i <= count; i++) {
-                (function (num) {
-                    setTimeout(() => {
-                        process.stderr.clearLine();
-                        process.stderr.cursorTo(0);
-                        if (num === count) {
-                            if (connected) {
-                                process.stderr.write(`    page is opened,reload it`.grey);
-                                messageQueue.add({type: "reload"});
-                            } else {
-                                process.stderr.write(`    can not found opened page,open it`.grey);
-                                opn(`http://${host}:${port}`);
-                            }
-                            process.stderr.write(`\n`);
-                        } else {
-                            let rdesc = `    now check [${num}] times ...`;
-                            process.stderr.write(rdesc.grey);
-                            process.stderr.cursorTo(rdesc.length);
-                        }
-                    }, i * 1000);
-                })(i);
-            }
+            let num = 0;
+            let intevalId = setInterval(() => {
+                num += 1;
+                process.stderr.clearLine();
+                process.stderr.cursorTo(0);
+                if (connected) {
+                    clearInterval(intevalId);
+                    messageQueue.add({type: "reload"});
+                    process.stderr.write(`    page is opened,reload it`.grey);
+                    process.stderr.write(`\n`);
+                } else if (num === count) {
+                    clearInterval(intevalId);
+                    opn(`http://${host}:${port}`);
+                    process.stderr.write(`    can not found opened page,open it`.grey);
+                    process.stderr.write(`\n`);
+                } else {
+                    let rdesc = `    now check [${num}] times ...`;
+                    process.stderr.write(rdesc.grey);
+                    process.stderr.cursorTo(rdesc.length);
+                }
+            }, 1000);
         });
     });
 }
