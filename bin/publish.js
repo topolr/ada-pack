@@ -20,5 +20,4 @@ function publish() {
     }
     return require("./../index").publish(appPath);
 }
-
 publish();
