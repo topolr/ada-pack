@@ -62,8 +62,8 @@ function runDev() {
             res.write("id: " + Date.now() + "\ndata: " + JSON.stringify(info) + "\n\n");
         });
     });
-    require("./../index").develop(appPath, ({type, files, map}) => {
-        messageQueue.add({type, files, map});
+    require("./../index").develop(appPath, ({type, files, map,log}) => {
+        messageQueue.add({type, files, map,log});
     }).then(() => {
         app.listen(port, () => {
             console.log("");
