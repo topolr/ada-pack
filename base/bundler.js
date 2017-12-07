@@ -418,7 +418,7 @@ let base = {
             if (index === 0) {
                 console.log(` [${info.key}]`.grey, `${key}`.cyan, `[MAIN]`.green, `[${info.size}]`.yellow, `[${info.hash}]`.grey);
             } else {
-                console.log(` [${info.key}][${info.hash}]`.grey, `${key}`.cyan, `[${info.size}]`.yellow, `[${info.hash}]`.grey);
+                console.log(` [${info.key}]`.grey, `${key}`.cyan, `[${info.size}]`.yellow, `[${info.hash}]`.grey);
             }
         });
         console.log(" -----------------------------------------".grey);
