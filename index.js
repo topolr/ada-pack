@@ -71,27 +71,30 @@ module.exports = {
             }).on("ready", function () {
                 waiter.setHandler(function (a, times) {
                     if (a.add) {
-                        _bundler.addFiles(a.add).then(r => {
+                        _bundler.addFiles(a.add).then((info) => {
                             fn && fn({
                                 type: "add",
                                 files: a.add.map(a => a.substring(Path.resolve(basePath, config.source_path).length + 1).replace(/\\/g, "/")),
-                                map: r
+                                map: info.map,
+                                log: info.log
                             });
                         });
                     } else if (a.edit) {
-                        _bundler.editFiles(a.edit).then(r => {
+                        _bundler.editFiles(a.edit).then((info) => {
                             fn && fn({
                                 type: "edit",
                                 files: a.edit.map(a => a.substring(Path.resolve(basePath, config.source_path).length + 1).replace(/\\/g, "/")),
-                                map: r
+                                map: info.map,
+                                log: info.log
                             });
                         });
                     } else if (a.remove) {
-                        _bundler.editFiles(a.remove).then(r => {
+                        _bundler.editFiles(a.remove).then((info) => {
                             fn && fn({
                                 type: "remove",
                                 files: a.remove.map(a => a.substring(Path.resolve(basePath, config.source_path).length + 1).replace(/\\/g, "/")),
-                                map: r
+                                map: info.map,
+                                log: info.log
                             });
                         });
                     }

@@ -491,7 +491,7 @@ let base = {
                 config.complete();
                 config.complete = null;
             }
-            return map;
+            return {map, log: this.logs};
         }).catch(e => console.log(e));
     }
 };
