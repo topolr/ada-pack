@@ -416,9 +416,9 @@ let base = {
         Reflect.ownKeys(this.packageLogs).forEach((key, index) => {
             let info = this.packageLogs[key];
             if (index === 0) {
-                console.log(` [${info.key}]`.grey, `${key}`.cyan, `[main]`.yellow, `[${info.size}]`.yellow);
+                console.log(` [${info.key}]`.grey, `${key}`.cyan, `[MAIN]`.green, `[${info.size}]`.yellow, `[${info.hash}]`.grey);
             } else {
-                console.log(` [${info.key}]`.grey, `${key}`.cyan, `[${info.size}]`.yellow);
+                console.log(` [${info.key}][${info.hash}]`.grey, `${key}`.cyan, `[${info.size}]`.yellow, `[${info.hash}]`.grey);
             }
         });
         console.log(" -----------------------------------------".grey);
@@ -454,7 +454,8 @@ let base = {
                 return new File(Path.resolve(config.dist_path, p) + ".js").write(c).then(() => {
                     this.packageLogs[file.name] = {
                         size: new File(Path.resolve(config.dist_path, p) + ".js").getFileSizeAuto(),
-                        key: p
+                        key: p,
+                        hash: file.hash
                     };
                 });
             });
