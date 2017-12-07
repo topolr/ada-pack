@@ -413,12 +413,18 @@ let base = {
         }
         console.log(` PACKAGES:`.yellow);
         console.log(" -----------------------------------------".grey);
+        let _length = 0;
+        Reflect.ownKeys(this.packageLogs).forEach(key => {
+            if (key.length > _length) {
+                _length = key.length;
+            }
+        });
         Reflect.ownKeys(this.packageLogs).forEach((key, index) => {
             let info = this.packageLogs[key];
             if (index === 0) {
-                console.log(` [${info.key}]`.grey, `${key}`.cyan, `[MAIN]`.green, `[${info.size}]`.yellow, `[${info.hash}]`.grey);
+                console.log(` [${info.key}]`.grey, `${util.padEnd(key,_length," ")}`.cyan, `[MAIN]`.green, `[${info.size}]`.yellow, `[${info.hash}]`.grey);
             } else {
-                console.log(` [${info.key}]`.grey, `${key}`.cyan, `[${info.size}]`.yellow, `[${info.hash}]`.grey);
+                console.log(` [${info.key}]`.grey, `${util.padEnd(key,_length," ")}`.cyan, `[${info.size}]`.yellow, `[${info.hash}]`.grey);
             }
         });
         console.log(" -----------------------------------------".grey);

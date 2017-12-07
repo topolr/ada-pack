@@ -278,6 +278,14 @@ let util = {
             info = module.exports;
         }
         return info;
+    },
+    padEnd(origin, length, dot){
+        let a = length - origin.length;
+        let b = origin;
+        for (let i = 0; i < a; i++) {
+            b += dot;
+        }
+        return b;
     }
 };
 
