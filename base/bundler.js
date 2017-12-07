@@ -366,7 +366,9 @@ let base = {
                 error[key] = this.logs[key];
             }
         });
+        let hasSuccess = false, hasError = false;
         if (success.length > 0) {
+            hasSuccess = true;
             let _nm = 0, _ll = 0;
             success.forEach((path, index) => {
                 if (path.indexOf("node_modules") === -1) {
@@ -389,6 +391,7 @@ let base = {
         }
         let et = Reflect.ownKeys(error);
         if (et.length > 0) {
+            hasError = true;
             let _nm = 0, _ll = 0;
             et.forEach((key, index) => {
                 if (path.indexOf("node_modules") === -1) {
@@ -408,7 +411,7 @@ let base = {
                 console.log(`   ${error[key]}`.red);
             });
         }
-        if (success.length === 0 && et.length === 0) {
+        if (!hasSuccess && !hasError) {
             console.log(` - [NOTHING TO DISPLAY] -`.grey);
         }
         console.log(` PACKAGES:`.yellow);
