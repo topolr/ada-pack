@@ -390,7 +390,7 @@ let base = {
         let et = Reflect.ownKeys(error);
         if (et.length > 0) {
             hasError = true;
-            console.log(` ERRORS`.red, util.padEnd(" ", 37 + `${_localLength}`.length + `${_moduleLength}`.length, "-").red);
+            console.log(` ERRORS`.red, util.padEnd(" ", 39 + `${_localLength}`.length + `${_moduleLength}`.length, "-").red);
             et.forEach((path, index) => {
                 if (path.indexOf("node_modules") === -1) {
                     console.log(`  [${index + 1}] ${path.substring(config.source_path.length)}`.grey);
