@@ -412,22 +412,28 @@ let base = {
             console.log(` - [NOTHING TO DISPLAY] -`.grey);
         }
         console.log(` PACKAGES:`.yellow);
-        console.log(" -----------------------------------------".grey);
-        let _length = 0;
+        let _length = 0, __length = 0;
         Reflect.ownKeys(this.packageLogs).forEach(key => {
             if (key.length > _length) {
                 _length = key.length;
             }
+            let info = this.packageLogs[key];
+            let _a = key.length + info.hash.length + info.size.length + info.key.length;
+            if (_a > __length) {
+                __length = _a;
+            }
         });
+        __length = __length + 10;
+        console.log(util.padEnd(" ", __length, "-").grey);
         Reflect.ownKeys(this.packageLogs).forEach((key, index) => {
             let info = this.packageLogs[key];
             if (index === 0) {
-                console.log(` [${info.key}]`.grey, `${util.padEnd(key,_length," ")}`.cyan, `[MAIN]`.green, `[${info.size}]`.yellow, `[${info.hash}]`.grey);
+                console.log(` [${info.key}]`.grey, `${util.padEnd(key, _length, " ")}`.green, `[${info.size}]`.yellow, `[${info.hash}]`.grey);
             } else {
-                console.log(` [${info.key}]`.grey, `${util.padEnd(key,_length," ")}`.cyan, `[${info.size}]`.yellow, `[${info.hash}]`.grey);
+                console.log(` [${info.key}]`.grey, `${util.padEnd(key, _length, " ")}`.cyan, `[${info.size}]`.yellow, `[${info.hash}]`.grey);
             }
         });
-        console.log(" -----------------------------------------".grey);
+        console.log(util.padEnd(" ", __length, "-").grey);
     },
     bundle() {
         this.logs = {};
