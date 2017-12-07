@@ -355,6 +355,26 @@ class file {
     renameSync(newname) {
         fs.renameSync(this._path, newname);
     }
+
+    getFileSizeAuto(radmon) {
+        let info = this.infoSync();
+        let v = 0, unit = "BYTE", byteSize = info.size;
+        radmon = radmon || 0;
+        if (byteSize >= 1073741824) {
+            v = (byteSize / 1073741824).toFixed(radmon);
+            unit = "GB";
+        } else if (byteSize >= 1048576) {
+            v = (byteSize / 1048576).toFixed(radmon);
+            unit = "MB";
+        } else if (byteSize >= 1024) {
+            v = (byteSize / 1024).toFixed(radmon);
+            unit = "KB";
+        } else {
+            v = byteSize;
+            unit = "B";
+        }
+        return v + unit;
+    }
 }
 
 module.exports = file;

@@ -69,6 +69,7 @@ class AdaBundler {
 
 let base = {
     logs: {},
+    packageLogs: {},
     cache: {},
     getFilePath(config, filePath, path) {
         let _path = "";
@@ -409,6 +410,10 @@ let base = {
         if (success.length === 0 && et.length === 0) {
             console.log(` - [NOTHING TO DISPLAY] -`.grey);
         }
+        console.log("---------------------------".grey);
+        Reflect.ownKeys(this.packageLogs).forEach((key, index) => {
+            console.log(` - ${key} `.grey, `[${this.packageLogs[key]}]`.yellow);
+        });
     },
     bundle() {
         this.logs = {};
@@ -438,7 +443,9 @@ let base = {
                 let c = `Ada.unpack(${JSON.stringify(file.code)})`;
                 file.hash = hash.md5(map.packages[p].split("|").sort().join("|")).substring(0, 8);
                 map[p] = file.hash;
-                return new File(Path.resolve(config.dist_path, p) + ".js").write(c);
+                return new File(Path.resolve(config.dist_path, p) + ".js").write(c).then(() => {
+                    this.packageLogs[p] = new File(Path.resolve(config.dist_path, p) + ".js").getFileSizeAuto();
+                });
             });
             tasks.push(() => {
                 if (config.develop) {
