@@ -6,7 +6,7 @@ module.exports = function (content, option, fn) {
             if (!e) {
                 reject(output.css);
             } else {
-                resolve(content);
+                reject(e);
             }
         });
     }).then(content => {

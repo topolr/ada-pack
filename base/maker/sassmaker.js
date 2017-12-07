@@ -9,7 +9,7 @@ module.exports = function (content, path, option) {
             if (!err) {
                 resolve(result.css.toString());
             } else {
-                reject(content);
+                reject(err);
             }
         });
     }).then(content => {

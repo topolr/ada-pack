@@ -33,6 +33,8 @@ module.exports = function (content, path, option) {
             autoprefixer(Object.assign({browsers: ['> 1%', 'IE 7']}, option.compiler.autoprefixer))
         ]).process(r).then(result => {
             resolve(result.css);
+        }, (e) => {
+            reject(e);
         });
     });
 };

@@ -17,11 +17,10 @@ module.exports = function (content, option) {
                 return `${str} id="${name}"`;
             });
             let code = `<svg style="width:0;height:0;overflow:hidden;" version="1.1" xmlns="http://www.w3.org/2000/svg">${et}</svg>`;
-
             let result = `var c=document.getElementById("ada-icon-container");if(!c){var c=document.createElement("div");c.setAttribute("id","ada-icon-container");c.style.cssText="width:0;height:0;";document.body.appendChild(c);}if(!document.getElementById("${name}")){var a=document.createElement("div");a.innerHTML=${JSON.stringify(code)};c.appendChild(a.childNodes[0]);}module.exports="${name}"`;
             resolve(result);
         } catch (e) {
-            resolve(content);
+            reject(e);
         }
     });
 };

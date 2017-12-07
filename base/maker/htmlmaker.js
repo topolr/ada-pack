@@ -33,7 +33,7 @@ module.exports = function (content, path, option) {
             // }, option.minifier)));
             resolve(content);
         } catch (e) {
-            resolve(content);
+            reject(content);
         }
     });
 };

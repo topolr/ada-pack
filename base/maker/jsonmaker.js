@@ -3,7 +3,7 @@ module.exports = function (content, option) {
         try {
             resolve(JSON.stringify(JSON.parse(content)));
         } catch (e) {
-            resolve(content);
+            reject(e);
         }
     });
 };
