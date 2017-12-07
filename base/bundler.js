@@ -277,7 +277,8 @@ let base = {
                 });
                 let _result = {
                     code: result,
-                    key: util.getMappedPath("package-" + key.replace(/\//g, "-").replace(/\\/g, "-"))
+                    key: util.getMappedPath("package-" + key.replace(/\//g, "-").replace(/\\/g, "-")),
+                    name: key
                 };
                 if (key === _mainEntry) {
                     mainEntry = _result;
@@ -410,10 +411,17 @@ let base = {
         if (success.length === 0 && et.length === 0) {
             console.log(` - [NOTHING TO DISPLAY] -`.grey);
         }
-        console.log("---------------------------".grey);
+        console.log(` PACKAGES:`.yellow);
+        console.log(" -----------------------------------------".grey);
         Reflect.ownKeys(this.packageLogs).forEach((key, index) => {
-            console.log(` - ${key} `.grey, `[${this.packageLogs[key]}]`.yellow);
+            let info = this.packageLogs[key];
+            if (index === 0) {
+                console.log(` [${info.key}]`.grey, `${key}`.cyan, `[main]`.yellow, `[${info.size}]`.yellow);
+            } else {
+                console.log(` [${info.key}]`.grey, `${key}`.cyan, `[${info.size}]`.yellow);
+            }
         });
+        console.log(" -----------------------------------------".grey);
     },
     bundle() {
         this.logs = {};
@@ -444,7 +452,10 @@ let base = {
                 file.hash = hash.md5(map.packages[p].split("|").sort().join("|")).substring(0, 8);
                 map[p] = file.hash;
                 return new File(Path.resolve(config.dist_path, p) + ".js").write(c).then(() => {
-                    this.packageLogs[p] = new File(Path.resolve(config.dist_path, p) + ".js").getFileSizeAuto();
+                    this.packageLogs[file.name] = {
+                        size: new File(Path.resolve(config.dist_path, p) + ".js").getFileSizeAuto(),
+                        key: p
+                    };
                 });
             });
             tasks.push(() => {
