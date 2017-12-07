@@ -427,14 +427,14 @@ let base = {
                 __length = _a;
             }
         });
-        __length = __length + 10;
+        __length = __length + 16;
         console.log(util.padEnd(" ", __length, "-").grey);
         Reflect.ownKeys(this.packageLogs).forEach((key, index) => {
             let info = this.packageLogs[key];
             if (index === 0) {
-                console.log(` [${info.key}]`.grey, `${util.padEnd(key, _length, " ")}`.green, `[${info.size}][${info.gsize}]`.yellow, `[${info.hash}]`.grey);
+                console.log(` [${info.key}]`.grey, `${util.padEnd(key, _length, " ")}`.green, `[${info.size} GZIP:${info.gsize}]`.yellow, `[${info.hash}]`.grey);
             } else {
-                console.log(` [${info.key}]`.grey, `${util.padEnd(key, _length, " ")}`.cyan, `[${info.size}][${info.gsize}]`.yellow, `[${info.hash}]`.grey);
+                console.log(` [${info.key}]`.grey, `${util.padEnd(key, _length, " ")}`.cyan, `[${info.size} GZIP:${info.gsize}]`.yellow, `[${info.hash}]`.grey);
             }
         });
         console.log(util.padEnd(" ", __length, "-").grey);
