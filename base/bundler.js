@@ -111,8 +111,8 @@ let base = {
                 this.cache[_path] = {hash, content, path: _path, result: "done"};
                 return {path: _path, content, result: "done"};
             }).catch(e => {
-                this.logs[_path] = e.message;
-                return {path: _path, content: "", result: e.message}
+                this.logs[_path] = e;
+                return {path: _path, content: "", result: e}
             });
         }
     },
