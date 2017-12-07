@@ -356,66 +356,53 @@ let base = {
         new File(Path.resolve(config.dist_path, "./ada.js")).renameSync(Path.resolve(config.dist_path, `./ada-${config.adaHash}.js`));
     },
     logResult() {
-        console.log("");
-        console.log(` ➲ ${util.formatDate()}`.cyan);
         let success = [], error = {};
-        let maxLine = 10;
+        let maxLine = 10, _localLength = 0, _moduleLength = 0;
         Reflect.ownKeys(this.logs).forEach(key => {
+            if (key.indexOf("node_modules") === -1) {
+                _localLength += 1;
+            } else {
+                _moduleLength += 1;
+            }
             if (this.logs[key] === "done") {
                 success.push(key);
             } else {
                 error[key] = this.logs[key];
             }
         });
+        console.log("");
+        console.log(` ${util.formatDate()} LOCAL[`, `${_localLength}`.yellow, `] NODE-MODULES[`, `${_moduleLength}`.yellow, `]`);
         let hasSuccess = false, hasError = false;
         if (success.length > 0) {
             hasSuccess = true;
-            let _nm = 0, _ll = 0;
-            success.forEach((path, index) => {
-                if (path.indexOf("node_modules") === -1) {
-                    _ll += 1;
-                } else {
-                    _nm += 1;
-                }
-            });
-            console.log(`   LOCAL`.grey, `[${_ll}]`.gray, "▪".grey, `NODE-MODULES`.grey, `[${_nm}]`.gray);
+            console.log(` COMPILED`.green, util.padEnd(" ", 37 + `${_localLength}`.length + `${_moduleLength}`.length, "-").grey);
             success.splice(0, maxLine).forEach((path, index) => {
                 if (path.indexOf("node_modules") === -1) {
-                    console.log(` - [${index + 1}]`.grey, `${path.substring(config.source_path.length)}`.cyan, `[local]`.grey);
+                    console.log(`  [${index + 1}]`.grey, `${path.substring(config.source_path.length)}`.cyan, `[local]`.grey);
                 } else {
-                    console.log(` - [${index + 1}]`.grey, `${path.substring(config.nmodule_path.length)}`.cyan, `[node_module]`.grey);
+                    console.log(`  [${index + 1}]`.grey, `${path.substring(config.nmodule_path.length)}`.cyan, `[node_module]`.grey);
                 }
             });
             if (success.length > maxLine) {
-                console.log(` + [${success.length + maxLine}]...`.grey);
+                console.log(` +[${success.length + maxLine}]...`.grey);
             }
         }
         let et = Reflect.ownKeys(error);
         if (et.length > 0) {
             hasError = true;
-            let _nm = 0, _ll = 0;
-            et.forEach((key, index) => {
+            console.log(` ERRORS`.red, util.padEnd(" ", 40, "-").red);
+            et.forEach((path, index) => {
                 if (path.indexOf("node_modules") === -1) {
-                    _ll += 1;
+                    console.log(`  [${index + 1}] ${path.substring(config.source_path.length)}`.grey);
                 } else {
-                    _nm += 1;
+                    console.log(`  [${index + 1}] ${path.substring(config.nmodule_path.length)}`.grey);
                 }
-                console.log(`   ${error[key]}`.red);
-            });
-            console.log(` ✪ LOCAL`.red, `[${_ll}]`.grey, "▪".red, `NODE-MODULES`.red, `[${_nm}]`.grey);
-            et.forEach((key, index) => {
-                if (path.indexOf("node_modules") === -1) {
-                    console.log(` - [${index + 1}] ${path.substring(config.source_path.length)}`.grey);
-                } else {
-                    console.log(` - [${index + 1}] ${path.substring(config.nmodule_path.length)}`.grey);
-                }
-                console.log(`   ${error[key]}`.red);
+                console.log(`   ${error[path]}`.red);
             });
         }
         if (!hasSuccess && !hasError) {
             console.log(` - [NOTHING TO DISPLAY] -`.grey);
         }
-        console.log(` PACKAGES:`.yellow);
         let _length = 0, __length = 0;
         Reflect.ownKeys(this.packageLogs).forEach(key => {
             if (key.length > _length) {
@@ -428,7 +415,7 @@ let base = {
             }
         });
         __length = __length + 16;
-        console.log(util.padEnd(" ", __length, "-").grey);
+        console.log(` PACKAGES`.green, util.padEnd(" ", __length - 10, "-").grey);
         Reflect.ownKeys(this.packageLogs).forEach((key, index) => {
             let info = this.packageLogs[key];
             if (index === 0) {
@@ -437,7 +424,6 @@ let base = {
                 console.log(` [${info.key}]`.grey, `${util.padEnd(key, _length, " ")}`.cyan, `[${info.size} GZIP:${info.gsize}]`.yellow, `[${info.hash}]`.grey);
             }
         });
-        console.log(util.padEnd(" ", __length, "-").grey);
     },
     bundle() {
         this.logs = {};
