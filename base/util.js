@@ -286,6 +286,24 @@ let util = {
             b += dot;
         }
         return b;
+    },
+    getFileSizeAuto(size, radmon) {
+        let v = 0, unit = "BYTE", byteSize = size;
+        radmon = radmon || 0;
+        if (byteSize >= 1073741824) {
+            v = (byteSize / 1073741824).toFixed(radmon);
+            unit = "GB";
+        } else if (byteSize >= 1048576) {
+            v = (byteSize / 1048576).toFixed(radmon);
+            unit = "MB";
+        } else if (byteSize >= 1024) {
+            v = (byteSize / 1024).toFixed(radmon);
+            unit = "KB";
+        } else {
+            v = byteSize;
+            unit = "B";
+        }
+        return v + unit;
     }
 };
 

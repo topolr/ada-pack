@@ -7,6 +7,7 @@ let hash = require("./lib/md5");
 let queue = require("./lib/queue");
 let isbinaryfile = require("isbinaryfile");
 let config = require("./config");
+let gzipSize = require('gzip-size');
 
 const THRIDPARTFOLDER = "node_modules";
 const IGNOREMODULES = ["fs", "path", "util", "http", "events", "crypto", "adajs"];
@@ -421,7 +422,7 @@ let base = {
                 _length = key.length;
             }
             let info = this.packageLogs[key];
-            let _a = key.length + info.hash.length + info.size.length + info.key.length;
+            let _a = key.length + info.hash.length + info.size.length + info.key.length + info.gsize.length;
             if (_a > __length) {
                 __length = _a;
             }
@@ -431,9 +432,9 @@ let base = {
         Reflect.ownKeys(this.packageLogs).forEach((key, index) => {
             let info = this.packageLogs[key];
             if (index === 0) {
-                console.log(` [${info.key}]`.grey, `${util.padEnd(key, _length, " ")}`.green, `[${info.size}]`.yellow, `[${info.hash}]`.grey);
+                console.log(` [${info.key}]`.grey, `${util.padEnd(key, _length, " ")}`.green, `[${info.size}][${info.gsize}]`.yellow, `[${info.hash}]`.grey);
             } else {
-                console.log(` [${info.key}]`.grey, `${util.padEnd(key, _length, " ")}`.cyan, `[${info.size}]`.yellow, `[${info.hash}]`.grey);
+                console.log(` [${info.key}]`.grey, `${util.padEnd(key, _length, " ")}`.cyan, `[${info.size}][${info.gsize}]`.yellow, `[${info.hash}]`.grey);
             }
         });
         console.log(util.padEnd(" ", __length, "-").grey);
@@ -470,7 +471,8 @@ let base = {
                     this.packageLogs[file.name] = {
                         size: new File(Path.resolve(config.dist_path, p) + ".js").getFileSizeAuto(),
                         key: p,
-                        hash: file.hash
+                        hash: file.hash,
+                        gsize: util.getFileSizeAuto(gzipSize.sync(c))
                     };
                 });
             });
