@@ -297,7 +297,7 @@ let base = {
         }).catch(e => console.log(e));
     },
     bundleAda(develop = false) {
-        new AdaBundler().bundle(Path.resolve(config.nmodule_path, `./adajs/${develop ? "develop" : "index"}.js`), Path.resolve(config.dist_path, "./ada.js"), develop);
+        return new AdaBundler().bundle(Path.resolve(config.nmodule_path, `./adajs/${develop ? "develop" : "index"}.js`), Path.resolve(config.dist_path, "./ada.js"), develop);
     },
     getAppSourceInfo() {
         let main = Path.resolve(config.base_path, config.main);
