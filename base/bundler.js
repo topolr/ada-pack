@@ -27,11 +27,17 @@ class AdaBundler {
             if (suffix === "html") {
                 resolve(`module.exports=${JSON.stringify(file.readSync().replace(/\n/g, '').replace(/\r/g, '').replace(/\n\r/g, ''))}`);
             } else if (suffix === "less") {
-                let code = file.readSync();
-                less.render(content, function (e, output) {
+                less.render(file.readSync(), function (e, output) {
                     if (!e) {
-                        code = output.css;
-                        resolve(`var _a = document.createElement("style");_a.setAttribute("media", "screen");_a.setAttribute("type", "text/css");_a.appendChild(document.createTextNode(${code}));document.body.appendChild(_a);module.exports=_a;`);
+                        let code = = minify(output.css, {
+                            removeComments: true,
+                            collapseWhitespace: true,
+                            minifyJS: true,
+                            minifyCSS: true
+                        });
+                        resolve(`var _a = document.createElement("style");_a.setAttribute("media", "screen");_a.setAttribute("type", "text/css");_a.appendChild(document.createTextNode(${JSON.stringify(code)}));document.body.appendChild(_a);module.exports=_a;`);
+                    } else {
+                        console.log(e)
                     }
                 });
             } else if (suffix === "icon") {
@@ -67,7 +73,10 @@ class AdaBundler {
         code = code.replace(/require\(.*?\)/g, (one) => {
             if (one.indexOf("${") === -1 && one.indexOf("+") === -1) {
                 let a = one.substring(8, one.length - 1).replace(/['|"|`]/g, "").trim();
-                let _path = Path.resolve(path, "./../", a).replace(/\\/g, "/") + ".js";
+                let _path = Path.resolve(path, "./../", a).replace(/\\/g, "/");
+                if (_path.split(".").length === 1) {
+                    _path = _path + ".js";
+                }
                 paths.push(_path);
                 let index = this.resultmap.indexOf(_path);
                 if (index === -1) {
