@@ -29,7 +29,7 @@ class AdaBundler {
             } else if (suffix === "less") {
                 less.render(file.readSync(), function (e, output) {
                     if (!e) {
-                        let code = = minify(output.css, {
+                        let code = minify(output.css, {
                             removeComments: true,
                             collapseWhitespace: true,
                             minifyJS: true,
@@ -556,7 +556,6 @@ let action = {
         return base.bundle();
     },
     publish() {
-        base.bundleAda(config.develop);
         return base.bundle();
     }
 };
@@ -570,6 +569,7 @@ module.exports = function (option) {
     if (config.site_url[config.site_url.length - 1] !== "/") {
         config.site_url = config.site_url + "/";
     }
-    base.bundleAda(config.develop);
-    return action;
+    return base.bundleAda(config.develop).then(() => {
+        return action;
+    });
 };

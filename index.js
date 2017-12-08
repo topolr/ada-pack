@@ -54,50 +54,51 @@ module.exports = {
             showTips();
             let config = util.getAppInfo(appPath);
             let basePath = path.resolve(appPath, "./../");
-            let _bundler = bundler(Object.assign({
+            bundler(Object.assign({
                 base_path: basePath,
                 develop: true,
                 projectPath: path.resolve(__dirname, "./../../"),
                 complete(){
                     resolve();
                 }
-            }, config));
-            chokidar.watch(path.resolve(basePath, config.source_path), {ignored: /[\/\\]\./}).on('change', function (path) {
-                waiter.add("edit", path);
-            }).on('add', function (path) {
-                waiter.add("add", path);
-            }).on('unlink', function (path) {
-                waiter.add("remove", path);
-            }).on("ready", function () {
-                waiter.setHandler(function (a, times) {
-                    if (a.add) {
-                        _bundler.addFiles(a.add).then((info) => {
-                            fn && fn({
-                                type: "add",
-                                files: a.add.map(a => a.substring(Path.resolve(basePath, config.source_path).length + 1).replace(/\\/g, "/")),
-                                map: info.map,
-                                log: info.log
+            }, config)).then(_bundler => {
+                chokidar.watch(path.resolve(basePath, config.source_path), {ignored: /[\/\\]\./}).on('change', function (path) {
+                    waiter.add("edit", path);
+                }).on('add', function (path) {
+                    waiter.add("add", path);
+                }).on('unlink', function (path) {
+                    waiter.add("remove", path);
+                }).on("ready", function () {
+                    waiter.setHandler(function (a, times) {
+                        if (a.add) {
+                            _bundler.addFiles(a.add).then((info) => {
+                                fn && fn({
+                                    type: "add",
+                                    files: a.add.map(a => a.substring(Path.resolve(basePath, config.source_path).length + 1).replace(/\\/g, "/")),
+                                    map: info.map,
+                                    log: info.log
+                                });
                             });
-                        });
-                    } else if (a.edit) {
-                        _bundler.editFiles(a.edit).then((info) => {
-                            fn && fn({
-                                type: "edit",
-                                files: a.edit.map(a => a.substring(Path.resolve(basePath, config.source_path).length + 1).replace(/\\/g, "/")),
-                                map: info.map,
-                                log: info.log
+                        } else if (a.edit) {
+                            _bundler.editFiles(a.edit).then((info) => {
+                                fn && fn({
+                                    type: "edit",
+                                    files: a.edit.map(a => a.substring(Path.resolve(basePath, config.source_path).length + 1).replace(/\\/g, "/")),
+                                    map: info.map,
+                                    log: info.log
+                                });
                             });
-                        });
-                    } else if (a.remove) {
-                        _bundler.editFiles(a.remove).then((info) => {
-                            fn && fn({
-                                type: "remove",
-                                files: a.remove.map(a => a.substring(Path.resolve(basePath, config.source_path).length + 1).replace(/\\/g, "/")),
-                                map: info.map,
-                                log: info.log
+                        } else if (a.remove) {
+                            _bundler.editFiles(a.remove).then((info) => {
+                                fn && fn({
+                                    type: "remove",
+                                    files: a.remove.map(a => a.substring(Path.resolve(basePath, config.source_path).length + 1).replace(/\\/g, "/")),
+                                    map: info.map,
+                                    log: info.log
+                                });
                             });
-                        });
-                    }
+                        }
+                    });
                 });
             });
         });
@@ -106,11 +107,12 @@ module.exports = {
         showTips();
         let config = util.getAppInfo(appPath);
         let basePath = path.resolve(appPath, "./../");
-        let _bundler = bundler(Object.assign({
+        return bundler(Object.assign({
             base_path: basePath,
             develop: false,
             projectPath: path.resolve(__dirname, "./../../")
-        }, config));
-        return _bundler.publish();
+        }, config)).then(_bundler => {
+            return _bundler.publish();
+        });
     }
 };
