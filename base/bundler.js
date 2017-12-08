@@ -79,10 +79,6 @@ class AdaBundler {
                 return one;
             }
         });
-        try {
-            code = util.minifyCode(config, code);
-        } catch (e) {
-        }
         this.resultmapcode[path] = code;
         return paths;
     }
