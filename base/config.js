@@ -3,6 +3,7 @@ module.exports = {
     base_path: "/",
     source_path: "./src/",
     dist_path: "./dist/",
+    index_path: "./dist/index.html",
     site_url: "/",
     regist_service: false,
     short_name: "ada",

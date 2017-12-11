@@ -381,9 +381,9 @@ let base = {
             return new File(Path.resolve(config.source_path, icon.src)).copyTo(Path.resolve(config.dist_path, icon.src));
         })).then(() => {
             Promise.all([
-                new File(Path.resolve(config.dist_path, "./manifest.json")).write(JSON.stringify(manifest)),
-                new File(Path.resolve(config.dist_path, "./serviceworker.js")).write(`'use strict';${util.minifyCode(config, codes.join(""))}`),
-                new File(Path.resolve(config.dist_path, "./index.html")).write(content)
+                new File(Path.resolve(config.index_path, "./manifest.json")).write(JSON.stringify(manifest)),
+                new File(Path.resolve(config.index_path, "./serviceworker.js")).write(`'use strict';${util.minifyCode(config, codes.join(""))}`),
+                new File(Path.resolve(config.index_path, "./index.html")).write(content)
             ]);
         });
     },
@@ -566,6 +566,7 @@ module.exports = function (option) {
     config.dist_path = Path.join(config.base_path, config.dist_path).replace(/\\/g, "/");
     config.source_path = Path.join(config.base_path, config.source_path).replace(/\\/g, "/");
     config.nmodule_path = Path.resolve(config.projectPath, "./node_modules/").replace(/\\/g, "/") + "/";
+    config.index_path = Path.resolve(config.base_path, config.index_path, "./../").replace(/\\/g, "/");
     if (config.site_url[config.site_url.length - 1] !== "/") {
         config.site_url = config.site_url + "/";
     }
