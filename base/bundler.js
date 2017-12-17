@@ -344,6 +344,9 @@ let base = {
         Reflect.ownKeys(config).filter(key => MANIFESTKEYS.indexOf(key) !== -1).forEach(key => {
             manifest[key] = config[key];
         });
+        manifest.icons.forEach(icon => {
+            icon.src = config.site_url + info.src;
+        });
 
         let worker = config.worker;
         let registCode = worker.regist.toString().trim();
@@ -376,7 +379,7 @@ let base = {
         let scriptContent = page.script.map(path => {
             return `<script src="${path}"></script>`;
         }).join("");
-        let content = `<!DOCTYPE html><html><head><link rel="manifest" href="${config.site_url}manifest.json"><meta charset="${page.charset}"><title>${config.name}</title>${metaContent}${iconsContent}${styleContent}${scriptContent}<script src="${config._adaPath}"></script><script>${config.regist_service ? workerRegistCode : ""}</script><script>Ada.boot(${JSON.stringify(config.ada)});</script></head><body></body></html>`;
+        let content = `<!DOCTYPE html><html><head><link rel="manifest" href="manifest.json"><meta charset="${page.charset}"><title>${config.name}</title>${metaContent}${iconsContent}${styleContent}${scriptContent}<script src="${config._adaPath}"></script><script>${config.regist_service ? workerRegistCode : ""}</script><script>Ada.boot(${JSON.stringify(config.ada)});</script></head><body></body></html>`;
         return Promise.all(config.icons.map(icon => {
             return new File(Path.resolve(config.source_path, icon.src)).copyTo(Path.resolve(config.dist_path, icon.src));
         })).then(() => {

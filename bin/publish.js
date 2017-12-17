@@ -9,9 +9,12 @@ function publish() {
     let package = JSON.parse(new File(packagePath).readSync());
     if (!package["ada-publish"]) {
         package["ada-publish"] = {
-            appPath: "./app/app.js",
-            serverPath: "./server.js"
+            appPath: "./app/app.js"
         };
+    } else {
+        package["ada-publish"] = Object.assign({
+            appPath: "./app/app.js"
+        }, package["ada-publish"]);
     }
     let appPath = Path.resolve(packagePath, "./../", package["ada-publish"].appPath);
     if (!new File(appPath).isExists()) {

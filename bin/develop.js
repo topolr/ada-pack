@@ -30,6 +30,12 @@ function runDev() {
             appPath: "./app/app.js",
             serverPath: "./server.js"
         };
+    } else {
+        packageInfo["ada-develop"] = Object.assign({
+            port: 8080,
+            appPath: "./app/app.js",
+            serverPath: "./server.js"
+        }, packageInfo["ada-develop"]);
     }
     let port = packageInfo["ada-develop"].port;
     let host = "localhost";
