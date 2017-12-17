@@ -24,22 +24,22 @@ function runDev() {
     let express = require(Path.resolve(projectPath, "./node_modules/express"));
     let packagePath = Path.resolve(projectPath, "./package.json");
     let packageInfo = JSON.parse(new File(packagePath).readSync());
-    if (!packageInfo.adaDev) {
-        packageInfo.adaDev = {
+    if (!packageInfo["ada-develop"]) {
+        packageInfo["ada-develop"] = {
             port: 8080,
             appPath: "./app/app.js",
             serverPath: "./server.js"
         };
     }
-    let port = packageInfo.adaDev.port;
+    let port = packageInfo["ada-develop"].port;
     let host = "localhost";
-    let appPath = Path.resolve(packagePath, "./../", packageInfo.adaDev.appPath);
+    let appPath = Path.resolve(packagePath, "./../", packageInfo["ada-develop"].appPath);
     if (!new File(appPath).isExists()) {
         appPath = Path.resolve(projectPath, "./app.js");
     }
     let appInfo = util.getAppInfo(appPath);
     let distPath = Path.resolve(appPath, "./../", appInfo.dist_path);
-    let serverPath = Path.resolve(projectPath, packageInfo.adaDev.serverPath);
+    let serverPath = Path.resolve(projectPath, packageInfo["ada-develop"].serverPath);
     let app = null;
     if (!new File(serverPath).isExists()) {
         app = new express();
@@ -62,8 +62,8 @@ function runDev() {
             res.write("id: " + Date.now() + "\ndata: " + JSON.stringify(info) + "\n\n");
         });
     });
-    require("./../index").develop(appPath, ({type, files, map,log}) => {
-        messageQueue.add({type, files, map,log});
+    require("./../index").develop(appPath, ({type, files, map, log}) => {
+        messageQueue.add({type, files, map, log});
     }).then(() => {
         app.listen(port, () => {
             console.log("");
@@ -96,4 +96,5 @@ function runDev() {
         });
     });
 }
+
 runDev();

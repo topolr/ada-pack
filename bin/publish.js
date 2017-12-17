@@ -7,17 +7,17 @@ function publish() {
     let express = require(Path.resolve(projectPath, "./node_modules/express"));
     let packagePath = Path.resolve(projectPath, "./package.json");
     let package = JSON.parse(new File(packagePath).readSync());
-    if (!package.adaDev) {
-        package.adaDev = {
-            port: 8080,
+    if (!package["ada-publish"]) {
+        package["ada-publish"] = {
             appPath: "./app/app.js",
             serverPath: "./server.js"
         };
     }
-    let appPath = Path.resolve(packagePath, "./../", package.adaDev.appPath);
+    let appPath = Path.resolve(packagePath, "./../", package["ada-publish"].appPath);
     if (!new File(appPath).isExists()) {
         appPath = Path.resolve(projectPath, "./app.js");
     }
     return require("./../index").publish(appPath);
 }
+
 publish();
