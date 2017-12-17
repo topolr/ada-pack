@@ -304,6 +304,48 @@ let util = {
             unit = "B";
         }
         return v + unit;
+    },
+    extend: function () {
+        let obj, key, val, vals, arrayis, clone, result = arguments[0] || {}, i = 1, length = arguments.length,
+            isdeep = false;
+        if (typeof result === "boolean") {
+            isdeep = result;
+            result = arguments[1] || {};
+            i = 2;
+        }
+        if (typeof result !== "object" && !is.isFunction(result)) {
+            result = {};
+        }
+        if (length === i) {
+            result = this;
+            i = i - 1;
+        }
+        while (i < length) {
+            obj = arguments[i];
+            if (obj !== null) {
+                for (key in obj) {
+                    val = result[key];
+                    vals = obj[key];
+                    if (result === vals) {
+                        continue;
+                    }
+                    arrayis = is.isArray(vals);
+                    if (isdeep && vals && (is.isObject(vals) || arrayis)) {
+                        if (arrayis) {
+                            arrayis = false;
+                            clone = val && is.isArray(val) ? val : [];
+                        } else {
+                            clone = val && is.isObject(val) ? val : {};
+                        }
+                        result[key] = json.cover(isdeep, clone, vals);
+                    } else if (vals !== undefined) {
+                        result[key] = vals;
+                    }
+                }
+            }
+            i++;
+        }
+        return result;
     }
 };
 

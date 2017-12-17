@@ -342,10 +342,7 @@ let base = {
     outputPWAFile(config) {
         let manifest = {};
         Reflect.ownKeys(config).filter(key => MANIFESTKEYS.indexOf(key) !== -1).forEach(key => {
-            manifest[key] = config[key];
-        });
-        manifest.icons.forEach(icon => {
-            icon.src = config.site_url + info.src;
+            manifest[key] = util.extend({}, config[key]);
         });
 
         let worker = config.worker;
@@ -383,6 +380,11 @@ let base = {
         return Promise.all(config.icons.map(icon => {
             return new File(Path.resolve(config.source_path, icon.src)).copyTo(Path.resolve(config.dist_path, icon.src));
         })).then(() => {
+            if (manifest.icons) {
+                manifest.icons.forEach(icon => {
+                    icon.src = config.site_url + icon.src;
+                });
+            }
             Promise.all([
                 new File(Path.resolve(config.index_path, "./manifest.json")).write(JSON.stringify(manifest)),
                 new File(Path.resolve(config.index_path, "./serviceworker.js")).write(`'use strict';${util.minifyCode(config, codes.join(""))}`),
