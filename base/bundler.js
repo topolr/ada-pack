@@ -304,7 +304,7 @@ let base = {
         let info = {};
         let entries = [];
         if (config.entry_path) {
-            entries = util.getAllSourcePaths(Path.resolve(config.base_path, config.entry_path) + "/");
+            entries = new File(Path.resolve(config.base_path, config.entry_path) + "/").subscan().filter(path => new File(path).suffix() === "js").map(path => path.replace(/\\/g, "/").replace(/[\/]+/g, "/"));
         }
         return queue([main, ...entries].map(path => {
             return "./" + path.substring(config.source_path.length);
