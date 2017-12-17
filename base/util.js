@@ -3,6 +3,9 @@ let babel = require("babel-core");
 let File = require("./lib/file");
 
 let util = {
+    isObject: function (obj) {
+        return typeof (obj) === "object" && Object.prototype.toString.call(obj).toLowerCase() === "[object object]" && !obj.length;
+    },
     replacePaths(content, fn) {
         return content.replace(/url\(['"]*.*?["']*\)/gi, function (a) {
             let b = a.substring(4, a.length - 1).trim();
@@ -279,7 +282,7 @@ let util = {
         }
         return info;
     },
-    padEnd(origin, length, dot){
+    padEnd(origin, length, dot) {
         let a = length - origin.length;
         let b = origin;
         for (let i = 0; i < a; i++) {
@@ -329,15 +332,15 @@ let util = {
                     if (result === vals) {
                         continue;
                     }
-                    arrayis = is.isArray(vals);
-                    if (isdeep && vals && (is.isObject(vals) || arrayis)) {
+                    arrayis = Array.isArray(vals);
+                    if (isdeep && vals && (util.isObject(vals) || arrayis)) {
                         if (arrayis) {
                             arrayis = false;
-                            clone = val && is.isArray(val) ? val : [];
+                            clone = val && Array.isArray(val) ? val : [];
                         } else {
-                            clone = val && is.isObject(val) ? val : {};
+                            clone = val && Array.isObject(val) ? val : {};
                         }
-                        result[key] = json.cover(isdeep, clone, vals);
+                        result[key] = util.extend(isdeep, clone, vals);
                     } else if (vals !== undefined) {
                         result[key] = vals;
                     }

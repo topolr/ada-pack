@@ -341,12 +341,13 @@ let base = {
     },
     outputPWAFile(config) {
         let manifest = {};
+        config = util.extend(true, {}, config);
         Reflect.ownKeys(config).filter(key => MANIFESTKEYS.indexOf(key) !== -1).forEach(key => {
-            manifest[key] = util.extend({}, config[key]);
+            manifest[key] = config[key];
         });
 
         let worker = config.worker;
-        let registCode = worker.regist.toString().trim();
+        let registCode = worker.beforeregist.toString().trim();
         let start = registCode.indexOf("{") + 1;
         let a = registCode.substring(start, registCode.length - 1);
         let c = a.substring(a.indexOf("."));
