@@ -13,16 +13,10 @@ module.exports = {
     theme_color: "#fff",
     description: "ada web framework.",
     main: "./src/root.js",
-    entry_path: "./src/view/pages",
+    entry_path: "",
     keywords: ["ada"],
     pages: [],
     icons: [
-        {"src": "icons/48@2x.png", "sizes": "48x48", "type": "image/png"},
-        {"src": "icons/72@2x.png", "sizes": "72x72", "type": "image/png"},
-        {"src": "icons/96@2x.png", "sizes": "96x96", "type": "image/png"},
-        {"src": "icons/144@2x.png", "sizes": "144x144", "type": "image/png"},
-        {"src": "icons/168@2x.png", "sizes": "168x168", "type": "image/png"},
-        {"src": "icons/192@2x.png", "sizes": "192x192", "type": "image/png"}
     ],
     related_applications: [{"platform": "web"}],
     page: {
