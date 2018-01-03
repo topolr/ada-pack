@@ -119,7 +119,7 @@ class AdaBundler {
             return new File(output).write(code).then(() => {
                 process.stderr.clearLine();
                 process.stderr.cursorTo(0);
-                console.log(` BUNDLE ADA CORE DONE [GZIP:${util.getFileSizeAuto(gzipSize.sync(code))}]`.yellow);
+                console.log(` BUNDLE ADA CORE DONE [${develop ? "DEVELOP" : "PUBLIC"} MODE GZIP:${util.getFileSizeAuto(gzipSize.sync(code))}]`.yellow);
             });
         });
     }
