@@ -103,7 +103,7 @@ class AdaBundler {
 
     bundle(path, output, develop) {
         console.log("");
-        let desc = ` NOW BUNDLING ADA CORE [${develop?"DEVELOP":"PUBLIC"} MODE]...`;
+        let desc = ` NOW BUNDLING ADA CORE [${develop ? "DEVELOP" : "PUBLIC"} MODE]...`;
         process.stderr.write(desc.grey);
         process.stderr.cursorTo(desc.length);
         return this.getCodeMap(path).then(() => {
@@ -305,7 +305,8 @@ let base = {
         }).catch(e => console.log(e));
     },
     bundleAda(develop = false) {
-        return new AdaBundler().bundle(Path.resolve(config.nmodule_path, `./adajs/${develop ? "develop" : "index"}.js`), Path.resolve(config.dist_path, "./ada.js"), develop);
+        return new AdaBundler().bundle(Path.resolve(config.nmodule_path, `./adajs/${develop ? "develop" : (config.super_ada ? "super" : "index")}.js`),
+            Path.resolve(config.dist_path, "./ada.js"), develop);
     },
     getAppSourceInfo() {
         let main = Path.resolve(config.base_path, config.main);

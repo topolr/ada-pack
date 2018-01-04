@@ -14,10 +14,10 @@ module.exports = {
     description: "ada web framework.",
     main: "./src/root.js",
     entry_path: "",
+    super_ada: false,
     keywords: ["ada"],
     pages: [],
-    icons: [
-    ],
+    icons: [],
     related_applications: [{"platform": "web"}],
     page: {
         charset: "UTF-8",
