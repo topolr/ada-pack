@@ -168,7 +168,11 @@ let base = {
                 this.cache[_path] = {hash, content, path: _path, result: "done"};
                 return {path: _path, content, result: "done"};
             }).catch(e => {
-                this.logs[_path] = e;
+                this.logs[_path] = {
+                    name: e.name,
+                    message: e.message,
+                    stack: e.stack
+                };
                 return {path: _path, content: "", result: e}
             });
         }
@@ -431,7 +435,7 @@ let base = {
             if (this.logs[key] === "done") {
                 success.push(key);
             } else {
-                error[key] = this.logs[key];
+                error[key] = this.logs[key].message;
             }
         });
         console.log("");
