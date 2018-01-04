@@ -33,12 +33,13 @@ function runDev() {
     } else {
         packageInfo["ada-develop"] = Object.assign({
             port: 8080,
+            host: "localhost",
             appPath: "./app/app.js",
             serverPath: "./server.js"
         }, packageInfo["ada-develop"]);
     }
     let port = packageInfo["ada-develop"].port;
-    let host = "localhost";
+    let host = packageInfo["ada-develop"].host || "localhost";
     let appPath = Path.resolve(packagePath, "./../", packageInfo["ada-develop"].appPath);
     if (!new File(appPath).isExists()) {
         appPath = Path.resolve(projectPath, "./app.js");
