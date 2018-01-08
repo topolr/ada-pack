@@ -129,6 +129,15 @@ let base = {
     logs: {},
     packageLogs: {},
     cache: {},
+    getAllSource(){
+        let files = [];
+        new File(config.source_path + "/").scan().forEach(path => {
+            if (new File(path).suffix() === "js") {
+                files.push(path);
+            }
+        });
+        return files;
+    },
     getFilePath(config, filePath, path) {
         let _path = "";
         if (path.startsWith("./") || path.startsWith("../") || path.startsWith("/")) {
@@ -312,14 +321,10 @@ let base = {
         return new AdaBundler().bundle(Path.resolve(config.nmodule_path, `./adajs/${develop ? "develop" : (config.super_ada ? "super" : "index")}.js`),
             Path.resolve(config.dist_path, "./ada.js"), develop);
     },
-    getAppSourceInfo() {
-        let main = Path.resolve(config.base_path, config.main);
+    getEntriesInfo(paths){
         let info = {};
-        let entries = [];
-        if (config.entry_path) {
-            entries = new File(Path.resolve(config.base_path, config.entry_path) + "/").subscan().filter(path => new File(path).suffix() === "js").map(path => path.replace(/\\/g, "/").replace(/[\/]+/g, "/"));
-        }
-        return queue([main, ...entries].map(path => {
+        let main = Path.resolve(config.base_path, config.main);
+        return queue(paths.map(path => {
             return "./" + path.substring(config.source_path.length);
         }).map(entry => () => {
             return this.getRequireInfo(config, config.source_path, entry).then(_info => {
@@ -351,6 +356,15 @@ let base = {
             });
             return {mainEntry, otherEnteries};
         });
+    },
+    getAppSourceInfo() {
+        let main = Path.resolve(config.base_path, config.main);
+        let info = {};
+        let entries = [];
+        if (config.entry_path) {
+            entries = new File(Path.resolve(config.base_path, config.entry_path) + "/").subscan().filter(path => new File(path).suffix() === "js").map(path => path.replace(/\\/g, "/").replace(/[\/]+/g, "/"));
+        }
+        return this.getEntriesInfo([main, ...entries]);
     },
     outputPWAFile(config) {
         let manifest = {};
@@ -515,45 +529,84 @@ let base = {
                 });
                 packages[file.key] = inp.join("|");
             });
-            map.packages = packages;
-            let tasks = otherEnteries.map(file => () => {
-                let p = file.key;
-                let c = `Ada.unpack(${JSON.stringify(file.code)})`;
-                file.hash = hash.md5(map.packages[p].split("|").sort().join("|")).substring(0, 8);
-                map[p] = file.hash;
-                return new File(Path.resolve(config.dist_path, p) + ".js").write(c).then(() => {
-                    this.packageLogs[file.name] = {
-                        size: new File(Path.resolve(config.dist_path, p) + ".js").getFileSizeAuto(),
-                        key: p,
-                        hash: file.hash,
-                        gsize: util.getFileSizeAuto(gzipSize.sync(c))
+
+            let ps = Promise.resolve();
+            if (config.entry_auto) {
+                ps = ps.then(() => {
+                    let allFiles = this.getAllSource(), _prentries = [];
+                    allFiles.forEach(path => {
+                        let a = util.getMappedPath(path.substring(config.source_path.length).replace(/\\/g, "/"));
+                        if (!map[a]) {
+                            _prentries.push(path);
+                        }
+                    });
+                    return this.getEntriesInfo(_prentries).then(({otherEnteries: _otherEnteries}) => {
+                        _otherEnteries = _otherEnteries.filter(file => {
+                            return Reflect.ownKeys(file.code).length > 1;
+                        });
+                        _otherEnteries.forEach(file => {
+                            let r = {};
+                            Reflect.ownKeys(file.code).forEach(key => {
+                                if (!mainEntry.code[key]) {
+                                    r[key] = file.code[key];
+                                }
+                            });
+                            file.code = r;
+                        });
+                        _otherEnteries.forEach(file => {
+                            let inp = [];
+                            Reflect.ownKeys(file.code).forEach(key => {
+                                map[key] = file.code[key].hash;
+                                inp.push(file.code[key].hash);
+                            });
+                            packages[file.key] = inp.join("|");
+                        });
+                        otherEnteries.push(..._otherEnteries);
+                    });
+                });
+            }
+            ps = ps.then(() => {
+                map.packages = packages;
+                let tasks = otherEnteries.map(file => () => {
+                    let p = file.key;
+                    let c = `Ada.unpack(${JSON.stringify(file.code)})`;
+                    file.hash = hash.md5(map.packages[p].split("|").sort().join("|")).substring(0, 8);
+                    map[p] = file.hash;
+                    return new File(Path.resolve(config.dist_path, p) + ".js").write(c).then(() => {
+                        this.packageLogs[file.name] = {
+                            size: new File(Path.resolve(config.dist_path, p) + ".js").getFileSizeAuto(),
+                            key: p,
+                            hash: file.hash,
+                            gsize: util.getFileSizeAuto(gzipSize.sync(c))
+                        };
+                    });
+                });
+                tasks.push(() => {
+                    if (config.develop) {
+                        config._adaPath = config.site_url + "ada.js";
+                    } else {
+                        config._adaPath = `${config.site_url}ada-${config.adaHash}.js`;
+                    }
+                    config.ada = {
+                        basePath: config.site_url,
+                        root: Path.resolve(config.base_path, config.main).replace(/\\/g, "/").substring(config.source_path.length),
+                        map: map,
+                        develop: config.develop
                     };
+                    if (!config.develop) {
+                        this.hashFiles(map);
+                    }
+                    return Promise.resolve();
+                });
+                tasks.push(() => {
+                    return this.outputPWAFile(config);
+                });
+                return queue(tasks).then(() => {
+                    this.logResult();
+                    return map;
                 });
             });
-            tasks.push(() => {
-                if (config.develop) {
-                    config._adaPath = config.site_url + "ada.js";
-                } else {
-                    config._adaPath = `${config.site_url}ada-${config.adaHash}.js`;
-                }
-                config.ada = {
-                    basePath: config.site_url,
-                    root: Path.resolve(config.base_path, config.main).replace(/\\/g, "/").substring(config.source_path.length),
-                    map: map,
-                    develop: config.develop
-                };
-                if (!config.develop) {
-                    this.hashFiles(map);
-                }
-                return Promise.resolve();
-            });
-            tasks.push(() => {
-                return this.outputPWAFile(config);
-            });
-            return queue(tasks).then(() => {
-                this.logResult();
-                return map;
-            });
+            return ps;
         }).then(map => {
             if (config.complete) {
                 config.complete();

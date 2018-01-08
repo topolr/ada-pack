@@ -14,6 +14,7 @@ module.exports = {
     description: "ada web framework.",
     main: "./src/root.js",
     entry_path: "",
+    entry_auto:true,
     super_ada: false,
     keywords: ["ada"],
     pages: [],
