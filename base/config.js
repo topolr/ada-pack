@@ -78,7 +78,11 @@ module.exports = {
                 "@babel/plugin-proposal-decorators",
                 ["@babel/plugin-proposal-class-properties", { "loose" : true }],
                 "@babel/transform-async-to-generator",
-                "@babel/syntax-dynamic-import"
+                "@babel/syntax-dynamic-import",
+                "@babel/plugin-proposal-function-bin",
+                "@babel/plugin-syntax-export-extensions",
+                "@babel/plugin-proposal-do-expressions",
+                "@babel/plugin-proposal-object-rest-spread"
             ]
         },
         uglify: {},
