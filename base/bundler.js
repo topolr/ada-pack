@@ -129,25 +129,30 @@ let base = {
     logs: {},
     packageLogs: {},
     cache: {},
-    getAllSource(){
+    getAllSource() {
         let files = [];
         new File(config.source_path + "/").scan().forEach(path => {
-            if (new File(path).suffix() === "js") {
+            let suffix = new File(path).suffix();
+            if (suffix === "js" || suffix === "ts") {
                 files.push(path);
             }
         });
         return files;
     },
     getFilePath(config, filePath, path) {
-        let _path = "";
+        let __path = "", _path = "";
         if (path.startsWith("./") || path.startsWith("../") || path.startsWith("/")) {
-            _path = Path.resolve(filePath, path).replace(/\\/g, "/");
+            __path = _path = Path.resolve(filePath, path).replace(/\\/g, "/");
             let _file = new File(_path);
             if (!_file.isExists() || _file.isFolder()) {
-                _path = _path + ".js";
+                _path = __path + ".ts";
+            }
+            _file = new File(_path);
+            if (!_file.isExists() || _file.isFolder()) {
+                _path = __path + ".js";
             }
         } else {
-            _path = Path.resolve(config.nmodule_path, path);
+            __path = _path = Path.resolve(config.nmodule_path, path);
             let file = new File(_path);
             if (file.isExists()) {
                 if (!file.isFile()) {
@@ -156,11 +161,18 @@ let base = {
                     if (_packageFile.isExists()) {
                         _path = Path.resolve(_packagePath, "./../", JSON.parse(_packageFile.readSync()).main);
                     } else {
-                        _path = Path.resolve(_packagePath, "./index.js");
+                        _path = Path.resolve(_packagePath, "./index.ts");
+                        if (!new File(_path).isExists()) {
+                            _path = Path.resolve(_packagePath, "./index.js");
+                        }
                     }
                 }
             } else {
-                _path = _path + ".js";
+                _path = __path + ".ts";
+                file = new File(_path);
+                if (!file.isExists()) {
+                    _path = __path + ".js";
+                }
             }
         }
         return _path.replace(/\\/g, "/");
@@ -321,7 +333,7 @@ let base = {
         return new AdaBundler().bundle(Path.resolve(config.nmodule_path, `./adajs/${develop ? "develop" : (config.super_ada ? "super" : "index")}.js`),
             Path.resolve(config.dist_path, "./ada.js"), develop);
     },
-    getEntriesInfo(paths){
+    getEntriesInfo(paths) {
         let info = {};
         let main = Path.resolve(config.base_path, config.main);
         return queue(paths.map(path => {
@@ -362,7 +374,10 @@ let base = {
         let info = {};
         let entries = [];
         if (config.entry_path) {
-            entries = new File(Path.resolve(config.base_path, config.entry_path) + "/").subscan().filter(path => new File(path).suffix() === "js").map(path => path.replace(/\\/g, "/").replace(/[\/]+/g, "/"));
+            entries = new File(Path.resolve(config.base_path, config.entry_path) + "/").subscan().filter(path => {
+                let suffix = new File(path).suffix();
+                return suffix === "js" || suffix === "ts";
+            }).map(path => path.replace(/\\/g, "/").replace(/[\/]+/g, "/"));
         }
         return this.getEntriesInfo([main, ...entries]);
     },
@@ -614,6 +629,30 @@ let base = {
             }
             return {map, log: this.logs};
         }).catch(e => console.log(e));
+    },
+    checkTs() {
+        return new Promise((resolve, reject) => {
+            require("child_process").exec("node bin/tsc", {
+                encoding: "utf-8",
+                cwd: config.source_path,
+                env: {
+                    "noEmit": true,
+                    "pretty": true,
+                    "skipLibCheck": true
+                }
+            }, (err, stdout, stderr) => {
+                if (err) {
+                    console.log(error.stack);
+                    console.log('Error code: ' + error.code);
+                    console.log('Signal received: ' + error.signal);
+                } else {
+                    resolve();
+                }
+                console.log('data : ' + stdout);
+            }).on('exit', function (code) {
+                console.log('子进程已退出, 退出码 ' + code);
+            });
+        });
     }
 };
 

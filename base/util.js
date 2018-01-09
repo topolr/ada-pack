@@ -261,12 +261,7 @@ let util = {
         content = babel.transform(content, {
             "presets": [
                 "@babel/typescript", [
-                    "@babel/env",
-                    {
-                        "targets": {
-                            "browsers": "last 2 Chrome versions"
-                        }
-                    }
+                    "@babel/env",{"targets": {"browsers": "last 2 Chrome versions"}}
                 ]
             ],
             plugins: ["transform-decorators-legacy", "@babel/transform-async-to-generator", "@babel/syntax-dynamic-import"]
