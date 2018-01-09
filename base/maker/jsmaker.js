@@ -1,4 +1,4 @@
-let babel = require("babel-core");
+let babel = require("@babel/core");
 let uglify = require("uglify-js");
 module.exports = function (content, path, option) {
     return new Promise((resolve, reject) => {

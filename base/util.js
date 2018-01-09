@@ -1,5 +1,5 @@
 let uglify = require("uglify-js");
-let babel = require("babel-core");
+let babel = require("@babel/core");
 let File = require("./lib/file");
 
 let util = {

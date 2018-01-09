@@ -71,11 +71,18 @@ module.exports = {
     },
     compiler: {
         babel: {
-            presets: [["env", {
-                targets: {
-                    chrome: 59
-                }
-            }]],
+            "presets": [
+                "@babel/typescript",
+                "@babel/react",
+                [
+                    "@babel/env",
+                    {
+                        "targets": {
+                            "browsers": "last 2 Chrome versions"
+                        }
+                    }
+                ]
+            ],
             plugins: ["transform-decorators-legacy", "transform-async-to-generator", "syntax-dynamic-import"]
         },
         uglify: {},
