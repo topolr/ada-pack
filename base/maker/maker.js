@@ -5,7 +5,8 @@ const Map = {
     less: require("./lessmaker"),
     json: require("./jsonmaker"),
     html: require("./htmlmaker"),
-    icon: require("./iconmaker")
+    icon: require("./iconmaker"),
+    ts: require("./tsmaker")
 };
 
 module.exports = {
