@@ -524,137 +524,111 @@ let base = {
     },
     bundle() {
         this.logs = {};
-        return this.checkTs().then(() => {
-            return this.getAppSourceInfo().then(({mainEntry, otherEnteries}) => {
-                otherEnteries.forEach(file => {
-                    let r = {};
-                    Reflect.ownKeys(file.code).forEach(key => {
-                        if (!mainEntry.code[key]) {
-                            r[key] = file.code[key];
-                        }
-                    });
-                    file.code = r;
+        return this.getAppSourceInfo().then(({mainEntry, otherEnteries}) => {
+            otherEnteries.forEach(file => {
+                let r = {};
+                Reflect.ownKeys(file.code).forEach(key => {
+                    if (!mainEntry.code[key]) {
+                        r[key] = file.code[key];
+                    }
                 });
-                otherEnteries.unshift(mainEntry);
-                let map = {}, packages = {};
-                otherEnteries.forEach(file => {
-                    let inp = [];
-                    Reflect.ownKeys(file.code).forEach(key => {
-                        map[key] = file.code[key].hash;
-                        inp.push(file.code[key].hash);
-                    });
-                    packages[file.key] = inp.join("|");
-                });
-
-                let ps = Promise.resolve();
-                if (config.entry_auto) {
-                    ps = ps.then(() => {
-                        let allFiles = this.getAllSource(), _prentries = [];
-                        allFiles.forEach(path => {
-                            let a = util.getMappedPath(path.substring(config.source_path.length).replace(/\\/g, "/"));
-                            if (!map[a]) {
-                                _prentries.push(path);
-                            }
-                        });
-                        return this.getEntriesInfo(_prentries).then(({otherEnteries: _otherEnteries}) => {
-                            _otherEnteries = _otherEnteries.filter(file => {
-                                return Reflect.ownKeys(file.code).length > 1;
-                            });
-                            _otherEnteries.forEach(file => {
-                                let r = {};
-                                Reflect.ownKeys(file.code).forEach(key => {
-                                    if (!mainEntry.code[key]) {
-                                        r[key] = file.code[key];
-                                    }
-                                });
-                                file.code = r;
-                            });
-                            _otherEnteries.forEach(file => {
-                                let inp = [];
-                                Reflect.ownKeys(file.code).forEach(key => {
-                                    map[key] = file.code[key].hash;
-                                    inp.push(file.code[key].hash);
-                                });
-                                packages[file.key] = inp.join("|");
-                            });
-                            otherEnteries.push(..._otherEnteries);
-                        });
-                    });
-                }
-                ps = ps.then(() => {
-                    map.packages = packages;
-                    let tasks = otherEnteries.map(file => () => {
-                        let p = file.key;
-                        let c = `Ada.unpack(${JSON.stringify(file.code)})`;
-                        file.hash = hash.md5(map.packages[p].split("|").sort().join("|")).substring(0, 8);
-                        map[p] = file.hash;
-                        return new File(Path.resolve(config.dist_path, p) + ".js").write(c).then(() => {
-                            this.packageLogs[file.name] = {
-                                size: new File(Path.resolve(config.dist_path, p) + ".js").getFileSizeAuto(),
-                                key: p,
-                                hash: file.hash,
-                                gsize: util.getFileSizeAuto(gzipSize.sync(c))
-                            };
-                        });
-                    });
-                    tasks.push(() => {
-                        if (config.develop) {
-                            config._adaPath = config.site_url + "ada.js";
-                        } else {
-                            config._adaPath = `${config.site_url}ada-${config.adaHash}.js`;
-                        }
-                        config.ada = {
-                            basePath: config.site_url,
-                            root: Path.resolve(config.base_path, config.main).replace(/\\/g, "/").substring(config.source_path.length),
-                            map: map,
-                            develop: config.develop
-                        };
-                        if (!config.develop) {
-                            this.hashFiles(map);
-                        }
-                        return Promise.resolve();
-                    });
-                    tasks.push(() => {
-                        return this.outputPWAFile(config);
-                    });
-                    return queue(tasks).then(() => {
-                        this.logResult();
-                        return map;
-                    });
-                });
-                return ps;
-            }).then(map => {
-                if (config.complete) {
-                    config.complete();
-                    config.complete = null;
-                }
-                return {map, log: this.logs};
-            }).catch(e => console.log(e));
-        });
-    },
-    checkTs() {
-        return new Promise((resolve, reject) => {
-            require("child_process").exec("node bin/tsc", {
-                encoding: "utf-8",
-                cwd: config.source_path,
-                env: {
-                    "noEmit": true,
-                    "pretty": true,
-                    "skipLibCheck": true
-                }
-            }, (err, stdout, stderr) => {
-                if (err) {
-                    console.log(error.stack);
-                    console.log('Error code: ' + error.code);
-                    console.log('Signal received: ' + error.signal);
-                } else {
-                    resolve();
-                }
-                console.log('data : ' + stdout);
-            }).on('exit', function (code) {
-                console.log('子进程已退出, 退出码 ' + code);
+                file.code = r;
             });
-        });
+            otherEnteries.unshift(mainEntry);
+            let map = {}, packages = {};
+            otherEnteries.forEach(file => {
+                let inp = [];
+                Reflect.ownKeys(file.code).forEach(key => {
+                    map[key] = file.code[key].hash;
+                    inp.push(file.code[key].hash);
+                });
+                packages[file.key] = inp.join("|");
+            });
+
+            let ps = Promise.resolve();
+            if (config.entry_auto) {
+                ps = ps.then(() => {
+                    let allFiles = this.getAllSource(), _prentries = [];
+                    allFiles.forEach(path => {
+                        let a = util.getMappedPath(path.substring(config.source_path.length).replace(/\\/g, "/"));
+                        if (!map[a]) {
+                            _prentries.push(path);
+                        }
+                    });
+                    return this.getEntriesInfo(_prentries).then(({otherEnteries: _otherEnteries}) => {
+                        _otherEnteries = _otherEnteries.filter(file => {
+                            return Reflect.ownKeys(file.code).length > 1;
+                        });
+                        _otherEnteries.forEach(file => {
+                            let r = {};
+                            Reflect.ownKeys(file.code).forEach(key => {
+                                if (!mainEntry.code[key]) {
+                                    r[key] = file.code[key];
+                                }
+                            });
+                            file.code = r;
+                        });
+                        _otherEnteries.forEach(file => {
+                            let inp = [];
+                            Reflect.ownKeys(file.code).forEach(key => {
+                                map[key] = file.code[key].hash;
+                                inp.push(file.code[key].hash);
+                            });
+                            packages[file.key] = inp.join("|");
+                        });
+                        otherEnteries.push(..._otherEnteries);
+                    });
+                });
+            }
+            ps = ps.then(() => {
+                map.packages = packages;
+                let tasks = otherEnteries.map(file => () => {
+                    let p = file.key;
+                    let c = `Ada.unpack(${JSON.stringify(file.code)})`;
+                    file.hash = hash.md5(map.packages[p].split("|").sort().join("|")).substring(0, 8);
+                    map[p] = file.hash;
+                    return new File(Path.resolve(config.dist_path, p) + ".js").write(c).then(() => {
+                        this.packageLogs[file.name] = {
+                            size: new File(Path.resolve(config.dist_path, p) + ".js").getFileSizeAuto(),
+                            key: p,
+                            hash: file.hash,
+                            gsize: util.getFileSizeAuto(gzipSize.sync(c))
+                        };
+                    });
+                });
+                tasks.push(() => {
+                    if (config.develop) {
+                        config._adaPath = config.site_url + "ada.js";
+                    } else {
+                        config._adaPath = `${config.site_url}ada-${config.adaHash}.js`;
+                    }
+                    config.ada = {
+                        basePath: config.site_url,
+                        root: Path.resolve(config.base_path, config.main).replace(/\\/g, "/").substring(config.source_path.length),
+                        map: map,
+                        develop: config.develop
+                    };
+                    if (!config.develop) {
+                        this.hashFiles(map);
+                    }
+                    return Promise.resolve();
+                });
+                tasks.push(() => {
+                    return this.outputPWAFile(config);
+                });
+                return queue(tasks).then(() => {
+                    this.logResult();
+                    return map;
+                });
+            });
+            return ps;
+        }).then(map => {
+            if (config.complete) {
+                config.complete();
+                config.complete = null;
+            }
+            return {map, log: this.logs};
+        }).catch(e => console.log(e));
     }
 };
 
