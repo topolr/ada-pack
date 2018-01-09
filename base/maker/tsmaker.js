@@ -1,12 +1,19 @@
-module.exports = function (content, option, fn) {
+let babel = require("babel-core");
+let uglify = require("uglify-js");
+module.exports = function (content, path, option) {
     return new Promise((resolve, reject) => {
-        let TypeScriptSimple = require('typescript-simple').TypeScriptSimple;
-        let tss = new TypeScriptSimple(Object.assign({
-            target: ts.ScriptTarget.ES6,
-            noImplicitAny: true
-        }, option.compiler.typescript));
         try {
-            resolve(tss.compile(content));
+            content = babel.transform(content, {
+                presets: ["typescript"]
+            }).code;
+            try {
+                content = uglify.minify(content, Object.assign({
+                    fromString: true,
+                    mangle: true
+                }, option.compiler.uglify)).code;
+            } catch (e) {
+            }
+            resolve(content);
         } catch (e) {
             reject(e);
         }
