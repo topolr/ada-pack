@@ -259,12 +259,10 @@ let util = {
         let info = {};
         let content = new File(appPath).readSync();
         content = babel.transform(content, {
-            "presets": [
-                "@babel/typescript", [
-                    "@babel/env",{"targets": {"browsers": "last 2 Chrome versions"}}
-                ]
+            presets: [
+                "@babel/typescript", ["@babel/env", {"targets": {"browsers": "last 2 Chrome versions"}}]
             ],
-            plugins: ["transform-decorators-legacy", "@babel/transform-async-to-generator", "@babel/syntax-dynamic-import"]
+            plugins: ["transform-decorators","@babel/transform-async-to-generator", "@babel/syntax-dynamic-import"]
         }).code;
         try {
             content = uglify.minify(content, {
@@ -274,7 +272,7 @@ let util = {
         } catch (e) {
         }
         let module = {exports: {}};
-        new Function("module", "exports", content)(module, module.exports);
+        new Function("module", "exports", "require", content)(module, module.exports, require);
         if (module.exports.default) {
             info = module.exports.default;
         } else {
