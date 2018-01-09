@@ -74,7 +74,7 @@ module.exports = {
             presets: [
                 "@babel/typescript", ["@babel/env", {"targets": {"browsers": "last 2 Chrome versions"}}]
             ],
-            plugins: ["@babel/proposal-decorators", "@babel/transform-async-to-generator", "@babel/syntax-dynamic-import"]
+            plugins: ["@babel/plugin-proposal-decorators", "@babel/transform-async-to-generator", "@babel/syntax-dynamic-import"]
         },
         uglify: {},
         uglifycss: {},
