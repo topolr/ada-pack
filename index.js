@@ -5,7 +5,6 @@ let Path = require("path");
 let package = require("./package.json");
 let colors = require("colors");
 let uglify = require("uglify-js");
-let babel = require("babel-core");
 let util = require("./base/util");
 
 let waiter = {

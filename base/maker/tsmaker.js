@@ -1,11 +1,9 @@
-let babel = require("babel-core");
+let babel = require("@babel/core");
 let uglify = require("uglify-js");
 module.exports = function (content, path, option) {
     return new Promise((resolve, reject) => {
         try {
-            content = babel.transform(content, {
-                presets: ["typescript"]
-            }).code;
+            content = babel.transform(content, option.compiler.babel).code;
             try {
                 content = uglify.minify(content, Object.assign({
                     fromString: true,

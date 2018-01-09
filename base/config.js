@@ -14,7 +14,7 @@ module.exports = {
     description: "ada web framework.",
     main: "./src/root.js",
     entry_path: "",
-    entry_auto:true,
+    entry_auto: true,
     super_ada: false,
     keywords: ["ada"],
     pages: [],
@@ -72,9 +72,7 @@ module.exports = {
     compiler: {
         babel: {
             "presets": [
-                "@babel/typescript",
-                "@babel/react",
-                [
+                "@babel/typescript", [
                     "@babel/env",
                     {
                         "targets": {
@@ -83,7 +81,7 @@ module.exports = {
                     }
                 ]
             ],
-            plugins: ["transform-decorators-legacy", "transform-async-to-generator", "syntax-dynamic-import"]
+            plugins: ["transform-decorators-legacy", "@babel/transform-async-to-generator", "@babel/syntax-dynamic-import"]
         },
         uglify: {},
         uglifycss: {},
