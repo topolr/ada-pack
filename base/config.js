@@ -72,11 +72,11 @@ module.exports = {
     compiler: {
         babel: {
             presets: [
-                "@babel/typescript", ["@babel/env", {"targets": {"browsers": "last 2 Chrome versions"}}]
+                "@babel/typescript", ["@babel/env", {"targets": {"chrome": "29"}}]
             ],
             plugins: [
                 "@babel/plugin-proposal-decorators",
-                ["@babel/plugin-proposal-class-properties", { "loose" : true }],
+                ["@babel/plugin-proposal-class-properties", {"loose": true}],
                 "@babel/transform-async-to-generator",
                 "@babel/syntax-dynamic-import",
                 "@babel/plugin-proposal-function-bin",
