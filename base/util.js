@@ -3,8 +3,11 @@ let babel = require("@babel/core");
 let File = require("./lib/file");
 
 let util = {
-    isObject: function (obj) {
+    isObject(obj) {
         return typeof (obj) === "object" && Object.prototype.toString.call(obj).toLowerCase() === "[object object]" && !obj.length;
+    },
+    isFunction(obj) {
+        return (typeof obj === 'function') && obj.constructor === window.Function;
     },
     replacePaths(content, fn) {
         return content.replace(/url\(['"]*.*?["']*\)/gi, function (a) {
@@ -312,46 +315,47 @@ let util = {
         return v + unit;
     },
     extend: function () {
-        let obj, key, val, vals, arrayis, clone, result = arguments[0] || {}, i = 1, length = arguments.length,
-            isdeep = false;
-        if (typeof result === "boolean") {
-            isdeep = result;
-            result = arguments[1] || {};
-            i = 2;
+        let options, name, src, copy, copyIsArray, clone,
+            target = arguments[0] || {},
+            i = 1,
+            length = arguments.length,
+            deep = false;
+        if (typeof target === "boolean") {
+            deep = target;
+            target = arguments[i] || {};
+            i++;
         }
-        if (typeof result !== "object" && !is.isFunction(result)) {
-            result = {};
+        if (typeof target !== "object" && !util.isFunction(target)) {
+            target = {};
         }
-        if (length === i) {
-            result = this;
-            i = i - 1;
+        if (i === length) {
+            target = this;
+            i--;
         }
-        while (i < length) {
-            obj = arguments[i];
-            if (obj !== null) {
-                for (key in obj) {
-                    val = result[key];
-                    vals = obj[key];
-                    if (result === vals) {
+        for (; i < length; i++) {
+            if (( options = arguments[i] ) != null) {
+                for (name in options) {
+                    src = target[name];
+                    copy = options[name];
+                    if (target === copy) {
                         continue;
                     }
-                    arrayis = Array.isArray(vals);
-                    if (isdeep && vals && (util.isObject(vals) || arrayis)) {
-                        if (arrayis) {
-                            arrayis = false;
-                            clone = val && Array.isArray(val) ? val : [];
+                    if (deep && copy && ( util.isObject(copy) ||
+                        ( copyIsArray = Array.isArray(copy) ) )) {
+                        if (copyIsArray) {
+                            copyIsArray = false;
+                            clone = src && Array.isArray(src) ? src : [];
                         } else {
-                            clone = val && Array.isObject(val) ? val : {};
+                            clone = src && util.isObject(src) ? src : {};
                         }
-                        result[key] = util.extend(isdeep, clone, vals);
-                    } else if (vals !== undefined) {
-                        result[key] = vals;
+                        target[name] = util.extend(deep, clone, copy);
+                    } else if (copy !== undefined) {
+                        target[name] = copy;
                     }
                 }
             }
-            i++;
         }
-        return result;
+        return target;
     }
 };
 

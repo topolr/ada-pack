@@ -648,7 +648,7 @@ let action = {
 };
 
 module.exports = function (option) {
-    util.extend(config, option);
+    util.extend(true, config, option);
     config.base_path = config.base_path.replace(/\\/g, "/");
     config.dist_path = Path.join(config.base_path, config.dist_path).replace(/\\/g, "/");
     config.source_path = Path.join(config.base_path, config.source_path).replace(/\\/g, "/");
