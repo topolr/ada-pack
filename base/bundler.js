@@ -71,7 +71,7 @@ class AdaBundler {
             this.resultmap.push(path);
         }
         code = code.replace(/require\(.*?\)/g, (one) => {
-            if (one.indexOf("${") === -1 && one.indexOf("+") === -1) {
+            if (one.indexOf("${") === -1 && one.indexOf("+") === -1 && one.indexOf("'") === -1) {
                 let a = one.substring(8, one.length - 1).replace(/['|"|`]/g, "").trim();
                 let _path = Path.resolve(path, "./../", a).replace(/\\/g, "/");
                 if (_path.split(".").length === 1) {
