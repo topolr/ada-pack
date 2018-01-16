@@ -5,7 +5,7 @@ module.exports = function (content, path, option) {
     return new Promise((resolve, reject) => {
         try {
             content = babel.transform(content, option.compiler.babel).code;
-            return pollyfill.pollyfill("js", path, content, option).then(content => {
+            pollyfill.pollyfill("js", path, content, option).then(content => {
                 try {
                     return uglify.minify(content, Object.assign({
                         fromString: true,
@@ -14,6 +14,8 @@ module.exports = function (content, path, option) {
                 } catch (e) {
                     return content;
                 }
+            }).then(content => {
+                resolve(content);
             });
         } catch (e) {
             reject(e);
