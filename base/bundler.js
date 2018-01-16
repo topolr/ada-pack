@@ -73,10 +73,7 @@ class AdaBundler {
         code = code.replace(/require\(.*?\)/g, (one) => {
             if (one.indexOf("${") === -1 && one.indexOf("+") === -1 && one.indexOf("'") === -1) {
                 let a = one.substring(8, one.length - 1).replace(/['|"|`]/g, "").trim();
-                let _path = Path.resolve(path, "./../", a).replace(/\\/g, "/");
-                if (_path.split(".").length === 1) {
-                    _path = _path + ".js";
-                }
+                let _path = base.getFilePath(config, Path.resolve(path, "./../"), a);
                 paths.push(_path);
                 let index = this.resultmap.indexOf(_path);
                 if (index === -1) {
@@ -161,10 +158,11 @@ let base = {
                     if (_packageFile.isExists()) {
                         _path = Path.resolve(_packagePath, "./../", JSON.parse(_packageFile.readSync()).main);
                     } else {
-                        _path = Path.resolve(_packagePath, "./index.ts");
-                        if (!new File(_path).isExists()) {
-                            _path = Path.resolve(_packagePath, "./index.js");
+                        let __path = Path.resolve(_path, "./index.ts");
+                        if (!new File(__path).isExists()) {
+                            __path = Path.resolve(_path, "./index.js");
                         }
+                        _path = __path;
                     }
                 }
             } else {
