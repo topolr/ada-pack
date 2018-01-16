@@ -76,8 +76,8 @@ module.exports = {
             ],
             plugins: [
                 ["@babel/plugin-transform-runtime", {
-                    "helpers": false,
-                    "polyfill": false,
+                    "helpers": true,
+                    "polyfill": true,
                     "regenerator": true,
                     "moduleName": "@babel/runtime"
                 }],
