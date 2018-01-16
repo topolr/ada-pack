@@ -75,6 +75,12 @@ module.exports = {
                 "@babel/typescript", ["@babel/env", {"targets": {"chrome": "29"}}]
             ],
             plugins: [
+                ["@babel/plugin-transform-runtime", {
+                    "helpers": false,
+                    "polyfill": false,
+                    "regenerator": true,
+                    "moduleName": "@babel/runtime"
+                }],
                 "@babel/plugin-proposal-decorators",
                 ["@babel/plugin-proposal-class-properties", {"loose": true}],
                 "@babel/transform-async-to-generator",
