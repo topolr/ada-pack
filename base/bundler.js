@@ -554,9 +554,6 @@ let base = {
                         }
                     });
                     return this.getEntriesInfo(_prentries).then(({otherEnteries: _otherEnteries}) => {
-                        _otherEnteries = _otherEnteries.filter(file => {
-                            return Reflect.ownKeys(file.code).length > 1;
-                        });
                         _otherEnteries.forEach(file => {
                             let r = {};
                             Reflect.ownKeys(file.code).forEach(key => {
@@ -566,15 +563,19 @@ let base = {
                             });
                             file.code = r;
                         });
+                        let _realOtherEnteries = [];
                         _otherEnteries.forEach(file => {
                             let inp = [];
                             Reflect.ownKeys(file.code).forEach(key => {
                                 map[key] = file.code[key].hash;
                                 inp.push(file.code[key].hash);
                             });
-                            packages[file.key] = inp.join("|");
+                            if (inp.length > 1) {
+                                packages[file.key] = inp.join("|");
+                                _realOtherEnteries.push(file);
+                            }
                         });
-                        otherEnteries.push(..._otherEnteries);
+                        otherEnteries.push(..._realOtherEnteries);
                     });
                 });
             }
