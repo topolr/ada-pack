@@ -534,13 +534,16 @@ let base = {
             });
             otherEnteries.unshift(mainEntry);
             let map = {}, packages = {};
-            otherEnteries.forEach(file => {
+            otherEnteries = otherEnteries.filter(file => {
                 let inp = [];
                 Reflect.ownKeys(file.code).forEach(key => {
                     map[key] = file.code[key].hash;
                     inp.push(file.code[key].hash);
                 });
-                packages[file.key] = inp.join("|");
+                if (inp.length > 1) {
+                    packages[file.key] = inp.join("|");
+                    return true;
+                }
             });
 
             let ps = Promise.resolve();
