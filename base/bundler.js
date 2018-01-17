@@ -250,8 +250,8 @@ let base = {
                     return str;
                 }
             });
-            info.content = info.content.replace(/imports\(.*?\)/g, (str) => {
-                let a = str.substring(8, str.length - 1);
+            info.content = info.content.replace(/import\(.*?\)/g, (str) => {
+                let a = str.substring(7, str.length - 1);
                 if (a.startsWith("\"") || a.startsWith("'") || a.startsWith("`")) {
                     a = a.replace(/['|"|`]/g, "").trim();
                     if (IGNOREMODULES.indexOf(a) === -1) {
@@ -271,10 +271,10 @@ let base = {
                         });
                         return value;
                     } else {
-                        return str;
+                        return `imports(${a})`;
                     }
                 } else {
-                    return str;
+                    return `imports(${a})`;
                 }
             });
             if (info.path.indexOf("node_modules") !== -1) {
