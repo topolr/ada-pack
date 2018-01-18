@@ -194,7 +194,11 @@ let base = {
                     message: e.message,
                     stack: e.stack
                 };
-                return {path: _path, content: "", result: e}
+                if (_file.suffix() === "js" || _file.suffix() === "ts") {
+                    return {path: _path, content: `console.error(${JSON.stringify(e.message)})`, result: e}
+                } else {
+                    return {path: _path, content: "", result: e}
+                }
             });
         }
     },
