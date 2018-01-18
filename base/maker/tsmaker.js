@@ -3,7 +3,7 @@ let Path = require("path");
 module.exports = function (content, path, config) {
     return new Promise((resolve, reject) => {
         let file = path.substring(config.source_path.length);
-        let args = ["--target ES5", "--noEmit", "--pretty", "--skipLibCheck", "--experimentalDecorators", "--version"];
+        let args = ["--target ES5", "--noEmit", "--pretty", "--skipLibCheck", "--experimentalDecorators"];
         require("child_process").exec(`node ${Path.resolve(config.projectPath, "./node_modules/typescript")}/bin/tsc ${file} ${args.join(" ")}`, {
             encoding: "utf-8",
             cwd: config.source_path
