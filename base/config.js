@@ -89,6 +89,7 @@ module.exports = {
         uglifycss: {},
         autoprefixer: {},
         sass: {},
-        minifier: {}
+        minifier: {},
+        typescript:["--target ES5", "--noEmit", "--pretty", "--skipLibCheck", "--experimentalDecorators"]
     }
 };
