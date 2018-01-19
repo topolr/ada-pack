@@ -90,6 +90,6 @@ module.exports = {
         autoprefixer: {},
         sass: {},
         minifier: {},
-        typescript:["--target ES5", "--noEmit", "--pretty", "--skipLibCheck", "--experimentalDecorators"]
+        typescript:["--target ESNext", "--noEmit", "--pretty", "--skipLibCheck", "--experimentalDecorators"]
     }
 };
