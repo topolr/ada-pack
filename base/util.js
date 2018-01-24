@@ -1,4 +1,5 @@
 let File = require("./lib/file");
+let maker = require("./maker/maker");
 
 let util = {
     isObject(obj) {
@@ -235,34 +236,17 @@ let util = {
         });
     },
     getAppInfo(appPath) {
-        let info = {};
-        let content = new File(appPath).readSync();
-        content = babel.transform(content, {
-            presets: [
-                "@babel/typescript", ["@babel/env", {"targets": {"browsers": "last 2 Chrome versions"}}]
-            ],
-            plugins: [
-                "@babel/plugin-proposal-decorators",
-                ["@babel/plugin-proposal-class-properties", {"loose": true}],
-                "@babel/transform-async-to-generator",
-                "@babel/syntax-dynamic-import"
-            ]
-        }).code;
-        try {
-            content = uglify.minify(content, {
-                fromString: true,
-                mangle: true
-            }).code;
-        } catch (e) {
-        }
-        let module = {exports: {}};
-        new Function("module", "exports", "require", content)(module, module.exports, require);
-        if (module.exports.default) {
-            info = module.exports.default;
-        } else {
-            info = module.exports;
-        }
-        return info;
+        return maker.jsCode(new File(appPath).readSync()).then(content => {
+            let info = {};
+            let module = {exports: {}};
+            new Function("module", "exports", "require", content)(module, module.exports, require);
+            if (module.exports.default) {
+                info = module.exports.default;
+            } else {
+                info = module.exports;
+            }
+            return info;
+        });
     },
     padEnd(origin, length, dot) {
         let a = length - origin.length;
@@ -309,15 +293,15 @@ let util = {
             i--;
         }
         for (; i < length; i++) {
-            if (( options = arguments[i] ) != null) {
+            if ((options = arguments[i]) != null) {
                 for (name in options) {
                     src = target[name];
                     copy = options[name];
                     if (target === copy) {
                         continue;
                     }
-                    if (deep && copy && ( util.isObject(copy) ||
-                        ( copyIsArray = Array.isArray(copy) ) )) {
+                    if (deep && copy && (util.isObject(copy) ||
+                            (copyIsArray = Array.isArray(copy)))) {
                         if (copyIsArray) {
                             copyIsArray = false;
                             clone = src && Array.isArray(src) ? src : [];

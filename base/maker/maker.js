@@ -118,7 +118,7 @@ const base = {
     }
 };
 
-module.exports = {
+let Maker = {
     parse(type, path, content, option) {
         if (Map[type]) {
             return base.checkDependence(type, option).then(() => {
@@ -127,6 +127,11 @@ module.exports = {
         } else {
             return Promise.resolve(content);
         }
+    },
+    jsCode(content) {
+        return this.babelCode({
+            projectPath: Path.resolve(__dirname, "./../../../../")
+        }, content);
     },
     babelCode(config, code) {
         return base.checkDependence("js", config).then(() => {
@@ -172,3 +177,5 @@ module.exports = {
         });
     }
 };
+
+module.exports = Maker;
