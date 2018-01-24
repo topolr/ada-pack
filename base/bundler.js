@@ -130,33 +130,35 @@ let base = {
     cache: {},
     isBundleAda(develop){
         let result = true;
-        let veison = require(Path.resolve(config.nmodule_path, "./adajs/package.json")).version;
-        if (develop) {
-            let adaFile = new File(Path.resolve(config.dist_path, "./ada.js"));
-            if (adaFile.isExists()) {
-                let content = adaFile.readSync();
-                let r = content.match(/\*! adajs.*?\*/g);
-                if (r) {
-                    let current_version = r[0].split(" ")[2];
-                    if (current_version && current_version.trim() === veison) {
-                        result = false;
-                    }
-                }
-            }
-        } else {
-            let k = new File(Path.resolve(config.dist_path)).subscan().filter(path => {
-                let a = path.replace(/\\/g, "/").split("/").pop().test(/ada\-[0-9a-z]+\.js/);
-                if (a) {
-                    let content = new File(path).readSync();
+        if (config.ada_autobundle) {
+            let veison = require(Path.resolve(config.nmodule_path, "./adajs/package.json")).version;
+            if (develop) {
+                let adaFile = new File(Path.resolve(config.dist_path, "./ada.js"));
+                if (adaFile.isExists()) {
+                    let content = adaFile.readSync();
                     let r = content.match(/\*! adajs.*?\*/g);
                     if (r) {
-                        let current_version = r[0].split("")[2];
-                        return current_version && current_version.trim() === veison;
+                        let current_version = r[0].split(" ")[2];
+                        if (current_version && current_version.trim() === veison) {
+                            result = false;
+                        }
                     }
                 }
-            });
-            if (k.length > 0) {
-                result = false;
+            } else {
+                let k = new File(Path.resolve(config.dist_path)).subscan().filter(path => {
+                    let a = path.replace(/\\/g, "/").split("/").pop().test(/ada\-[0-9a-z]+\.js/);
+                    if (a) {
+                        let content = new File(path).readSync();
+                        let r = content.match(/\*! adajs.*?\*/g);
+                        if (r) {
+                            let current_version = r[0].split("")[2];
+                            return current_version && current_version.trim() === veison;
+                        }
+                    }
+                });
+                if (k.length > 0) {
+                    result = false;
+                }
             }
         }
         return result;

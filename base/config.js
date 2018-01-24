@@ -15,6 +15,7 @@ module.exports = {
     main: "./src/root.js",
     entry_path: "",
     entry_auto: true,
+    ada_autobundle: true,
     super_ada: false,
     keywords: ["ada"],
     pages: [],
@@ -90,6 +91,6 @@ module.exports = {
         autoprefixer: {},
         sass: {},
         minifier: {},
-        typescript:["--target ESNext", "--noEmit", "--pretty", "--skipLibCheck", "--experimentalDecorators"]
+        typescript: ["--target ESNext", "--noEmit", "--pretty", "--skipLibCheck", "--experimentalDecorators"]
     }
 };
