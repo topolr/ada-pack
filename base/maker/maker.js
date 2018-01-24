@@ -127,5 +127,48 @@ module.exports = {
         } else {
             return Promise.resolve(content);
         }
+    },
+    babelCode(config, code) {
+        return base.checkDependence("js", config).then(() => {
+            let content = require("babel").transform(code, config.compiler.babel).code;
+            try {
+                content = require("uglify-es").minify(content, Object.assign({
+                    fromString: true,
+                    mangle: true
+                }, config.compiler.uglify)).code;
+            } catch (e) {
+            }
+            return content;
+        });
+    },
+    minifyCode(config, code) {
+        return base.checkDependence("js", config).then(() => {
+            let content = code;
+            try {
+                content = require("uglify-es").minify(content, Object.assign({
+                    fromString: true,
+                    mangle: true
+                }, config.compiler.uglify)).code;
+            } catch (e) {
+            }
+            return content;
+        });
+    },
+    lessCode(content) {
+        return base.checkDependence("less", config).then(() => {
+            require("less").render(content, function (e, output) {
+                if (!e) {
+                    let code = minify(output.css, {
+                        removeComments: true,
+                        collapseWhitespace: true,
+                        minifyJS: true,
+                        minifyCSS: true
+                    });
+                    resolve(code);
+                } else {
+                    console.log(e)
+                }
+            });
+        });
     }
 };

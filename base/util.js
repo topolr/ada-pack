@@ -1,5 +1,3 @@
-let uglify = require("uglify-js");
-let babel = require("@babel/core");
 let File = require("./lib/file");
 
 let util = {
@@ -215,28 +213,6 @@ let util = {
                 return c;
             }
         });
-    },
-    babelCode(config, code) {
-        let content = babel.transform(code, config.compiler.babel).code;
-        try {
-            content = uglify.minify(content, Object.assign({
-                fromString: true,
-                mangle: true
-            }, config.compiler.uglify)).code;
-        } catch (e) {
-        }
-        return content;
-    },
-    minifyCode(config, code) {
-        let content = code;
-        try {
-            content = uglify.minify(content, Object.assign({
-                fromString: true,
-                mangle: true
-            }, config.compiler.uglify)).code;
-        } catch (e) {
-        }
-        return content;
     },
     hashCode(str) {
         let hash = 0;

@@ -8,8 +8,6 @@ let queue = require("./lib/queue");
 let isbinaryfile = require("isbinaryfile");
 let config = require("./config");
 let gzipSize = require('gzip-size');
-let less = require("less");
-let minify = require('html-minifier').minify;
 
 const THRIDPARTFOLDER = "node_modules";
 const IGNOREMODULES = ["fs", "path", "util", "http", "events", "crypto", "adajs"];
@@ -27,18 +25,8 @@ class AdaBundler {
             if (suffix === "html") {
                 resolve(`module.exports=${JSON.stringify(file.readSync().replace(/\n/g, '').replace(/\r/g, '').replace(/\n\r/g, ''))}`);
             } else if (suffix === "less") {
-                less.render(file.readSync(), function (e, output) {
-                    if (!e) {
-                        let code = minify(output.css, {
-                            removeComments: true,
-                            collapseWhitespace: true,
-                            minifyJS: true,
-                            minifyCSS: true
-                        });
-                        resolve(`module.exports={active:function(){var _a = document.createElement("style");_a.setAttribute("media", "screen");_a.setAttribute("type", "text/css");_a.appendChild(document.createTextNode(${JSON.stringify(code)}));document.head.appendChild(_a);}};`);
-                    } else {
-                        console.log(e)
-                    }
+                maker.lessCode(file.readSync()).then(code => {
+                    resolve(`module.exports={active:function(){var _a = document.createElement("style");_a.setAttribute("media", "screen");_a.setAttribute("type", "text/css");_a.appendChild(document.createTextNode(${JSON.stringify(code)}));document.head.appendChild(_a);}};`);
                 });
             } else if (suffix === "icon") {
                 let content = file.readSync();
@@ -60,7 +48,9 @@ class AdaBundler {
                 let result = `var active=function(){var c=document.getElementById("ada-icon-container");if(!c){var c=document.createElement("div");c.setAttribute("id","ada-icon-container");c.style.cssText="width:0;height:0;";document.body.appendChild(c);}if(!document.getElementById("${name}")){var a=document.createElement("div");a.innerHTML=${JSON.stringify(code)};c.appendChild(a.childNodes[0]);}};module.exports={active:function(){if(/complete|loaded|interactive/.test(window.document.readyState)){active();}else{window.addEventListener("DOMContentLoaded",function(){active();});}},getIconId:function(){return "${name}";}};`;
                 resolve(result);
             } else {
-                resolve(util.babelCode(config, file.readSync()));
+                maker.babelCode(config, file.readSync()).then(content => {
+                    resolve(content);
+                });
             }
         });
     }
@@ -128,7 +118,7 @@ let base = {
     logs: {},
     packageLogs: {},
     cache: {},
-    isBundleAda(develop){
+    isBundleAda(develop) {
         let result = true;
         if (config.ada_autobundle) {
             let veison = require(Path.resolve(config.nmodule_path, "./adajs/package.json")).version;
@@ -473,7 +463,9 @@ let base = {
             }
             Promise.all([
                 new File(Path.resolve(config.index_path, "./manifest.json")).write(JSON.stringify(manifest)),
-                new File(Path.resolve(config.index_path, "./serviceworker.js")).write(`'use strict';${util.minifyCode(config, codes.join(""))}`),
+                maker.minifyCode(config, codes.join("")).then(content => {
+                    return new File(Path.resolve(config.index_path, "./serviceworker.js")).write(`'use strict';${content}`),
+                }),
                 new File(Path.resolve(config.index_path, "./index.html")).write(content)
             ]);
         });
