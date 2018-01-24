@@ -130,9 +130,31 @@ let Maker = {
         }
     },
     jsCode(content) {
-        return this.babelCode({
+        return base.checkDependence("js", {
             projectPath: Path.resolve(__dirname, "./../../../../")
-        }, content);
+        }).then(() => {
+            let content = new File(appPath).readSync();
+            content = require("@babel/core").transform(content, {
+                presets: [
+                    "@babel/typescript", ["@babel/env", {"targets": {"browsers": "last 2 Chrome versions"}}]
+                ],
+                plugins: [
+                    "@babel/plugin-proposal-decorators",
+                    ["@babel/plugin-proposal-class-properties", {"loose": true}],
+                    "@babel/transform-async-to-generator",
+                    "@babel/syntax-dynamic-import"
+                ]
+            }).code;
+            try {
+                content = require("uglify-es").minify(content, {
+                    fromString: true,
+                    mangle: true
+                }).code;
+            } catch (e) {
+            }
+            return content;
+        });
+
     },
     babelCode(config, code) {
         return base.checkDependence("js", config).then(() => {
