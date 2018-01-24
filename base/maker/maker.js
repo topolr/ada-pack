@@ -1,6 +1,7 @@
 let File = require("./../lib/file");
 let queue = require("./../lib/queue");
 let Path = require("path");
+let colors = require("colors");
 
 const Mapped = {
     js: {
@@ -91,7 +92,7 @@ const base = {
         if (a) {
             return queue(Reflect.ownKeys(a.dependence).map(name => () => {
                 let path = Path.resolve(config.projectPath, "./node_modules/", name);
-                if (new File(path).isExists()) {
+                if (!new File(path).isExists()) {
                     console.log(` - [INSTALL MODULE]:${name}`.white);
                     return new Promise((resolve, reject) => {
                         let args = ["install", name, "--save-dev"];
@@ -135,7 +136,7 @@ let Maker = {
     },
     babelCode(config, code) {
         return base.checkDependence("js", config).then(() => {
-            let content = require("babel").transform(code, config.compiler.babel).code;
+            let content = require("@babel/core").transform(code, config.compiler.babel).code;
             try {
                 content = require("uglify-es").minify(content, Object.assign({
                     fromString: true,
