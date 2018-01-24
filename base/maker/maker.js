@@ -129,7 +129,7 @@ let Maker = {
             return Promise.resolve(content);
         }
     },
-    jsCode(content) {
+    appCode(appPath) {
         return base.checkDependence("js", {
             projectPath: Path.resolve(__dirname, "./../../../../")
         }).then(() => {

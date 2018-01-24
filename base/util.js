@@ -236,7 +236,7 @@ let util = {
         });
     },
     getAppInfo(appPath) {
-        return maker.jsCode(new File(appPath).readSync()).then(content => {
+        return maker.appCode(appPath).then(content => {
             let info = {};
             let module = {exports: {}};
             new Function("module", "exports", "require", content)(module, module.exports, require);
