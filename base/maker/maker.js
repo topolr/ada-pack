@@ -28,6 +28,7 @@ const Mapped = {
             "autoprefixer": "^7.1.6",
             "postcss": "^5.2.5",
             "uglifycss": "^0.0.25",
+            "html-minifier": "^3.5.6"
         },
         moduleName: "./cssmaker"
     },
@@ -180,18 +181,21 @@ let Maker = {
         return base.checkDependence("less", {
             projectPath: Path.resolve(__dirname, "./../../../../")
         }).then(() => {
-            require("less").render(content, function (e, output) {
-                if (!e) {
-                    let code = require('html-minifier')(output.css, {
-                        removeComments: true,
-                        collapseWhitespace: true,
-                        minifyJS: true,
-                        minifyCSS: true
-                    });
-                    resolve(code);
-                } else {
-                    console.log(e)
-                }
+            return new Promise((resolve, reject) => {
+                require("less").render(content, function (e, output) {
+                    if (!e) {
+                        let code = require('html-minifier').minify(output.css, {
+                            removeComments: true,
+                            collapseWhitespace: true,
+                            minifyJS: true,
+                            minifyCSS: true
+                        });
+                        resolve(code);
+                    } else {
+                        console.log(e)
+                        resolve("");
+                    }
+                });
             });
         });
     }
