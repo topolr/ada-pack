@@ -464,7 +464,7 @@ let base = {
             Promise.all([
                 new File(Path.resolve(config.index_path, "./manifest.json")).write(JSON.stringify(manifest)),
                 maker.minifyCode(config, codes.join("")).then(content => {
-                    return new File(Path.resolve(config.index_path, "./serviceworker.js")).write(`'use strict';${content}`),
+                    return new File(Path.resolve(config.index_path, "./serviceworker.js")).write(`'use strict';${content}`);
                 }),
                 new File(Path.resolve(config.index_path, "./index.html")).write(content)
             ]);

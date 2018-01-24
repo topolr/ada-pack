@@ -121,7 +121,7 @@ const base = {
 
 let Maker = {
     parse(type, path, content, option) {
-        if (Map[type]) {
+        if (Mapped[type]) {
             return base.checkDependence(type, option).then(() => {
                 return require(Mapped[type].maker)(content, path, option);
             });
@@ -146,10 +146,7 @@ let Maker = {
                 ]
             }).code;
             try {
-                content = require("uglify-es").minify(content, {
-                    fromString: true,
-                    mangle: true
-                }).code;
+                content = require("uglify-es").minify(content).code;
             } catch (e) {
             }
             return content;
@@ -173,10 +170,7 @@ let Maker = {
         return base.checkDependence("js", config).then(() => {
             let content = code;
             try {
-                content = require("uglify-es").minify(content, Object.assign({
-                    fromString: true,
-                    mangle: true
-                }, config.compiler.uglify)).code;
+                content = require("uglify-es").minify(content, Object.assign({}, config.compiler.uglify)).code;
             } catch (e) {
             }
             return content;
@@ -186,7 +180,7 @@ let Maker = {
         return base.checkDependence("less", config).then(() => {
             require("less").render(content, function (e, output) {
                 if (!e) {
-                    let code = minify(output.css, {
+                    let code = require('html-minifier')(output.css, {
                         removeComments: true,
                         collapseWhitespace: true,
                         minifyJS: true,

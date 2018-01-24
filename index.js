@@ -4,7 +4,6 @@ let chokidar = require('chokidar');
 let Path = require("path");
 let package = require("./package.json");
 let colors = require("colors");
-let uglify = require("uglify-js");
 let util = require("./base/util");
 
 let waiter = {
