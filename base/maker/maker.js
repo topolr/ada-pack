@@ -177,7 +177,9 @@ let Maker = {
         });
     },
     lessCode(content) {
-        return base.checkDependence("less", config).then(() => {
+        return base.checkDependence("less", {
+            projectPath: Path.resolve(__dirname, "./../../../../")
+        }).then(() => {
             require("less").render(content, function (e, output) {
                 if (!e) {
                     let code = require('html-minifier')(output.css, {
