@@ -128,8 +128,8 @@ let base = {
     logs: {},
     packageLogs: {},
     cache: {},
-    checkAdaCode(develop){
-        let result = false;
+    isBundleAda(develop){
+        let result = true;
         let veison = require(Path.resolve(config.nmodule_path, "./adajs/package.json")).version;
         if (develop) {
             let adaFile = new File(Path.resolve(config.dist_path, "./ada.js"));
@@ -137,9 +137,9 @@ let base = {
                 let content = adaFile.readSync();
                 let r = content.match(/\*! adajs.*?\*/g);
                 if (r) {
-                    let current_version = r[0].split("")[2];
+                    let current_version = r[0].split(" ")[2];
                     if (current_version && current_version.trim() === veison) {
-                        result = true;
+                        result = false;
                     }
                 }
             }
@@ -156,7 +156,7 @@ let base = {
                 }
             });
             if (k.length > 0) {
-                result = true;
+                result = false;
             }
         }
         return result;
@@ -367,7 +367,7 @@ let base = {
         }).catch(e => console.log(e));
     },
     bundleAda(develop = false) {
-        if (this.checkAdaCode(develop)) {
+        if (this.isBundleAda(develop)) {
             return new AdaBundler().bundle(Path.resolve(config.nmodule_path, `./adajs/${develop ? "develop" : (config.super_ada ? "super" : "index")}.js`),
                 Path.resolve(config.dist_path, "./ada.js"), develop);
         } else {
