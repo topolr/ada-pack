@@ -109,6 +109,7 @@ const base = {
                                 process.stderr.clearLine();
                                 process.stderr.cursorTo(0);
                                 console.log(` - [INSTALL MODULE FAIL]:${name}`.red);
+                                console.log(stdout || stderr);
                                 reject(name);
                             } else {
                                 process.stderr.clearLine();
