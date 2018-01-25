@@ -29,24 +29,10 @@ class AdaBundler {
                     resolve(`module.exports={active:function(){var _a = document.createElement("style");_a.setAttribute("media", "screen");_a.setAttribute("type", "text/css");_a.appendChild(document.createTextNode(${JSON.stringify(code)}));document.head.appendChild(_a);}};`);
                 });
             } else if (suffix === "icon") {
-                let content = file.readSync();
-                content = minify(content, {
-                    removeComments: true,
-                    collapseWhitespace: true,
-                    minifyJS: true,
-                    minifyCSS: true
+                maker.minifyIcon(file.readSync()).then(({name, code}) => {
+                    let result = `var active=function(){var c=document.getElementById("ada-icon-container");if(!c){var c=document.createElement("div");c.setAttribute("id","ada-icon-container");c.style.cssText="width:0;height:0;";document.body.appendChild(c);}if(!document.getElementById("${name}")){var a=document.createElement("div");a.innerHTML=${JSON.stringify(code)};c.appendChild(a.childNodes[0]);}};module.exports={active:function(){if(/complete|loaded|interactive/.test(window.document.readyState)){active();}else{window.addEventListener("DOMContentLoaded",function(){active();});}},getIconId:function(){return "${name}";}};`;
+                    resolve(result);
                 });
-                let titleTag = content.match(/<title>[\s\S]*?>/);
-                let name = "";
-                if (titleTag) {
-                    name = titleTag[0].substring(7, titleTag[0].length - 8).trim();
-                }
-                let et = content.replace(/svg/g, "symbol").replace(/xmlns\=".*?"/, "").replace(/version\=".*?"/, "").replace(/viewBox\=".*?"/, (str) => {
-                    return `${str} id="${name}"`;
-                });
-                let code = `<svg style="width:0;height:0;overflow:hidden;" version="1.1" xmlns="http://www.w3.org/2000/svg">${et}</svg>`;
-                let result = `var active=function(){var c=document.getElementById("ada-icon-container");if(!c){var c=document.createElement("div");c.setAttribute("id","ada-icon-container");c.style.cssText="width:0;height:0;";document.body.appendChild(c);}if(!document.getElementById("${name}")){var a=document.createElement("div");a.innerHTML=${JSON.stringify(code)};c.appendChild(a.childNodes[0]);}};module.exports={active:function(){if(/complete|loaded|interactive/.test(window.document.readyState)){active();}else{window.addEventListener("DOMContentLoaded",function(){active();});}},getIconId:function(){return "${name}";}};`;
-                resolve(result);
             } else {
                 maker.babelCode(config, file.readSync()).then(content => {
                     resolve(content);

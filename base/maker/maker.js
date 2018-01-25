@@ -224,6 +224,28 @@ let Maker = {
             return content;
         });
     },
+    minifyIcon(content){
+        return base.checkDependence("less", {
+            projectPath: Path.resolve(__dirname, "./../../../../")
+        }).then(() => {
+            content = require('html-minifier').minify(content, {
+                removeComments: true,
+                collapseWhitespace: true,
+                minifyJS: true,
+                minifyCSS: true
+            });
+            let titleTag = content.match(/<title>[\s\S]*?>/);
+            let name = "";
+            if (titleTag) {
+                name = titleTag[0].substring(7, titleTag[0].length - 8).trim();
+            }
+            let et = content.replace(/svg/g, "symbol").replace(/xmlns\=".*?"/, "").replace(/version\=".*?"/, "").replace(/viewBox\=".*?"/, (str) => {
+                return `${str} id="${name}"`;
+            });
+            let code = `<svg style="width:0;height:0;overflow:hidden;" version="1.1" xmlns="http://www.w3.org/2000/svg">${et}</svg>`;
+            return {name, code};
+        });
+    },
     lessCode(content) {
         return base.checkDependence("less", {
             projectPath: Path.resolve(__dirname, "./../../../../")
