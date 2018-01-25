@@ -95,7 +95,10 @@ const base = {
             return queue(Reflect.ownKeys(a.dependence).map(name => () => {
                 let path = Path.resolve(config.projectPath, "./node_modules/", name);
                 if (!new File(path).isExists()) {
-                    console.log(` - [INSTALL MODULE]:${name}`.white);
+                    console.log("");
+                    let desc = ` - [INSTALL MODULE]:${name}...`;
+                    process.stderr.write(desc.grey);
+                    process.stderr.cursorTo(desc.length);
                     return new Promise((resolve, reject) => {
                         let args = ["install", name, "--save-dev"];
                         require("child_process").exec(`npm ${args.join(" ")}`, {
@@ -103,9 +106,13 @@ const base = {
                             cwd: config.projectPath
                         }, (error, stdout, stderr) => {
                             if (error) {
+                                process.stderr.clearLine();
+                                process.stderr.cursorTo(0);
                                 console.log(` - [INSTALL MODULE FAIL]:${name}`.red);
                                 reject(name);
                             } else {
+                                process.stderr.clearLine();
+                                process.stderr.cursorTo(0);
                                 console.log(` - [INSTALL MODULE DONE]:${name}`.green);
                                 resolve(name);
                             }
@@ -116,8 +123,19 @@ const base = {
                 }
             }));
         } else {
+            console.log(` [sorry ada-pack can not resolve files with suffix of ${type}]`.red);
             return Promise.resolve();
         }
+    },
+    checkAllDependence(sourcePath, config){
+        console.log(` NOW CHECK AND INSTALL MODULES WHICH REQUIRED`.yellow);
+        return queue(new File(sourcePath).scan().map(path => {
+            return new File(path).suffix();
+        }).map(type => () => {
+            return this.checkDependence(type, config);
+        })).then(() => {
+            console.log(` MODULES INSTALL DONE`.green);
+        });
     }
 };
 
@@ -196,6 +214,9 @@ let Maker = {
                 });
             });
         });
+    },
+    installAllDependence(sourcePath, config){
+        return base.checkAllDependence(sourcePath, config);
     }
 };
 
