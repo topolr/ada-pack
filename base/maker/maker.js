@@ -272,7 +272,7 @@ let Maker = {
         return base.checkAllDependence(sourcePath, config);
     },
     installAdapackDependence(){
-        let types = ["js"];
+        let types = ["js","less"];
         if (base.checkNotInstalled(types)) {
             console.log(` INSTALL BASE MODULES`.yellow);
             return queue(types.map(type => () => {
