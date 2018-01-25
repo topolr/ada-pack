@@ -696,9 +696,7 @@ module.exports = function (option) {
     if (config.site_url[config.site_url.length - 1] !== "/") {
         config.site_url = config.site_url + "/";
     }
-    return maker.installAllDependence(config.source_path, config).then(() => {
-        return base.bundleAda(config.develop).then(() => {
-            return action;
-        });
+    return base.bundleAda(config.develop).then(() => {
+        return action;
     });
 };

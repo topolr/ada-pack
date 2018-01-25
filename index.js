@@ -5,6 +5,7 @@ let Path = require("path");
 let package = require("./package.json");
 let colors = require("colors");
 let util = require("./base/util");
+let maker=require("./base/maker/maker");
 
 let waiter = {
     _data: {},
