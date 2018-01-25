@@ -155,17 +155,23 @@ const base = {
         }
     },
     checkNotInstalled(types){
-        let projectPath = Path.resolve(__dirname, "./../../../../");
-        return types.some(type => {
+        let projectPath = Path.resolve(__dirname, "./../../../../"), result = false;
+        for (let i = 0; i < types.length; i++) {
+            let type = types[i];
             if (Mapped[type]) {
-                if (Reflect.ownKeys(Mapped[type].dependence).some(name => {
-                        let path = Path.resolve(projectPath, "./node_modules/", name);
-                        return !new File(path).isExists();
-                    })) {
-                    return true;
+                for (let name in Mapped[type].dependence) {
+                    let path = Path.resolve(projectPath, "./node_modules/", name);
+                    if (!new File(path).isExists()) {
+                        result = true;
+                        break;
+                    }
                 }
             }
-        });
+            if (result) {
+                break;
+            }
+        }
+        return result;
     }
 };
 
@@ -251,13 +257,13 @@ let Maker = {
     installAdapackDependence(){
         let types = ["js"];
         if (base.checkNotInstalled(types)) {
-            console.log(` CHECK AND INSTALL ADA-PACK DEPENDENCE MODULES...`.yellow);
+            console.log(` CHECK AND INSTALL BASE MODULES...`.yellow);
             return queue(types.map(type => () => {
-                return this.checkDependence(type, {
+                return base.checkDependence(type, {
                     projectPath: Path.resolve(__dirname, "./../../../../")
                 });
             })).then(() => {
-                console.log(` MODULES INSTALL DONE`.green);
+                console.log(` BASE MODULES INSTALL DONE`.green);
             });
         } else {
             return Promise.resolve();

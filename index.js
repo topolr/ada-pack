@@ -51,54 +51,52 @@ module.exports = {
     develop(appPath = "", fn) {
         return new Promise((resolve, reject) => {
             showTips();
-            maker.installAdapackDependence().then(() => {
-                util.getAppInfo(appPath).then(config => {
-                    let basePath = path.resolve(appPath, "./../");
-                    bundler(Object.assign({
-                        base_path: basePath,
-                        develop: true,
-                        projectPath: path.resolve(__dirname, "./../../"),
-                        complete() {
-                            resolve();
-                        }
-                    }, config)).then(_bundler => {
-                        chokidar.watch(path.resolve(basePath, config.source_path), {ignored: /[\/\\]\./}).on('change', function (path) {
-                            waiter.add("edit", path);
-                        }).on('add', function (path) {
-                            waiter.add("add", path);
-                        }).on('unlink', function (path) {
-                            waiter.add("remove", path);
-                        }).on("ready", function () {
-                            waiter.setHandler(function (a, times) {
-                                if (a.add) {
-                                    _bundler.addFiles(a.add).then((info) => {
-                                        fn && fn({
-                                            type: "add",
-                                            files: a.add.map(a => a.substring(Path.resolve(basePath, config.source_path).length + 1).replace(/\\/g, "/")),
-                                            map: info.map,
-                                            log: info.log
-                                        });
+            util.getAppInfo(appPath).then(config => {
+                let basePath = path.resolve(appPath, "./../");
+                bundler(Object.assign({
+                    base_path: basePath,
+                    develop: true,
+                    projectPath: path.resolve(__dirname, "./../../"),
+                    complete() {
+                        resolve();
+                    }
+                }, config)).then(_bundler => {
+                    chokidar.watch(path.resolve(basePath, config.source_path), {ignored: /[\/\\]\./}).on('change', function (path) {
+                        waiter.add("edit", path);
+                    }).on('add', function (path) {
+                        waiter.add("add", path);
+                    }).on('unlink', function (path) {
+                        waiter.add("remove", path);
+                    }).on("ready", function () {
+                        waiter.setHandler(function (a, times) {
+                            if (a.add) {
+                                _bundler.addFiles(a.add).then((info) => {
+                                    fn && fn({
+                                        type: "add",
+                                        files: a.add.map(a => a.substring(Path.resolve(basePath, config.source_path).length + 1).replace(/\\/g, "/")),
+                                        map: info.map,
+                                        log: info.log
                                     });
-                                } else if (a.edit) {
-                                    _bundler.editFiles(a.edit).then((info) => {
-                                        fn && fn({
-                                            type: "edit",
-                                            files: a.edit.map(a => a.substring(Path.resolve(basePath, config.source_path).length + 1).replace(/\\/g, "/")),
-                                            map: info.map,
-                                            log: info.log
-                                        });
+                                });
+                            } else if (a.edit) {
+                                _bundler.editFiles(a.edit).then((info) => {
+                                    fn && fn({
+                                        type: "edit",
+                                        files: a.edit.map(a => a.substring(Path.resolve(basePath, config.source_path).length + 1).replace(/\\/g, "/")),
+                                        map: info.map,
+                                        log: info.log
                                     });
-                                } else if (a.remove) {
-                                    _bundler.editFiles(a.remove).then((info) => {
-                                        fn && fn({
-                                            type: "remove",
-                                            files: a.remove.map(a => a.substring(Path.resolve(basePath, config.source_path).length + 1).replace(/\\/g, "/")),
-                                            map: info.map,
-                                            log: info.log
-                                        });
+                                });
+                            } else if (a.remove) {
+                                _bundler.editFiles(a.remove).then((info) => {
+                                    fn && fn({
+                                        type: "remove",
+                                        files: a.remove.map(a => a.substring(Path.resolve(basePath, config.source_path).length + 1).replace(/\\/g, "/")),
+                                        map: info.map,
+                                        log: info.log
                                     });
-                                }
-                            });
+                                });
+                            }
                         });
                     });
                 });
@@ -107,16 +105,14 @@ module.exports = {
     },
     publish(appPath = "") {
         showTips();
-        maker.installAdapackDependence().then(() => {
-            util.getAppInfo(appPath).then(config => {
-                let basePath = path.resolve(appPath, "./../");
-                return bundler(Object.assign({
-                    base_path: basePath,
-                    develop: false,
-                    projectPath: path.resolve(__dirname, "./../../")
-                }, config)).then(_bundler => {
-                    return _bundler.publish();
-                });
+        util.getAppInfo(appPath).then(config => {
+            let basePath = path.resolve(appPath, "./../");
+            return bundler(Object.assign({
+                base_path: basePath,
+                develop: false,
+                projectPath: path.resolve(__dirname, "./../../")
+            }, config)).then(_bundler => {
+                return _bundler.publish();
             });
         });
     }

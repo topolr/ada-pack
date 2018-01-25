@@ -236,16 +236,18 @@ let util = {
         });
     },
     getAppInfo(appPath) {
-        return maker.appCode(appPath).then(content => {
-            let info = {};
-            let module = {exports: {}};
-            new Function("module", "exports", "require", content)(module, module.exports, require);
-            if (module.exports.default) {
-                info = module.exports.default;
-            } else {
-                info = module.exports;
-            }
-            return info;
+        return maker.installAdapackDependence().then(() => {
+            return maker.appCode(appPath).then(content => {
+                let info = {};
+                let module = {exports: {}};
+                new Function("module", "exports", "require", content)(module, module.exports, require);
+                if (module.exports.default) {
+                    info = module.exports.default;
+                } else {
+                    info = module.exports;
+                }
+                return info;
+            });
         });
     },
     padEnd(origin, length, dot) {
@@ -301,7 +303,7 @@ let util = {
                         continue;
                     }
                     if (deep && copy && (util.isObject(copy) ||
-                            (copyIsArray = Array.isArray(copy)))) {
+                        (copyIsArray = Array.isArray(copy)))) {
                         if (copyIsArray) {
                             copyIsArray = false;
                             clone = src && Array.isArray(src) ? src : [];
