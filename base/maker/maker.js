@@ -102,7 +102,8 @@ const base = {
                         process.stderr.write(desc.grey);
                         process.stderr.cursorTo(desc.length);
                         return new Promise((resolve, reject) => {
-                            let args = ["install", name, "--save-dev"];
+                            // let args = ["install", name, "--save-dev"];
+                            let args = ["install", name];
                             require("child_process").exec(`npm ${args.join(" ")}`, {
                                 encoding: "utf-8",
                                 cwd: config.projectPath
