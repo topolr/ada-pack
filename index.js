@@ -2,7 +2,6 @@ let bundler = require("./base/bundler");
 let path = require("path");
 let chokidar = require('chokidar');
 let Path = require("path");
-let package = require("./package.json");
 let colors = require("colors");
 let util = require("./base/util");
 let maker = require("./base/maker/maker");
@@ -43,14 +42,9 @@ let waiter = {
     }
 };
 
-function showTips() {
-    console.log(colors.blue.bold(` ≡ ADA-PACK ${package.version} ≡`));
-}
-
 module.exports = {
     develop(appPath = "", fn) {
         return new Promise((resolve, reject) => {
-            showTips();
             util.getAppInfo(appPath).then(config => {
                 let basePath = path.resolve(appPath, "./../");
                 bundler(Object.assign({
@@ -104,7 +98,6 @@ module.exports = {
         });
     },
     publish(appPath = "") {
-        showTips();
         util.getAppInfo(appPath).then(config => {
             let basePath = path.resolve(appPath, "./../");
             return bundler(Object.assign({

@@ -3,6 +3,7 @@ let Path = require("path");
 let util = require("./../base/util");
 
 function publish() {
+    util.showTips();
     let projectPath = Path.resolve(__dirname, "./../../../");
     let express = require(Path.resolve(projectPath, "./node_modules/express"));
     let packagePath = Path.resolve(projectPath, "./package.json");

@@ -19,6 +19,7 @@ let messageQueue = {
 };
 
 function runDev() {
+    util.showTips();
     let waitTime = 5000;
     let projectPath = Path.resolve(__dirname, "./../../../");
     let express = require(Path.resolve(projectPath, "./node_modules/express"));

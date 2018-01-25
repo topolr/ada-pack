@@ -1,5 +1,6 @@
 let File = require("./lib/file");
 let maker = require("./maker/maker");
+let packageInfo = require("./../package.json");
 
 let util = {
     isObject(obj) {
@@ -276,7 +277,7 @@ let util = {
         }
         return v + unit;
     },
-    extend: function () {
+    extend() {
         let options, name, src, copy, copyIsArray, clone,
             target = arguments[0] || {},
             i = 1,
@@ -318,6 +319,9 @@ let util = {
             }
         }
         return target;
+    },
+    showTips(){
+        console.log(colors.blue.bold(` ≡ ADA-PACK ${packageInfo.version} ≡`));
     }
 };
 
