@@ -129,6 +129,8 @@ const base = {
                 console.log(` [sorry ada-pack can not resolve files with suffix of ${type}]`.red);
                 return Promise.resolve();
             }
+        } else {
+            return Promise.resolve();
         }
     },
     checkAllDependence(sourcePath, config){
@@ -143,21 +145,24 @@ const base = {
         if (this.checkNotInstalled(types)) {
             return queue(types.map(type => () => {
                 return this.checkDependence(type, config);
-            }).then(() => {
+            })).then(() => {
                 console.log(` MODULES INSTALL DONE`.green);
-            }));
+            });
         } else {
+            console.log(` MODULES INSTALL DONE`.green);
             return Promise.resolve();
         }
     },
     checkNotInstalled(types){
         let projectPath = Path.resolve(__dirname, "./../../../../");
         return types.some(type => {
-            if (Reflect.ownKeys(Mapped[type].dependence).some(name => {
-                    let path = Path.resolve(projectPath, "./node_modules/", name);
-                    return !new File(path).isExists();
-                })) {
-                return true;
+            if (Mapped[type]) {
+                if (Reflect.ownKeys(Mapped[type].dependence).some(name => {
+                        let path = Path.resolve(projectPath, "./node_modules/", name);
+                        return !new File(path).isExists();
+                    })) {
+                    return true;
+                }
             }
         });
     }
@@ -250,9 +255,9 @@ let Maker = {
                 return this.checkDependence(type, {
                     projectPath: Path.resolve(__dirname, "./../../../../")
                 });
-            }).then(() => {
+            })).then(() => {
                 console.log(` MODULES INSTALL DONE`.green);
-            }));
+            });
         } else {
             return Promise.resolve();
         }
