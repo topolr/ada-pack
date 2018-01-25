@@ -20,7 +20,7 @@ const Mapped = {
             "@babel/preset-typescript": "^7.0.0-beta.37",
             "uglify-es": "^3.3.8"
         },
-        moduleName: "./jsmaker"
+        maker: "./jsmaker"
     },
     css: {
         dependence: {
@@ -29,7 +29,7 @@ const Mapped = {
             "uglifycss": "^0.0.25",
             "html-minifier": "^3.5.6"
         },
-        moduleName: "./cssmaker"
+        maker: "./cssmaker"
     },
     scss: {
         dependence: {
