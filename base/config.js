@@ -77,6 +77,7 @@ module.exports = {
             ],
             plugins: [
                 "@babel/plugin-proposal-decorators",
+                "@babel/plugin-transform-regenerator",
                 ["@babel/plugin-proposal-class-properties", {"loose": true}],
                 "@babel/transform-async-to-generator",
                 "@babel/syntax-dynamic-import",
