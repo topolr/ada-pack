@@ -135,7 +135,6 @@ const base = {
         }
     },
     checkAllDependence(sourcePath, config){
-        console.log(` NOW CHECK AND INSTALL MODULES WHICH REQUIRED`.yellow);
         let types = [];
         new File(sourcePath).scan().map(path => {
             let suffix = new File(path).suffix();
@@ -144,13 +143,13 @@ const base = {
             }
         });
         if (this.checkNotInstalled(types)) {
+            console.log(` NOW CHECK AND INSTALL MODULES WHICH REQUIRED`.yellow);
             return queue(types.map(type => () => {
                 return this.checkDependence(type, config);
             })).then(() => {
                 console.log(` MODULES INSTALL DONE`.green);
             });
         } else {
-            console.log(` MODULES INSTALL DONE`.green);
             return Promise.resolve();
         }
     },
