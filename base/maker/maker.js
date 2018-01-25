@@ -133,11 +133,16 @@ const base = {
     },
     checkAllDependence(sourcePath, config){
         console.log(` NOW CHECK AND INSTALL MODULES WHICH REQUIRED`.yellow);
-        return queue(new File(sourcePath).scan().map(path => {
-            return new File(path).suffix();
-        }).map(type => () => {
+        let types = [];
+        new File(sourcePath).scan().map(path => {
+            let suffix = new File(path).suffix();
+            if (types.indexOf(suffix) === -1) {
+                types.push(suffix);
+            }
+        });
+        return queue(types.map(type => () => {
             return this.checkDependence(type, config);
-        })).then(() => {
+        }).then(() => {
             console.log(` MODULES INSTALL DONE`.green);
         });
     }
@@ -221,6 +226,17 @@ let Maker = {
     },
     installAllDependence(sourcePath, config){
         return base.checkAllDependence(sourcePath, config);
+    },
+    installAdapackDependence(){
+        let types = ["js"];
+        console.log(` CHECK AND INSTALL ADA-PACK DEPENDENCE MODULES...`.yellow);
+        return queue(types.map(type => () => {
+            return this.checkDependence(type, {
+                projectPath: Path.resolve(__dirname, "./../../../../")
+            });
+        }).then(() => {
+            console.log(` MODULES INSTALL DONE`.green);
+        });
     }
 };
 
