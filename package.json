@@ -1,27 +1,26 @@
 {
-  "name": "ada-pack",
-  "version": "1.0.4",
-  "description": "ada pack",
-  "main": "index.js",
-  "scripts": {},
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/topolr/ada-pack.git"
-  },
-  "author": "WangJinliang(hou80houzhu)",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/topolr/ada-pack/issues"
-  },
-  "homepage": "https://github.com/topolr/ada-pack#readme",
-  "dependencies": {
-    "chokidar": "^1.7.0",
-    "colors": "^1.1.2",
-    "gzip-size": "^4.1.0",
-    "isbinaryfile": "^3.0.2",
-    "opn": "^5.1.0"
-  },
-  "devDependencies": {
-    "marko": "^4.5.6"
-  }
+    "name": "ada-pack",
+    "version": "1.0.4",
+    "description": "ada pack",
+    "main": "index.js",
+    "scripts": {},
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/topolr/ada-pack.git"
+    },
+    "author": "WangJinliang(hou80houzhu)",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/topolr/ada-pack/issues"
+    },
+    "homepage": "https://github.com/topolr/ada-pack#readme",
+    "dependencies": {
+        "chokidar": "^1.7.0",
+        "colors": "^1.1.2",
+        "gzip-size": "^4.1.0",
+        "isbinaryfile": "^3.0.2",
+        "opn": "^5.1.0"
+    },
+    "devDependencies": {
+    }
 }
