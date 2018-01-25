@@ -140,10 +140,25 @@ const base = {
                 types.push(suffix);
             }
         });
-        return queue(types.map(type => () => {
-            return this.checkDependence(type, config);
-        }).then(() => {
-            console.log(` MODULES INSTALL DONE`.green);
+        if (this.checkNotInstalled(types)) {
+            return queue(types.map(type => () => {
+                return this.checkDependence(type, config);
+            }).then(() => {
+                console.log(` MODULES INSTALL DONE`.green);
+            }));
+        } else {
+            return Promise.resolve();
+        }
+    },
+    checkNotInstalled(types){
+        let projectPath = Path.resolve(__dirname, "./../../../../");
+        return types.some(type => {
+            if (Reflect.ownKeys(Mapped[type].dependence).some(name => {
+                    let path = Path.resolve(projectPath, "./node_modules/", name);
+                    return !new File(path).isExists();
+                })) {
+                return true;
+            }
         });
     }
 };
@@ -229,14 +244,18 @@ let Maker = {
     },
     installAdapackDependence(){
         let types = ["js"];
-        console.log(` CHECK AND INSTALL ADA-PACK DEPENDENCE MODULES...`.yellow);
-        return queue(types.map(type => () => {
-            return this.checkDependence(type, {
-                projectPath: Path.resolve(__dirname, "./../../../../")
-            });
-        }).then(() => {
-            console.log(` MODULES INSTALL DONE`.green);
-        });
+        if (base.checkNotInstalled(types)) {
+            console.log(` CHECK AND INSTALL ADA-PACK DEPENDENCE MODULES...`.yellow);
+            return queue(types.map(type => () => {
+                return this.checkDependence(type, {
+                    projectPath: Path.resolve(__dirname, "./../../../../")
+                });
+            }).then(() => {
+                console.log(` MODULES INSTALL DONE`.green);
+            }));
+        } else {
+            return Promise.resolve();
+        }
     }
 };
 
