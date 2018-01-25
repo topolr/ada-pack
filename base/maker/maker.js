@@ -89,43 +89,46 @@ const Mapped = {
 };
 
 const base = {
+    tasks: [],
     checkDependence(type, config) {
-        let a = Mapped[type];
-        if (a) {
-            return queue(Reflect.ownKeys(a.dependence).map(name => () => {
-                let path = Path.resolve(config.projectPath, "./node_modules/", name);
-                if (!new File(path).isExists()) {
-                    console.log("");
-                    let desc = ` - [INSTALL MODULE]:${name}...`;
-                    process.stderr.write(desc.grey);
-                    process.stderr.cursorTo(desc.length);
-                    return new Promise((resolve, reject) => {
-                        let args = ["install", name, "--save-dev"];
-                        require("child_process").exec(`npm ${args.join(" ")}`, {
-                            encoding: "utf-8",
-                            cwd: config.projectPath
-                        }, (error, stdout, stderr) => {
-                            if (error) {
-                                process.stderr.clearLine();
-                                process.stderr.cursorTo(0);
-                                console.log(` - [INSTALL MODULE FAIL]:${name}`.red);
-                                console.log(stdout || stderr);
-                                reject(name);
-                            } else {
-                                process.stderr.clearLine();
-                                process.stderr.cursorTo(0);
-                                console.log(` - [INSTALL MODULE DONE]:${name}`.green);
-                                resolve(name);
-                            }
+        if (this.tasks.indexOf(type) === -1) {
+            this.tasks.push(type);
+            let a = Mapped[type];
+            if (a) {
+                return queue(Reflect.ownKeys(a.dependence).map(name => () => {
+                    let path = Path.resolve(config.projectPath, "./node_modules/", name);
+                    if (!new File(path).isExists()) {
+                        let desc = ` - INSTALL MODULE [${name}]...`;
+                        process.stderr.write(desc.grey);
+                        process.stderr.cursorTo(desc.length);
+                        return new Promise((resolve, reject) => {
+                            let args = ["install", name, "--save-dev"];
+                            require("child_process").exec(`npm ${args.join(" ")}`, {
+                                encoding: "utf-8",
+                                cwd: config.projectPath
+                            }, (error, stdout, stderr) => {
+                                if (error) {
+                                    process.stderr.clearLine();
+                                    process.stderr.cursorTo(0);
+                                    console.log(` - INSTALL MODULE [${name}] FAIL`.red);
+                                    console.log(stdout || stderr);
+                                    reject(name);
+                                } else {
+                                    process.stderr.clearLine();
+                                    process.stderr.cursorTo(0);
+                                    console.log(` - INSTALL MODULE [${name}] DONE`.green);
+                                    resolve(name);
+                                }
+                            });
                         });
-                    });
-                } else {
-                    return Promise.resolve();
-                }
-            }));
-        } else {
-            console.log(` [sorry ada-pack can not resolve files with suffix of ${type}]`.red);
-            return Promise.resolve();
+                    } else {
+                        return Promise.resolve();
+                    }
+                }));
+            } else {
+                console.log(` [sorry ada-pack can not resolve files with suffix of ${type}]`.red);
+                return Promise.resolve();
+            }
         }
     },
     checkAllDependence(sourcePath, config){
