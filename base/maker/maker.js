@@ -98,11 +98,10 @@ const base = {
                 return queue(Reflect.ownKeys(a.dependence).map(name => () => {
                     let path = Path.resolve(config.projectPath, "./node_modules/", name);
                     if (!new File(path).isExists()) {
-                        let desc = ` - INSTALL MODULE [${name.green}]...`;
-                        process.stderr.write(desc.cyan);
+                        let desc = ` - INSTALL MODULE [`.grey + `${name}`.green + `]...`.grey;
+                        process.stderr.write(desc);
                         process.stderr.cursorTo(desc.length);
                         return new Promise((resolve, reject) => {
-                            // let args = ["install", name, "--save-dev"];
                             let args = ["install", name];
                             require("child_process").exec(`npm ${args.join(" ")}`, {
                                 encoding: "utf-8",
@@ -111,13 +110,13 @@ const base = {
                                 if (error) {
                                     process.stderr.clearLine();
                                     process.stderr.cursorTo(0);
-                                    console.log(` - INSTALL MODULE [${name.yellow}] FAIL`.red);
-                                    console.log(` - Please run > npm install ${name.yellow} to install the module`);
+                                    console.log(` - INSTALL MODULE [`.red, `${name}`.white, `] FAIL`.red);
+                                    console.log(` - Please run > npm install`.red, `${name}`.white, `to install the module`.red);
                                     reject(name);
                                 } else {
                                     process.stderr.clearLine();
                                     process.stderr.cursorTo(0);
-                                    console.log(` - INSTALL MODULE [${name.blue}] DONE`.green);
+                                    console.log(` - INSTALL MODULE [`.cyan, `${name}`.green, `] DONE`.cyan);
                                     resolve(name);
                                 }
                             });
@@ -127,7 +126,6 @@ const base = {
                     }
                 }));
             } else {
-                console.log(` [sorry ada-pack can not resolve files with suffix of ${type}]`.red);
                 return Promise.resolve();
             }
         } else {
@@ -143,12 +141,10 @@ const base = {
             }
         });
         if (this.checkNotInstalled(types)) {
-            console.log(` NOW CHECK AND INSTALL MODULES WHICH REQUIRED`.yellow);
+            console.log(` NOW INSTALL MODULES PROJECT REQUIRED`.yellow);
             return queue(types.map(type => () => {
                 return this.checkDependence(type, config);
-            })).then(() => {
-                console.log(` MODULES INSTALL DONE`.yellow);
-            });
+            }));
         } else {
             return Promise.resolve();
         }
@@ -256,14 +252,12 @@ let Maker = {
     installAdapackDependence(){
         let types = ["js"];
         if (base.checkNotInstalled(types)) {
-            console.log(` CHECK AND INSTALL BASE MODULES...`.yellow);
+            console.log(` INSTALL BASE MODULES`.yellow);
             return queue(types.map(type => () => {
                 return base.checkDependence(type, {
                     projectPath: Path.resolve(__dirname, "./../../../../")
                 });
-            })).then(() => {
-                console.log(` BASE MODULES INSTALL DONE`.green);
-            });
+            }));
         } else {
             return Promise.resolve();
         }

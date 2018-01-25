@@ -90,6 +90,9 @@ class AdaBundler {
 
     bundle(path, output, develop) {
         console.log("");
+        if (config.ada_autobundle) {
+            console.log(` ada_autobundle:true always bundle ada core`.grey);
+        }
         let desc = ` NOW BUNDLING ADA CORE [${develop ? "DEVELOP" : "PUBLIC"} MODE]...`;
         process.stderr.write(desc.grey);
         process.stderr.cursorTo(desc.length);
