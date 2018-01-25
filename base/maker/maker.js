@@ -98,8 +98,8 @@ const base = {
                 return queue(Reflect.ownKeys(a.dependence).map(name => () => {
                     let path = Path.resolve(config.projectPath, "./node_modules/", name);
                     if (!new File(path).isExists()) {
-                        let desc = ` - INSTALL MODULE [${name}]...`;
-                        process.stderr.write(desc.grey);
+                        let desc = ` - INSTALL MODULE [${name.green}]...`;
+                        process.stderr.write(desc.cyan);
                         process.stderr.cursorTo(desc.length);
                         return new Promise((resolve, reject) => {
                             // let args = ["install", name, "--save-dev"];
@@ -111,13 +111,13 @@ const base = {
                                 if (error) {
                                     process.stderr.clearLine();
                                     process.stderr.cursorTo(0);
-                                    console.log(` - INSTALL MODULE [${name}] FAIL`.red);
-                                    console.log(stdout || stderr);
+                                    console.log(` - INSTALL MODULE [${name.yellow}] FAIL`.red);
+                                    console.log(` - Please run > npm install ${name.yellow} to install the module`);
                                     reject(name);
                                 } else {
                                     process.stderr.clearLine();
                                     process.stderr.cursorTo(0);
-                                    console.log(` - INSTALL MODULE [${name}] DONE`.green);
+                                    console.log(` - INSTALL MODULE [${name.blue}] DONE`.green);
                                     resolve(name);
                                 }
                             });
@@ -147,7 +147,7 @@ const base = {
             return queue(types.map(type => () => {
                 return this.checkDependence(type, config);
             })).then(() => {
-                console.log(` MODULES INSTALL DONE`.green);
+                console.log(` MODULES INSTALL DONE`.yellow);
             });
         } else {
             return Promise.resolve();
