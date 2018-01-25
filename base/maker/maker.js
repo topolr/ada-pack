@@ -141,7 +141,7 @@ const base = {
             }
         });
         if (this.checkNotInstalled(types)) {
-            console.log(` NOW INSTALL MODULES PROJECT REQUIRED`.yellow);
+            console.log(` INSTALL MODULES PROJECT REQUIRED`.yellow);
             return queue(types.map(type => () => {
                 return this.checkDependence(type, config);
             }));
