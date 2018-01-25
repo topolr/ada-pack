@@ -21,7 +21,6 @@ const Mapped = {
             "uglify-es": "^3.3.8"
         },
         moduleName: "./jsmaker"
-
     },
     css: {
         dependence: {
@@ -37,7 +36,8 @@ const Mapped = {
             "autoprefixer": "^7.1.6",
             "postcss": "^5.2.5",
             "uglifycss": "^0.0.25",
-            "node-sass": "^3.10.1"
+            "node-sass": "^3.10.1",
+            "html-minifier": "^3.5.6"
         },
         maker: "./sassmaker"
     },
@@ -46,7 +46,8 @@ const Mapped = {
             "autoprefixer": "^7.1.6",
             "postcss": "^5.2.5",
             "uglifycss": "^0.0.25",
-            "less": "^2.7.1"
+            "less": "^2.7.1",
+            "html-minifier": "^3.5.6"
         },
         maker: "./lessmaker"
     },
@@ -158,10 +159,7 @@ let Maker = {
         return base.checkDependence("js", config).then(() => {
             let content = require("@babel/core").transform(code, config.compiler.babel).code;
             try {
-                content = require("uglify-es").minify(content, Object.assign({
-                    fromString: true,
-                    mangle: true
-                }, config.compiler.uglify)).code;
+                content = require("uglify-es").minify(content, Object.assign({}, config.compiler.uglify)).code;
             } catch (e) {
             }
             return content;
