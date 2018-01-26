@@ -95,8 +95,8 @@ class AdaBundler {
     bundle(path, output, develop) {
         path = path.replace(/\\/g, "/");
         console.log("");
-        if (config.ada_autobundle) {
-            console.log(` [ada_autobundle:true] always bundle ada core`.grey);
+        if (!config.ada_autobundle) {
+            console.log(` [ada_autobundle:true] ALWAYS BUNDLE ADA CORE`.grey);
         }
         let desc = ` NOW BUNDLING ADA CORE [${develop ? "DEVELOP" : "PUBLIC"} MODE]...`;
         process.stderr.write(desc.grey);
