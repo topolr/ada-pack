@@ -17,52 +17,70 @@ class AdaBundler {
     constructor() {
         this.resultmap = [];
         this.resultmapcode = {};
+        this.contentCache = {};
     }
 
     getFileCode(path) {
-        return new Promise((resolve, reject) => {
-            let file = new File(path), suffix = file.suffix();
-            if (suffix === "html") {
-                resolve(`module.exports=${JSON.stringify(file.readSync().replace(/\n/g, '').replace(/\r/g, '').replace(/\n\r/g, ''))}`);
-            } else if (suffix === "less") {
-                maker.lessCode(file.readSync()).then(code => {
-                    resolve(`module.exports={active:function(){var _a = document.createElement("style");_a.setAttribute("media", "screen");_a.setAttribute("type", "text/css");_a.appendChild(document.createTextNode(${JSON.stringify(code)}));document.head.appendChild(_a);}};`);
-                });
-            } else if (suffix === "icon") {
-                maker.minifyIcon(file.readSync()).then(({name, code}) => {
-                    let result = `var active=function(){var c=document.getElementById("ada-icon-container");if(!c){var c=document.createElement("div");c.setAttribute("id","ada-icon-container");c.style.cssText="width:0;height:0;";document.body.appendChild(c);}if(!document.getElementById("${name}")){var a=document.createElement("div");a.innerHTML=${JSON.stringify(code)};c.appendChild(a.childNodes[0]);}};module.exports={active:function(){if(/complete|loaded|interactive/.test(window.document.readyState)){active();}else{window.addEventListener("DOMContentLoaded",function(){active();});}},getIconId:function(){return "${name}";}};`;
-                    resolve(result);
-                });
-            } else {
-                maker.babelCode(config, file.readSync()).then(content => {
-                    resolve(content);
-                });
-            }
-        });
+        if (!this.contentCache[path]) {
+            return new Promise((resolve, reject) => {
+                let file = new File(path), suffix = file.suffix();
+                if (suffix === "html") {
+                    resolve(`module.exports=${JSON.stringify(file.readSync().replace(/\n/g, '').replace(/\r/g, '').replace(/\n\r/g, ''))}`);
+                } else if (suffix === "less") {
+                    maker.lessCode(file.readSync()).then(code => {
+                        resolve(`module.exports={active:function(){var _a = document.createElement("style");_a.setAttribute("media", "screen");_a.setAttribute("type", "text/css");_a.appendChild(document.createTextNode(${JSON.stringify(code)}));document.head.appendChild(_a);}};`);
+                    });
+                } else if (suffix === "icon") {
+                    maker.minifyIcon(file.readSync()).then(({name, code}) => {
+                        let result = `var active=function(){var c=document.getElementById("ada-icon-container");if(!c){var c=document.createElement("div");c.setAttribute("id","ada-icon-container");c.style.cssText="width:0;height:0;";document.body.appendChild(c);}if(!document.getElementById("${name}")){var a=document.createElement("div");a.innerHTML=${JSON.stringify(code)};c.appendChild(a.childNodes[0]);}};module.exports={active:function(){if(/complete|loaded|interactive/.test(window.document.readyState)){active();}else{window.addEventListener("DOMContentLoaded",function(){active();});}},getIconId:function(){return "${name}";}};`;
+                        resolve(result);
+                    });
+                } else {
+                    let __code = file.readSync();
+                    if (__code.trim().length === 0) {
+                        resolve("module.exports={};");
+                    } else {
+                        if (path.indexOf("node_modules") === -1) {
+                            resolve(__code + `/*${path}*/`);
+                        } else {
+                            maker.babelCode(config, __code).then(content => {
+                                resolve(content + `/*${path}*/`);
+                            });
+                        }
+                    }
+                }
+            }).then((content) => {
+                this.contentCache[path] = content;
+                return content;
+            });
+        } else {
+            return Promise.resolve(this.contentCache[path]);
+        }
     }
 
     getDependenceInfo(path, code) {
-        let paths = [];
-        if (this.resultmap.indexOf(path) === -1) {
-            this.resultmap.push(path);
-        }
-        code = code.replace(/require\(.*?\)/g, (one) => {
-            if (one.indexOf("${") === -1 && one.indexOf("+") === -1 && one.indexOf("'") === -1) {
-                let a = one.substring(8, one.length - 1).replace(/['|"|`]/g, "").trim();
-                let _path = base.getFilePath(config, Path.resolve(path, "./../"), a);
-                paths.push(_path);
-                let index = this.resultmap.indexOf(_path);
-                if (index === -1) {
-                    this.resultmap.push(_path);
-                    index = this.resultmap.length - 1;
+        if (!this.resultmapcode[path]) {
+            let paths = [];
+            code = code.replace(/require\(.*?\)/g, (one) => {
+                if (one.indexOf("${") === -1 && one.indexOf("+") === -1 && one.indexOf(".concat(") === -1) {
+                    let a = one.substring(8, one.length - 1).replace(/['|"|`]/g, "").trim();
+                    let _path = base.getFilePath(config, Path.resolve(path, "./../"), a);
+                    let index = this.resultmap.indexOf(_path);
+                    if (index === -1) {
+                        paths.push(_path);
+                        this.resultmap.push(_path);
+                        index = this.resultmap.length - 1;
+                    }
+                    return `require(${index})`;
+                } else {
+                    return one;
                 }
-                return `require(${index})`;
-            } else {
-                return one;
-            }
-        });
-        this.resultmapcode[path] = code;
-        return paths;
+            });
+            this.resultmapcode[path] = code;
+            return paths;
+        } else {
+            return [];
+        }
     }
 
     getCodeMap(path) {
@@ -75,6 +93,7 @@ class AdaBundler {
     }
 
     bundle(path, output, develop) {
+        path = path.replace(/\\/g, "/");
         console.log("");
         if (config.ada_autobundle) {
             console.log(` [ada_autobundle:true] always bundle ada core`.grey);
@@ -85,13 +104,12 @@ class AdaBundler {
         return new File(`${config.projectPath}/node_modules/adajs/index.d.ts`).copyTo(`${config.projectPath}/node_modules/@types/adajs/index.d.ts`).then(() => {
             return this.getCodeMap(path).then(() => {
                 let veison = require(Path.resolve(path, "./../package.json")).version;
+                this.resultmap.push(path);
                 let result = this.resultmap.map(path => {
-                    return this.resultmapcode[path];
-                }).map(code => {
-                    return `function(module,exports,require){${code}}`;
+                    return `function(module,exports,require){${this.resultmapcode[path]}}`;
                 });
                 let commet = `/*! adajs[${develop ? "Develop" : "Publish"}] ${veison} https://github.com/topolr/ada | https://github.com/topolr/ada/blob/master/LICENSE */\n`;
-                let code = `${commet}(function (map,moduleName) {var Installed={};var requireModule = function (index) {if (Installed[index]) {return Installed[index].exports;}var module = Installed[index] = {exports: {}};map[index].call(module.exports, module, module.exports, requireModule);return module.exports;};var mod=requireModule(0);window&&window.Ada.installModule(moduleName,mod);})([${result.join(",")}],"adajs");`;
+                let code = `${commet}(function (map,moduleName) {var Installed={};var requireModule = function (index) {if (Installed[index]) {return Installed[index].exports;}var module = Installed[index] = {exports: {}};map[index].call(module.exports, module, module.exports, requireModule);return module.exports;};var mod=requireModule(map.length-1);window&&window.Ada.installModule(moduleName,mod);})([${result.join(",")}],"adajs");`;
                 config.adaHash = hash.md5(code).substring(0, 10);
                 return new File(output).write(code).then(() => {
                     process.stderr.clearLine();
@@ -107,6 +125,7 @@ let base = {
     logs: {},
     packageLogs: {},
     cache: {},
+    doneMap: [],
     isBundleAda(develop) {
         let result = true;
         if (config.ada_autobundle) {
@@ -153,6 +172,7 @@ let base = {
         return files;
     },
     getFilePath(config, filePath, path) {
+        // console.log(path)
         let __path = "", _path = "";
         if (path.startsWith("./") || path.startsWith("../") || path.startsWith("/")) {
             __path = _path = Path.resolve(filePath, path).replace(/\\/g, "/");
@@ -218,10 +238,12 @@ let base = {
     },
     getRequireInfo(config, filePath, path) {
         return this.getFileContent(config, filePath, path).then(info => {
+            let currentPath = info.path;
             let at = {}, tasks = [], parseTasks = [], infoTasks = [], importsTasks = [];
             let entry = {};
             let result = {};
             let name = "";
+            this.doneMap.push(currentPath);
             info.content = info.content.replace(/_adajs.view\)\(\{[\d\D]*?\)/g, str => {
                 let map = str.substring(13, str.length - 1);
                 let mapj = new Function(`return ${map};`)();
@@ -256,10 +278,12 @@ let base = {
                 let a = str.substring(8, str.length - 1).replace(/['|"|`]/g, "").trim();
                 if (IGNOREMODULES.indexOf(a) === -1) {
                     let m = this.getFilePath(config, Path.resolve(info.path, "./../"), a);
-                    infoTasks.push({
-                        filePath: Path.resolve(info.path, "./../"),
-                        path: a
-                    });
+                    if (this.doneMap.indexOf(m) === -1 && m !== currentPath) {
+                        infoTasks.push({
+                            filePath: Path.resolve(info.path, "./../"),
+                            path: a
+                        });
+                    }
                     if (m.indexOf("node_modules") === -1) {
                         return `require("${m.substring(config.source_path.length)}")`;
                     } else {
@@ -284,11 +308,13 @@ let base = {
                             let name = `${THRIDPARTFOLDER}/${m.substring(config.nmodule_path.length)}`;
                             value = `imports("${name}")`;
                         }
-                        importsTasks.push({
-                            filePath: Path.resolve(info.path, "./../"),
-                            path: a,
-                            name
-                        });
+                        if (this.doneMap.indexOf(m) === -1 && m !== currentPath) {
+                            importsTasks.push({
+                                filePath: Path.resolve(info.path, "./../"),
+                                path: a,
+                                name
+                            });
+                        }
                         return value;
                     } else {
                         return `imports(${a})`;
@@ -299,24 +325,32 @@ let base = {
             });
             if (info.path.indexOf("node_modules") !== -1) {
                 name = `${THRIDPARTFOLDER}/${info.path.substring(config.nmodule_path.length)}`;
-                tasks.push({
-                    path: Path.resolve(config.dist_path, `./${name}`),
-                    content: info.content
-                });
+                let __path = Path.resolve(config.dist_path, `./${name}`);
+                if (this.doneMap.indexOf(__path) === -1) {
+                    tasks.push({
+                        path: __path,
+                        content: info.content
+                    });
+                }
             } else {
                 name = info.path.substring(config.source_path.length);
-                tasks.push({
-                    path: Path.resolve(config.dist_path, info.path.substring(config.source_path.length)),
-                    content: info.content
-                });
+                let __path = Path.resolve(config.dist_path, info.path.substring(config.source_path.length))
+                if (this.doneMap.indexOf(__path) === -1) {
+                    tasks.push({
+                        path: __path,
+                        content: info.content
+                    });
+                }
             }
             at[name] = info.content;
             return Promise.all(parseTasks.map(({path, current, content, value}) => {
+                this.doneMap.push(path);
                 return this.getFileContent(config, current, "./").then(({content}) => {
                     at[value] = content;
                     return new File(path).write(content);
                 });
             }).concat(tasks.map(({path, content}) => {
+                this.doneMap.push(path);
                 return new File(path).write(content);
             })).concat(infoTasks.map(({filePath, path}) => {
                 return this.getRequireInfo(config, filePath, path).then(b => {
@@ -548,6 +582,7 @@ let base = {
     },
     bundle() {
         this.logs = {};
+        this.doneMap.length = [];
         return this.getAppSourceInfo().then(({mainEntry, otherEnteries}) => {
             otherEnteries.forEach(file => {
                 let r = {};

@@ -7,7 +7,6 @@ const Mapped = {
     js: {
         dependence: {
             "@babel/core": "^7.0.0-beta.37",
-            "@babel/plugin-transform-regenerator": "",
             "@babel/plugin-proposal-class-properties": "^7.0.0-beta.37",
             "@babel/plugin-proposal-decorators": "^7.0.0-beta.37",
             "@babel/plugin-proposal-do-expressions": "^7.0.0-beta.37",
@@ -71,7 +70,6 @@ const Mapped = {
     ts: {
         dependence: {
             "@babel/core": "^7.0.0-beta.37",
-            "@babel/plugin-transform-regenerator": "",
             "@babel/plugin-proposal-class-properties": "^7.0.0-beta.37",
             "@babel/plugin-proposal-decorators": "^7.0.0-beta.37",
             "@babel/plugin-proposal-do-expressions": "^7.0.0-beta.37",
