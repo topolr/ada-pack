@@ -144,7 +144,7 @@ let base = {
                 }
             } else {
                 let k = new File(Path.resolve(config.dist_path)).subscan().filter(path => {
-                    let a = path.replace(/\\/g, "/").split("/").pop().test(/ada\-[0-9a-z]+\.js/);
+                    let a = /ada\-[0-9a-z]+\.js/.test(path.replace(/\\/g, "/").split("/").pop());
                     if (a) {
                         let content = new File(path).readSync();
                         let r = content.match(/\*! adajs.*?\*/g);
