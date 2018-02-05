@@ -41,10 +41,10 @@ class AdaBundler {
                         resolve("module.exports={};");
                     } else {
                         if (path.indexOf("node_modules") === -1) {
-                            resolve(__code + `/*${path}*/`);
+                            resolve(__code);
                         } else {
                             maker.babelCode(config, __code).then(content => {
-                                resolve(content + `/*${path}*/`);
+                                resolve(content);
                             });
                         }
                     }
@@ -269,6 +269,12 @@ let base = {
                         mapj[key] = value;
                     }
                 });
+                let __path = info.path.replace(/\\/g, "/");
+                if (__path.indexOf("node_modules") === -1) {
+                    mapj.module = __path.substring(config.source_path.length);
+                } else {
+                    mapj.module = `${THRIDPARTFOLDER}/${__path.substring(config.nmodule_path.length)}`;
+                }
                 let result = Reflect.ownKeys(mapj).map(key => {
                     return `${key}:"${mapj[key]}"`;
                 });
