@@ -161,6 +161,9 @@ let base = {
         }
         return result;
     },
+    getAllFiles(){
+        return new File(config.source_path + "/").scan();
+    },
     getAllSource() {
         let files = [];
         new File(config.source_path + "/").scan().forEach(path => {
@@ -684,6 +687,13 @@ let base = {
                 });
                 tasks.push(() => {
                     return this.outputPWAFile(config);
+                });
+                tasks.push(() => {
+                    return queue(this.getAllFiles().map(path => path.substring(config.source_path.length).replace(/\\/g, "/")).filter(path => {
+                        return map[util.getMappedPath(path)] === undefined;
+                    }).map(path => () => {
+                        return new File(Path.resolve(config.source_path, path)).copyTo(Path.resolve(config.dist_path, path));
+                    }));
                 });
                 return queue(tasks).then(() => {
                     this.logResult();
