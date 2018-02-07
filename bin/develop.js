@@ -60,12 +60,14 @@ function runDev() {
         });
         app.use("/ada/sse", (req, res) => {
             connected = true;
+            req.socket.setTimeout(Number.MAX_VALUE);
             res.writeHead(200, {
                 'Connection': 'keep-alive',
                 'Content-Type': 'text/event-stream',
                 'Cache-Control': 'no-cache'
             });
             res.write(`retry: ${waitTime}\n`);
+            res.write("id: " + Date.now() + "\ndata:{}\n\n");
             messageQueue.subscribe((info) => {
                 res.write("id: " + Date.now() + "\ndata: " + JSON.stringify(info) + "\n\n");
             });
