@@ -1,6 +1,6 @@
 {
     "name": "ada-pack",
-    "version": "1.0.4",
+    "version": "1.0.5",
     "description": "ada pack",
     "main": "index.js",
     "scripts": {},
