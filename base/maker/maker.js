@@ -106,7 +106,7 @@ const base = {
                         process.stderr.write(desc);
                         process.stderr.cursorTo(desc.length);
                         return new Promise((resolve, reject) => {
-                            let args = ["install", name];
+                            let args = ["install", name, "--save-dev"];
                             require("child_process").exec(`npm ${args.join(" ")}`, {
                                 encoding: "utf-8",
                                 cwd: config.projectPath
@@ -136,7 +136,7 @@ const base = {
             return Promise.resolve();
         }
     },
-    checkAllDependence(sourcePath, config){
+    checkAllDependence(sourcePath, config) {
         let types = [];
         new File(sourcePath).scan().map(path => {
             let suffix = new File(path).suffix();
@@ -153,7 +153,7 @@ const base = {
             return Promise.resolve();
         }
     },
-    checkNotInstalled(types){
+    checkNotInstalled(types) {
         let projectPath = Path.resolve(__dirname, "./../../../../"), result = false;
         for (let i = 0; i < types.length; i++) {
             let type = types[i];
@@ -228,7 +228,7 @@ let Maker = {
             return content;
         });
     },
-    minifyIcon(content){
+    minifyIcon(content) {
         return base.checkDependence("less", {
             projectPath: Path.resolve(__dirname, "./../../../../")
         }).then(() => {
@@ -272,10 +272,10 @@ let Maker = {
             });
         });
     },
-    installAllDependence(sourcePath, config){
+    installAllDependence(sourcePath, config) {
         return base.checkAllDependence(sourcePath, config);
     },
-    installAdapackDependence(){
+    installAdapackDependence() {
         let types = ["js", "less"];
         if (base.checkNotInstalled(types)) {
             console.log(` INSTALL BASE MODULES`.yellow);
