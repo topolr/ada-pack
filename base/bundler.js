@@ -161,7 +161,7 @@ let base = {
         }
         return result;
     },
-    getAllFiles(){
+    getAllFiles() {
         return new File(config.source_path + "/").scan();
     },
     getAllSource() {
@@ -189,7 +189,16 @@ let base = {
             }
         } else {
             __path = _path = Path.resolve(config.nmodule_path, path);
+            _path = __path + ".ts";
             let file = new File(_path);
+            if (!file.isExists()) {
+                _path = __path + ".js";
+            }
+            file = new File(_path);
+            if (!file.isExists()) {
+                file = new File(__path);
+            }
+            file = new File(_path);
             if (file.isExists()) {
                 if (!file.isFile()) {
                     let _packagePath = Path.resolve(_path, "./package.json");
