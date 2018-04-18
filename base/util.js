@@ -242,7 +242,7 @@ let util = {
             return maker.appCode(appPath).then(content => {
                 let info = {};
                 let module = {exports: {}};
-                new Function("module", "exports", "require", content)(module, module.exports, require);
+                new Function("module", "exports", "require", "__dirname", "__filename", "process", content)(module, module.exports, require, require("path").resolve(appPath, "./../"), appPath, process);
                 if (module.exports.default) {
                     info = module.exports.default;
                 } else {
@@ -305,7 +305,7 @@ let util = {
                         continue;
                     }
                     if (deep && copy && (util.isObject(copy) ||
-                        (copyIsArray = Array.isArray(copy)))) {
+                            (copyIsArray = Array.isArray(copy)))) {
                         if (copyIsArray) {
                             copyIsArray = false;
                             clone = src && Array.isArray(src) ? src : [];
@@ -321,7 +321,7 @@ let util = {
         }
         return target;
     },
-    showTips(){
+    showTips() {
         console.log(colors.blue.bold(` ≡ ADA-PACK ${packageInfo.version} ≡`));
     }
 };
