@@ -129,7 +129,6 @@ let base = {
     doneMap: [],
     getUnIgnorePath(paths) {
         return paths.filter(path => {
-            console.log("==>",path.substring(config.source_path.length))
             return !config.ignore.ignores(path.substring(config.source_path.length));
         });
     },
@@ -414,6 +413,7 @@ let base = {
         }
     },
     getEntriesInfo(paths) {
+        paths = this.getUnIgnorePath(paths);
         let info = {};
         let main = Path.resolve(config.base_path, config.main);
         return queue(paths.map(path => {
@@ -459,8 +459,7 @@ let base = {
                 return suffix === "js" || suffix === "ts";
             }).map(path => path.replace(/\\/g, "/").replace(/[\/]+/g, "/"));
         }
-        let _entries = this.getUnIgnorePath([...entries]);
-        return this.getEntriesInfo([main, ..._entries]);
+        return this.getEntriesInfo([main, ...entries]);
     },
     outputPWAFile(config) {
         let manifest = {};
@@ -636,8 +635,6 @@ let base = {
             if (config.entry_auto) {
                 ps = ps.then(() => {
                     let allFiles = this.getAllSource(), _prentries = [];
-                    allFiles = this.getUnIgnorePath(allFiles);
-                    console.log(allFiles)
                     allFiles.forEach(path => {
                         let a = util.getMappedPath(path.substring(config.source_path.length).replace(/\\/g, "/"));
                         if (!map[a]) {
