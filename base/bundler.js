@@ -616,7 +616,7 @@ let base = {
     bundle() {
         let spinner = ora({
             color: "yellow",
-            text: "Bundle Project"
+            text: "Built Project"
         }).start();
         this.logs = {};
         this.doneMap.length = [];
