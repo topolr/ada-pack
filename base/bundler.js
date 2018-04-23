@@ -127,6 +127,12 @@ let base = {
     packageLogs: {},
     cache: {},
     doneMap: [],
+    getUnIgnorePath(paths) {
+        return paths.filter(path => {
+            console.log("==>",path.substring(config.source_path.length))
+            return !config.ignore.ignores(path.substring(config.source_path.length));
+        });
+    },
     isBundleAda(develop) {
         let result = true;
         if (config.ada_autobundle) {
@@ -453,8 +459,8 @@ let base = {
                 return suffix === "js" || suffix === "ts";
             }).map(path => path.replace(/\\/g, "/").replace(/[\/]+/g, "/"));
         }
-        let _entries = config.ignore.filter([...entries]);
-        return this.getEntriesInfo([main, _entries]);
+        let _entries = this.getUnIgnorePath([...entries]);
+        return this.getEntriesInfo([main, ..._entries]);
     },
     outputPWAFile(config) {
         let manifest = {};
@@ -630,7 +636,8 @@ let base = {
             if (config.entry_auto) {
                 ps = ps.then(() => {
                     let allFiles = this.getAllSource(), _prentries = [];
-                    allFiles = config.ignore.filter(allFiles);
+                    allFiles = this.getUnIgnorePath(allFiles);
+                    console.log(allFiles)
                     allFiles.forEach(path => {
                         let a = util.getMappedPath(path.substring(config.source_path.length).replace(/\\/g, "/"));
                         if (!map[a]) {
