@@ -25,15 +25,14 @@ function runDev() {
     let express = require(Path.resolve(projectPath, "./node_modules/express"));
     let packagePath = Path.resolve(projectPath, "./package.json");
     let packageInfo = JSON.parse(new File(packagePath).readSync());
-    let package = JSON.parse(new File(packagePath).readSync());
-    if (!package["ada-develop"]) {
-        package["ada-develop"] = {
+    if (!packageInfo["ada-develop"]) {
+        packageInfo["ada-develop"] = {
             appPath: "./app/app.js"
         };
     } else {
-        package["ada-develop"] = Object.assign({
+        packageInfo["ada-develop"] = Object.assign({
             appPath: "./app/app.js"
-        }, package["ada-develop"]);
+        }, packageInfo["ada-develop"]);
     }
     let appPath = Path.resolve(packagePath, "./../", packageInfo["ada-develop"].appPath);
     if (!new File(appPath).isExists()) {
