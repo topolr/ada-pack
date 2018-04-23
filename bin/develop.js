@@ -63,7 +63,6 @@ function runDev() {
         });
         app.use("/ada/sse", (req, res) => {
             connected = true;
-            req.socket.setTimeout(Number.MAX_VALUE);
             res.writeHead(200, {
                 'Connection': 'keep-alive',
                 'Content-Type': 'text/event-stream',
