@@ -129,7 +129,7 @@ let base = {
     doneMap: [],
     getUnIgnorePath(paths) {
         return paths.filter(path => {
-            return !config.ignore.ignores(path.substring(config.source_path.length));
+            return !config.ignore.ignores("./"+path.substring(config.source_path.length));
         });
     },
     isBundleAda(develop) {
