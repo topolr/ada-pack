@@ -9,6 +9,7 @@ let isbinaryfile = require("isbinaryfile");
 let config = require("./config");
 let gzipSize = require('gzip-size');
 let ignore = require('ignore');
+let ora = require('ora');
 
 const THRIDPARTFOLDER = "node_modules";
 const IGNOREMODULES = ["fs", "path", "util", "http", "events", "crypto", "adajs"];
@@ -129,7 +130,7 @@ let base = {
     doneMap: [],
     getUnIgnorePath(paths) {
         return paths.filter(path => {
-            return !config.ignore.ignores("./"+path.substring(config.source_path.length));
+            return !config.ignore.ignores("./" + path.substring(config.source_path.length));
         });
     },
     isBundleAda(develop) {
@@ -405,10 +406,18 @@ let base = {
         }).catch(e => console.log(e));
     },
     bundleAda(develop = false) {
+        let spinner = ora({
+            color: "yellow",
+            text: "Bundle Ada"
+        }).start();
         if (this.isBundleAda(develop)) {
             return new AdaBundler().bundle(Path.resolve(config.nmodule_path, `./adajs/${develop ? "develop" : (config.super_ada ? "super" : "index")}.js`),
-                Path.resolve(config.dist_path, "./ada.js"), develop);
+                Path.resolve(config.dist_path, "./ada.js"), develop).then(a => {
+                spinner.stop();
+                return a;
+            });
         } else {
+            spinner.stop();
             return Promise.resolve();
         }
     },
@@ -605,6 +614,10 @@ let base = {
         });
     },
     bundle() {
+        let spinner = ora({
+            color: "yellow",
+            text: "Bundle Project"
+        }).start();
         this.logs = {};
         this.doneMap.length = [];
         return this.getAppSourceInfo().then(({mainEntry, otherEnteries}) => {
@@ -711,6 +724,7 @@ let base = {
                     }));
                 });
                 return queue(tasks).then(() => {
+                    spinner.stop();
                     this.logResult();
                     return map;
                 });
