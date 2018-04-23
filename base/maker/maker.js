@@ -105,11 +105,8 @@ const base = {
                     if (!new File(path).isExists()) {
                         let spinner = ora({
                             color: "yellow",
-                            text: ` - INSTALL MODULE [${name}]...`
+                            text: `INSTALL MODULE [ ${name} ]`
                         }).start();
-                        // let desc = ` - INSTALL MODULE [`.grey + `${name}`.green + `]...`.grey;
-                        // process.stderr.write(desc);
-                        // process.stderr.cursorTo(desc.length);
                         return new Promise((resolve, reject) => {
                             let args = ["install", name, "--save-dev"];
                             require("child_process").exec(`npm ${args.join(" ")}`, {
@@ -117,17 +114,11 @@ const base = {
                                 cwd: config.projectPath
                             }, (error, stdout, stderr) => {
                                 if (error) {
-                                    spinner.fail(` - INSTALL MODULE [${name}] FAIL`);
-                                    // process.stderr.clearLine();
-                                    // process.stderr.cursorTo(0);
-                                    // console.log(` - INSTALL MODULE [`.red, `${name}`.white, `] FAIL`.red);
-                                    console.log(` - Please run > npm install`.red, `${name}`.white, `to install the module`.red);
+                                    spinner.fail(`INSTALL MODULE [ ${name} ]`);
+                                    console.log(`Please run > npm install`.red, `${name}`.white, `to install the module`.red);
                                     reject(name);
                                 } else {
-                                    spinner.succeed(` - INSTALL MODULE [${name}] DONE`);
-                                    // process.stderr.clearLine();
-                                    // process.stderr.cursorTo(0);
-                                    // console.log(` - INSTALL MODULE [`.cyan, `${name}`.green, `] DONE`.cyan);
+                                    spinner.succeed(`INSTALL MODULE [ ${name} ]`);
                                     resolve(name);
                                 }
                             });
@@ -201,7 +192,7 @@ let Maker = {
                     "@babel/typescript", ["@babel/env", {"targets": {"browsers": "last 2 Chrome versions"}}]
                 ],
                 plugins: [
-                    "@babel/plugin-proposal-decorators",
+                    ["@babel/plugin-proposal-decorators",{"legacy": true}],
                     ["@babel/plugin-proposal-class-properties", {"loose": true}],
                     "@babel/transform-async-to-generator",
                     "@babel/syntax-dynamic-import"

@@ -83,7 +83,7 @@ module.exports = {
                     "regenerator": true,
                     "moduleName": "@babel/runtime"
                 }],
-                "@babel/plugin-proposal-decorators",
+                ["@babel/plugin-proposal-decorators", {"legacy": true}],
                 ["@babel/plugin-proposal-class-properties", {"loose": true}],
                 "@babel/transform-async-to-generator",
                 "@babel/syntax-dynamic-import",
@@ -99,5 +99,11 @@ module.exports = {
         sass: {},
         minifier: {},
         typescript: ["--target ESNext", "--noEmit", "--pretty", "--skipLibCheck", "--experimentalDecorators"]
+    },
+    server: {
+        protocol: "http",
+        host: "localhost",
+        port: "8080",
+        serverPath: "./server.js"
     }
 };

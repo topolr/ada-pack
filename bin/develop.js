@@ -25,29 +25,33 @@ function runDev() {
     let express = require(Path.resolve(projectPath, "./node_modules/express"));
     let packagePath = Path.resolve(projectPath, "./package.json");
     let packageInfo = JSON.parse(new File(packagePath).readSync());
-    if (!packageInfo["ada-develop"]) {
-        packageInfo["ada-develop"] = {
-            port: 8080,
-            appPath: "./app/app.js",
-            serverPath: "./server.js"
+    let package = JSON.parse(new File(packagePath).readSync());
+    if (!package["ada-develop"]) {
+        package["ada-develop"] = {
+            appPath: "./app/app.js"
         };
     } else {
-        packageInfo["ada-develop"] = Object.assign({
-            port: 8080,
-            host: "localhost",
-            appPath: "./app/app.js",
-            serverPath: "./server.js"
-        }, packageInfo["ada-develop"]);
+        package["ada-develop"] = Object.assign({
+            appPath: "./app/app.js"
+        }, package["ada-develop"]);
     }
-    let port = packageInfo["ada-develop"].port;
-    let host = packageInfo["ada-develop"].host || "localhost";
     let appPath = Path.resolve(packagePath, "./../", packageInfo["ada-develop"].appPath);
     if (!new File(appPath).isExists()) {
         appPath = Path.resolve(projectPath, "./app.js");
     }
     util.getAppInfo(appPath).then(appInfo => {
+        if (!appInfo.server) {
+            appInfo.server = {
+                protocol: "http",
+                host: "localhost",
+                port: "8080",
+                serverPath: "./server.js"
+            };
+        }
+        let port = appInfo.server.port || 8080;
+        let host = appInfo.server.host || "localhost";
         let distPath = Path.resolve(appPath, "./../", appInfo.dist_path);
-        let serverPath = Path.resolve(projectPath, packageInfo["ada-develop"].serverPath);
+        let serverPath = Path.resolve(projectPath, (appInfo.server.serverPath || "./server.js"));
         let app = null;
         if (!new File(serverPath).isExists()) {
             app = new express();

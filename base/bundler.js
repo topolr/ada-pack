@@ -100,9 +100,10 @@ class AdaBundler {
         if (!config.ada_autobundle) {
             console.log(` [ada_autobundle:true] ALWAYS BUNDLE ADA CORE`.grey);
         }
-        let desc = ` NOW BUNDLING ADA CORE [${develop ? "DEVELOP" : "PUBLIC"} MODE]...`;
-        process.stderr.write(desc.grey);
-        process.stderr.cursorTo(desc.length);
+        let spinner = ora({
+            color: "yellow",
+            text: `NOW BUNDLING ADA CORE [${develop ? "DEVELOP" : "PUBLIC"} MODE]`
+        }).start();
         return new File(`${config.projectPath}/node_modules/adajs/index.d.ts`).copyTo(`${config.projectPath}/node_modules/@types/adajs/index.d.ts`).then(() => {
             return this.getCodeMap(path).then(() => {
                 let veison = require(Path.resolve(path, "./../package.json")).version;
@@ -113,7 +114,9 @@ class AdaBundler {
                 let commet = `/*! adajs[${develop ? "Develop" : "Publish"}] ${veison} https://github.com/topolr/ada | https://github.com/topolr/ada/blob/master/LICENSE */\n`;
                 let code = `${commet}(function (map,moduleName) {var Installed={};var requireModule = function (index) {if (Installed[index]) {return Installed[index].exports;}var module = Installed[index] = {exports: {}};map[index].call(module.exports, module, module.exports, requireModule);return module.exports;};var mod=requireModule(map.length-1);window&&window.Ada.installModule(moduleName,mod);})([${result.join(",")}],"adajs");`;
                 config.adaHash = hash.md5(code).substring(0, 10);
+                code.replace(/'\/ada\/sse'/, `'${config.server.protocol}:${config.server.host}${config.server.port ? ":" + config.server.port}/ada/sse'`);
                 return new File(output).write(code).then(() => {
+                    spinner.stop();
                     process.stderr.clearLine();
                     process.stderr.cursorTo(0);
                     console.log(` BUNDLE ADA CORE DONE [${develop ? "DEVELOP" : "PUBLIC"} MODE GZIP:${util.getFileSizeAuto(gzipSize.sync(code))}]`.yellow);
