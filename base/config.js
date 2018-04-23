@@ -21,6 +21,7 @@ module.exports = {
     pages: [],
     icons: [],
     related_applications: [{"platform": "web"}],
+    ignore: [],
     page: {
         charset: "UTF-8",
         meta: {

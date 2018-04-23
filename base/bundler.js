@@ -8,6 +8,7 @@ let queue = require("./lib/queue");
 let isbinaryfile = require("isbinaryfile");
 let config = require("./config");
 let gzipSize = require('gzip-size');
+let ignore = require('ignore');
 
 const THRIDPARTFOLDER = "node_modules";
 const IGNOREMODULES = ["fs", "path", "util", "http", "events", "crypto", "adajs"];
@@ -175,7 +176,6 @@ let base = {
         return files;
     },
     getFilePath(config, filePath, path) {
-        // console.log(path)
         let __path = "", _path = "";
         if (path.startsWith("./") || path.startsWith("../") || path.startsWith("/")) {
             __path = _path = Path.resolve(filePath, path).replace(/\\/g, "/");
@@ -453,7 +453,8 @@ let base = {
                 return suffix === "js" || suffix === "ts";
             }).map(path => path.replace(/\\/g, "/").replace(/[\/]+/g, "/"));
         }
-        return this.getEntriesInfo([main, ...entries]);
+        let _entries = config.ignore.filter([...entries]);
+        return this.getEntriesInfo([main, _entries]);
     },
     outputPWAFile(config) {
         let manifest = {};
@@ -629,6 +630,7 @@ let base = {
             if (config.entry_auto) {
                 ps = ps.then(() => {
                     let allFiles = this.getAllSource(), _prentries = [];
+                    allFiles = config.ignore.filter(allFiles);
                     allFiles.forEach(path => {
                         let a = util.getMappedPath(path.substring(config.source_path.length).replace(/\\/g, "/"));
                         if (!map[a]) {
@@ -742,6 +744,7 @@ module.exports = function (option) {
     config.source_path = Path.join(config.base_path, config.source_path).replace(/\\/g, "/");
     config.nmodule_path = Path.resolve(config.projectPath, "./node_modules/").replace(/\\/g, "/") + "/";
     config.index_path = Path.resolve(config.base_path, config.index_path, "./../").replace(/\\/g, "/");
+    config.ignore = ignore().add(config.ignore);
     if (config.site_url[config.site_url.length - 1] !== "/") {
         config.site_url = config.site_url + "/";
     }
