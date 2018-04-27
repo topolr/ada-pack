@@ -174,13 +174,14 @@ const base = {
 
 let Maker = {
     parse(type, path, content, option) {
-        if (Mapped[type]) {
-            return base.checkDependence(type, option).then(() => {
-                return require(Mapped[type].maker)(content, path, option);
-            });
-        } else {
-            return Promise.resolve(content);
+        if (!option.ignore.ignores("./" + path.substring(option.source_path.length))) {
+            if (Mapped[type]) {
+                return base.checkDependence(type, option).then(() => {
+                    return require(Mapped[type].maker)(content, path, option);
+                });
+            }
         }
+        return Promise.resolve(content);
     },
     appCode(appPath) {
         return base.checkDependence("js", {
@@ -192,7 +193,7 @@ let Maker = {
                     "@babel/typescript", ["@babel/env", {"targets": {"browsers": "last 2 Chrome versions"}}]
                 ],
                 plugins: [
-                    ["@babel/plugin-proposal-decorators",{"legacy": true}],
+                    ["@babel/plugin-proposal-decorators", {"legacy": true}],
                     ["@babel/plugin-proposal-class-properties", {"loose": true}],
                     "@babel/transform-async-to-generator",
                     "@babel/syntax-dynamic-import"
