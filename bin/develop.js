@@ -116,6 +116,10 @@ function runDev() {
                 })));
             }
 
+            app.get('*', function(req, res){
+                res.send(require("fs").readFileSync(Path.resolve(distPath, "./index.html"), "utf-8"));
+            });
+
             require("./../index").develop(appPath, ({type, files, map, log}) => {
                 messageQueue.add({type, files, map, log});
             }).then(() => {
