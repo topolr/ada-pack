@@ -12,7 +12,7 @@ let ignore = require('ignore');
 let ora = require('ora');
 
 const THRIDPARTFOLDER = "node_modules";
-const IGNOREMODULES = ["fs", "path", "util", "http", "events", "crypto", "adajs"];
+const IGNOREMODULES = ["fs", "path", "util", "http", "url", "zlib", "https", "events", "crypto", "adajs"];
 const MANIFESTKEYS = ["theme_color", "start_url", "short_name", "scope", "related_applications", "prefer_related_applications", "orientation", "name", "lang", "icons", "display", "dir", "description", "background_color"];
 
 class AdaBundler {
@@ -186,6 +186,9 @@ let base = {
     },
     getFilePath(config, filePath, path) {
         let __path = "", _path = "";
+        if (path.substring(0, path.length - 3) === ".js") {
+            path = path.substring(0, path.length - 3);
+        }
         if (path.startsWith("./") || path.startsWith("../") || path.startsWith("/")) {
             __path = _path = Path.resolve(filePath, path).replace(/\\/g, "/");
             let _file = new File(_path);
@@ -205,7 +208,7 @@ let base = {
             }
             file = new File(_path);
             if (!file.isExists()) {
-                file = new File(__path);
+                _path = __path;
             }
             file = new File(_path);
             if (file.isExists()) {
