@@ -43,36 +43,10 @@ function runDev() {
         let ps = Promise.resolve();
         if (appInfo.proxy && appInfo.proxy.server) {
             let proxy = new File(Path.resolve(projectPath, "./node_modules/http-proxy-middleware"));
-            let body = new File(Path.resolve(projectPath, "./node_modules/body-parser"));
             if (!proxy.isExists()) {
                 ps = ps.then(() => {
                     return new Promise((resolve, reject) => {
                         let name = "http-proxy-middleware";
-                        let spinner = ora({
-                            color: "yellow",
-                            text: `INSTALL MODULE [ ${name} ]`
-                        }).start();
-                        let args = ["install", name, "--save-dev"];
-                        require("child_process").exec(`npm ${args.join(" ")}`, {
-                            encoding: "utf-8",
-                            cwd: projectPath
-                        }, (error, stdout, stderr) => {
-                            if (error) {
-                                spinner.fail(`INSTALL MODULE [ ${name} ]`);
-                                console.log(`Please run > npm install`.red, `${name}`.white, `to install the module`.red);
-                                reject(name);
-                            } else {
-                                spinner.succeed(`INSTALL MODULE [ ${name} ]`);
-                                resolve(name);
-                            }
-                        });
-                    });
-                });
-            }
-            if (!body.isExists()) {
-                ps = ps.then(() => {
-                    return new Promise((resolve, reject) => {
-                        let name = "body-parser";
                         let spinner = ora({
                             color: "yellow",
                             text: `INSTALL MODULE [ ${name} ]`
@@ -120,19 +94,9 @@ function runDev() {
             });
             if (appInfo.proxy && appInfo.proxy.server) {
                 let proxyMiddleWare = require(Path.resolve(projectPath, "./node_modules/http-proxy-middleware"));
-                let bodyParser = require(Path.resolve(projectPath, "./node_modules/body-parser"));
-                app.use(bodyParser.urlencoded({extended: false}));
                 app.use(appInfo.proxy.path, proxyMiddleWare(Object.assign({
                     target: "",
-                    changeOrigoin: true,
-                    onProxyReq: function (proxyReq, req, res, options) {
-                        if (req.body) {
-                            let bodyData = JSON.stringify(req.body);
-                            proxyReq.setHeader('Content-Type', 'application/json');
-                            proxyReq.setHeader('Content-Length', Buffer.byteLength(bodyData));
-                            proxyReq.write(bodyData);
-                        }
-                    }
+                    changeOrigoin: true
                 }, appInfo.proxy.option, {
                     target: appInfo.proxy.server
                 })));
