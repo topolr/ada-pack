@@ -263,7 +263,6 @@ let base = {
     getRequireInfo(config, filePath, path) {
         let _path = this.getFilePath(config, filePath, path);
         if(!config.ignore.ignores("./" + _path.substring(config.source_path.length))) {
-            console.log("===>",_path.substring(config.source_path.length));
             return this.getFileContent(config, filePath, path).then(info => {
                 let currentPath = info.path;
                 let at = {}, tasks = [], parseTasks = [], infoTasks = [], importsTasks = [];
