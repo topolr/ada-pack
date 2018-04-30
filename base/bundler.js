@@ -261,155 +261,165 @@ let base = {
         }
     },
     getRequireInfo(config, filePath, path) {
-        return this.getFileContent(config, filePath, path).then(info => {
-            let currentPath = info.path;
-            let at = {}, tasks = [], parseTasks = [], infoTasks = [], importsTasks = [];
-            let entry = {};
-            let result = {};
-            let name = "";
-            this.doneMap.push(currentPath);
-            info.content = info.content.replace(/_adajs.view\)\(\{[\d\D]*?\)/g, str => {
-                let map = str.substring(13, str.length - 1);
-                let mapj = new Function(`return ${map};`)();
-                ["template", "style"].forEach(key => {
-                    let value = mapj[key];
-                    if (value) {
-                        let path = Path.join(info.path, "./../", value).replace(/\\/g, "/");
-                        if (path.indexOf("node_modules") === -1) {
-                            value = path.substring(config.source_path.length);
-                            parseTasks.push({
-                                path: Path.resolve(config.dist_path, path.substring(config.source_path.length)),
-                                current: path,
-                                value
-                            });
-                        } else {
-                            value = `${THRIDPARTFOLDER}/${path.substring(config.nmodule_path.length)}`;
-                            parseTasks.push({
-                                path: Path.resolve(config.dist_path, `./${THRIDPARTFOLDER}/${path.substring(config.nmodule_path.length)}`),
-                                current: path,
-                                value
-                            });
+        let _path = this.getFilePath(config, filePath, path);
+        if(!config.ignore.ignores("./" + _path.substring(config.source_path.length))) {
+            console.log("===>",_path.substring(config.source_path.length));
+            return this.getFileContent(config, filePath, path).then(info => {
+                let currentPath = info.path;
+                let at = {}, tasks = [], parseTasks = [], infoTasks = [], importsTasks = [];
+                let entry = {};
+                let result = {};
+                let name = "";
+                this.doneMap.push(currentPath);
+                info.content = info.content.replace(/_adajs.view\)\(\{[\d\D]*?\)/g, str => {
+                    let map = str.substring(13, str.length - 1);
+                    let mapj = new Function(`return ${map};`)();
+                    ["template", "style"].forEach(key => {
+                        let value = mapj[key];
+                        if (value) {
+                            let path = Path.join(info.path, "./../", value).replace(/\\/g, "/");
+                            if (path.indexOf("node_modules") === -1) {
+                                value = path.substring(config.source_path.length);
+                                parseTasks.push({
+                                    path: Path.resolve(config.dist_path, path.substring(config.source_path.length)),
+                                    current: path,
+                                    value
+                                });
+                            } else {
+                                value = `${THRIDPARTFOLDER}/${path.substring(config.nmodule_path.length)}`;
+                                parseTasks.push({
+                                    path: Path.resolve(config.dist_path, `./${THRIDPARTFOLDER}/${path.substring(config.nmodule_path.length)}`),
+                                    current: path,
+                                    value
+                                });
+                            }
+                            mapj[key] = value;
                         }
-                        mapj[key] = value;
-                    }
-                });
-                let __path = info.path.replace(/\\/g, "/");
-                if (__path.indexOf("node_modules") === -1) {
-                    mapj.module = __path.substring(config.source_path.length);
-                } else {
-                    mapj.module = `${THRIDPARTFOLDER}/${__path.substring(config.nmodule_path.length)}`;
-                }
-                let result = Reflect.ownKeys(mapj).map(key => {
-                    return `${key}:"${mapj[key]}"`;
-                });
-                return `_adajs.view)({${result.join(",")}})`;
-            });
-            info.content = info.content.replace(/require\(.*?\)/g, (str) => {
-                let a = str.substring(8, str.length - 1).replace(/['|"|`]/g, "").trim();
-                if (IGNOREMODULES.indexOf(a) === -1) {
-                    let m = this.getFilePath(config, Path.resolve(info.path, "./../"), a);
-                    if (this.doneMap.indexOf(m) === -1 && m !== currentPath) {
-                        infoTasks.push({
-                            filePath: Path.resolve(info.path, "./../"),
-                            path: a
-                        });
-                    }
-                    if (m.indexOf("node_modules") === -1) {
-                        return `require("${m.substring(config.source_path.length)}")`;
+                    });
+                    let __path = info.path.replace(/\\/g, "/");
+                    if (__path.indexOf("node_modules") === -1) {
+                        mapj.module = __path.substring(config.source_path.length);
                     } else {
-                        let name = `${THRIDPARTFOLDER}/${m.substring(config.nmodule_path.length)}`;
-                        return `require("${name}")`;
+                        mapj.module = `${THRIDPARTFOLDER}/${__path.substring(config.nmodule_path.length)}`;
                     }
-                } else {
-                    return str;
-                }
-            });
-            info.content = info.content.replace(/import\(.*?\)/g, (str) => {
-                let a = str.substring(7, str.length - 1);
-                if (a.startsWith("\"") || a.startsWith("'") || a.startsWith("`")) {
-                    a = a.replace(/['|"|`]/g, "").trim();
+                    let result = Reflect.ownKeys(mapj).map(key => {
+                        return `${key}:"${mapj[key]}"`;
+                    });
+                    return `_adajs.view)({${result.join(",")}})`;
+                });
+                info.content = info.content.replace(/require\(.*?\)/g, (str) => {
+                    let a = str.substring(8, str.length - 1).replace(/['|"|`]/g, "").trim();
                     if (IGNOREMODULES.indexOf(a) === -1) {
                         let m = this.getFilePath(config, Path.resolve(info.path, "./../"), a);
-                        let name = "", value = "";
-                        if (m.indexOf("node_modules") === -1) {
-                            name = m.substring(config.source_path.length);
-                            value = `imports("${name}")`;
-                        } else {
-                            let name = `${THRIDPARTFOLDER}/${m.substring(config.nmodule_path.length)}`;
-                            value = `imports("${name}")`;
-                        }
                         if (this.doneMap.indexOf(m) === -1 && m !== currentPath) {
-                            importsTasks.push({
+                            infoTasks.push({
                                 filePath: Path.resolve(info.path, "./../"),
-                                path: a,
-                                name
+                                path: a
                             });
                         }
-                        return value;
+                        if (m.indexOf("node_modules") === -1) {
+                            return `require("${m.substring(config.source_path.length)}")`;
+                        } else {
+                            let name = `${THRIDPARTFOLDER}/${m.substring(config.nmodule_path.length)}`;
+                            return `require("${name}")`;
+                        }
+                    } else {
+                        return str;
+                    }
+                });
+                info.content = info.content.replace(/import\(.*?\)/g, (str) => {
+                    let a = str.substring(7, str.length - 1);
+                    if (a.startsWith("\"") || a.startsWith("'") || a.startsWith("`")) {
+                        a = a.replace(/['|"|`]/g, "").trim();
+                        if (IGNOREMODULES.indexOf(a) === -1) {
+                            let m = this.getFilePath(config, Path.resolve(info.path, "./../"), a);
+                            let name = "", value = "";
+                            if (m.indexOf("node_modules") === -1) {
+                                name = m.substring(config.source_path.length);
+                                value = `imports("${name}")`;
+                            } else {
+                                let name = `${THRIDPARTFOLDER}/${m.substring(config.nmodule_path.length)}`;
+                                value = `imports("${name}")`;
+                            }
+                            if (this.doneMap.indexOf(m) === -1 && m !== currentPath) {
+                                importsTasks.push({
+                                    filePath: Path.resolve(info.path, "./../"),
+                                    path: a,
+                                    name
+                                });
+                            }
+                            return value;
+                        } else {
+                            return `imports(${a})`;
+                        }
                     } else {
                         return `imports(${a})`;
                     }
+                });
+                if (info.path.indexOf("node_modules") !== -1) {
+                    name = `${THRIDPARTFOLDER}/${info.path.substring(config.nmodule_path.length)}`;
+                    let __path = Path.resolve(config.dist_path, `./${name}`);
+                    if (this.doneMap.indexOf(__path) === -1) {
+                        tasks.push({
+                            path: __path,
+                            content: info.content
+                        });
+                    }
                 } else {
-                    return `imports(${a})`;
+                    name = info.path.substring(config.source_path.length);
+                    let __path = Path.resolve(config.dist_path, info.path.substring(config.source_path.length))
+                    if (this.doneMap.indexOf(__path) === -1) {
+                        tasks.push({
+                            path: __path,
+                            content: info.content
+                        });
+                    }
                 }
-            });
-            if (info.path.indexOf("node_modules") !== -1) {
-                name = `${THRIDPARTFOLDER}/${info.path.substring(config.nmodule_path.length)}`;
-                let __path = Path.resolve(config.dist_path, `./${name}`);
-                if (this.doneMap.indexOf(__path) === -1) {
-                    tasks.push({
-                        path: __path,
-                        content: info.content
+                at[name] = info.content;
+                return Promise.all(parseTasks.map(({path, current, content, value}) => {
+                    this.doneMap.push(path);
+                    return this.getFileContent(config, current, "./").then(({content}) => {
+                        at[value] = content;
+                        return new File(path).write(content);
                     });
-                }
-            } else {
-                name = info.path.substring(config.source_path.length);
-                let __path = Path.resolve(config.dist_path, info.path.substring(config.source_path.length))
-                if (this.doneMap.indexOf(__path) === -1) {
-                    tasks.push({
-                        path: __path,
-                        content: info.content
-                    });
-                }
-            }
-            at[name] = info.content;
-            return Promise.all(parseTasks.map(({path, current, content, value}) => {
-                this.doneMap.push(path);
-                return this.getFileContent(config, current, "./").then(({content}) => {
-                    at[value] = content;
+                }).concat(tasks.map(({path, content}) => {
+                    this.doneMap.push(path);
                     return new File(path).write(content);
-                });
-            }).concat(tasks.map(({path, content}) => {
-                this.doneMap.push(path);
-                return new File(path).write(content);
-            })).concat(infoTasks.map(({filePath, path}) => {
-                return this.getRequireInfo(config, filePath, path).then(b => {
-                    let name = b.__name__;
-                    Object.keys(b[name]).forEach(key => {
-                        at[key] = b[name][key];
-                    });
-                    Object.keys(b).forEach(key => {
-                        if (key !== name) {
-                            result[key] = b[key];
+                })).concat(infoTasks.map(({filePath, path}) => {
+                    return this.getRequireInfo(config, filePath, path).then(b => {
+                        if(b) {
+                            let name = b.__name__;
+                            Object.keys(b[name]).forEach(key => {
+                                at[key] = b[name][key];
+                            });
+                            Object.keys(b).forEach(key => {
+                                if (key !== name) {
+                                    result[key] = b[key];
+                                }
+                            });
                         }
                     });
-                });
-            })).concat(importsTasks.map(({filePath, path, name}) => {
-                return this.getRequireInfo(config, filePath, path).then(b => {
-                    let name = b.__name__;
-                    result[name] = b[name];
-                    Object.keys(b).forEach(key => {
-                        if (key !== name) {
-                            result[key] = b[key];
+                })).concat(importsTasks.map(({filePath, path, name}) => {
+                    return this.getRequireInfo(config, filePath, path).then(b => {
+                        if(b) {
+                            let name = b.__name__;
+                            result[name] = b[name];
+                            Object.keys(b).forEach(key => {
+                                if (key !== name) {
+                                    result[key] = b[key];
+                                }
+                            });
                         }
                     });
+                }))).then(() => {
+                    util.setProp(result, "__name__", name);
+                    result[name] = at;
+                    return result;
                 });
-            }))).then(() => {
-                util.setProp(result, "__name__", name);
-                result[name] = at;
-                return result;
-            });
-        }).catch(e => console.log(e));
+            }).catch(e => console.log(e));
+        }else{
+            return Promise.resolve(null);
+        }
     },
     bundleAda(develop = false) {
         if (this.isBundleAda(develop)) {
@@ -426,14 +436,17 @@ let base = {
         let info = {};
         let main = Path.resolve(config.base_path, config.main);
         return queue(paths.map(path => {
-            return "./" + path.substring(config.source_path.length);
-        }).map(entry => () => {
-            return this.getRequireInfo(config, config.source_path, entry).then(_info => {
-                Object.keys(_info).forEach(key => {
-                    info[key] = _info[key];
+                return "./" + path.substring(config.source_path.length);
+            }).map(entry => () => {
+                return this.getRequireInfo(config, config.source_path, entry).then(_info => {
+                    if(_info) {
+                        Object.keys(_info).forEach(key => {
+                            info[key] = _info[key];
+                        });
+                    }
                 });
-            });
-        })).then(() => {
+            })
+        ).then(() => {
             let mainEntry = null, otherEnteries = [];
             let _mainEntry = main.substring(config.source_path.length);
             Object.keys(info).forEach(key => {
