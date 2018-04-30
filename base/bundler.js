@@ -98,7 +98,7 @@ class AdaBundler {
         path = path.replace(/\\/g, "/");
         console.log("");
         if (!config.ada_autobundle) {
-            console.log(` [ada_autobundle:true] ALWAYS BUNDLE ADA CORE`.grey);
+            console.log(` [ada_autobundle:false] ALWAYS BUNDLE ADA CORE`.grey);
         }
         let spinner = ora({
             color: "yellow",

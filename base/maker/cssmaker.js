@@ -25,10 +25,12 @@ module.exports = function (content, path, option) {
                 return option.site_url + util.getHashPath(r, hash);
             }
         });
-        r = uglifycss.processString(r, Object.assign({
-            uglyComments: true,
-            cuteComments: true
-        }, option.compiler.uglifycss));
+        if(!option.develop) {
+            r = uglifycss.processString(r, Object.assign({
+                uglyComments: true,
+                cuteComments: true
+            }, option.compiler.uglifycss));
+        }
         postcss([
             autoprefixer(Object.assign({browsers: ['> 1%', 'IE 7']}, option.compiler.autoprefixer))
         ]).process(r, {

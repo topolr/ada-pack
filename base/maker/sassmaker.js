@@ -4,7 +4,8 @@ module.exports = function (content, path, option) {
     return new Promise((resolve, reject) => {
         sass.render(Object.assign({
             file: path,
-            sourceMap: true
+            sourceMap: true,
+            sourceMapEmbed:true
         }, option.compiler.sass), function (err, result) {
             if (!err) {
                 resolve(result.css.toString());
