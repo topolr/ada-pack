@@ -9,7 +9,8 @@ module.exports = function (content, path, option) {
                 let info = babel.transform(content, Object.assign({
                     filename: path.indexOf("node_modules") === -1 ? path.substring(option.source_path.length) : "node_modules/" + path.substring(option.nmodule_path.length),
                     sourceMaps: "both"
-                }, option.compiler.babel)).code;
+                }, option.compiler.babel));
+                content = info.code;
                 content = classPropertiesPollyfill(content);
             } else {
                 content = babel.transform(content, option.compiler.babel).code;
