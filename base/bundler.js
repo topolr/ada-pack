@@ -262,7 +262,7 @@ let base = {
     },
     getRequireInfo(config, filePath, path) {
         let _path = this.getFilePath(config, filePath, path);
-        if(!config.ignore.ignores("./" + _path.substring(config.source_path.length))) {
+        if (!config.ignore.ignores("./" + _path.substring(config.source_path.length))) {
             return this.getFileContent(config, filePath, path).then(info => {
                 let currentPath = info.path;
                 let at = {}, tasks = [], parseTasks = [], infoTasks = [], importsTasks = [];
@@ -386,7 +386,7 @@ let base = {
                     return new File(path).write(content);
                 })).concat(infoTasks.map(({filePath, path}) => {
                     return this.getRequireInfo(config, filePath, path).then(b => {
-                        if(b) {
+                        if (b) {
                             let name = b.__name__;
                             Object.keys(b[name]).forEach(key => {
                                 at[key] = b[name][key];
@@ -400,7 +400,7 @@ let base = {
                     });
                 })).concat(importsTasks.map(({filePath, path, name}) => {
                     return this.getRequireInfo(config, filePath, path).then(b => {
-                        if(b) {
+                        if (b) {
                             let name = b.__name__;
                             result[name] = b[name];
                             Object.keys(b).forEach(key => {
@@ -416,8 +416,18 @@ let base = {
                     return result;
                 });
             }).catch(e => console.log(e));
-        }else{
-            return Promise.resolve(null);
+        } else {
+            return this.getFileContent(config, filePath, path).then(info => {
+                let name = "";
+                if (info.path.indexOf("node_modules") !== -1) {
+                    name = `${THRIDPARTFOLDER}/${info.path.substring(config.nmodule_path.length)}`;
+                } else {
+                    name = info.path.substring(config.source_path.length);
+                }
+                let result = {[name]: {[name]: info.content}};
+                util.setProp(result, "__name__", name);
+                return result;
+            });
         }
     },
     bundleAda(develop = false) {
@@ -438,7 +448,7 @@ let base = {
                 return "./" + path.substring(config.source_path.length);
             }).map(entry => () => {
                 return this.getRequireInfo(config, config.source_path, entry).then(_info => {
-                    if(_info) {
+                    if (_info) {
                         Object.keys(_info).forEach(key => {
                             info[key] = _info[key];
                         });
