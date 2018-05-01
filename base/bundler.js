@@ -486,7 +486,7 @@ let base = {
         let info = {};
         let entries = [];
         if (config.entry_path) {
-            entries = new File(Path.resolve(config.base_path, config.entry_path) + "/").subscan().filter(path => {
+            entries = new File(Path.resolve(config.base_path, config.entry_path) + "/").scan().filter(path => {
                 let suffix = new File(path).suffix();
                 return suffix === "js" || suffix === "ts";
             }).map(path => path.replace(/\\/g, "/").replace(/[\/]+/g, "/"));
