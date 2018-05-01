@@ -18,7 +18,6 @@ module.exports = function (content, path, option) {
                         k = k.indexOf("node_modules") === -1 ? k.substring(option.source_path.length) : "node_modules/" + k.substring(option.nmodule_path.length);
                         return "/" + k;
                     });
-                    console.log(map);
                     let _result = result.css.toString();
                     _result = _result.replace(/\/\*# sourceMappingURL[\s\S]+?\*\//g, "");
                     _result += "/*# sourceMappingURL=data:application/json;charset=utf-8;base64,";
