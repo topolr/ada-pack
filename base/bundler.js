@@ -786,6 +786,7 @@ module.exports = function (option) {
     config.nmodule_path = Path.resolve(config.projectPath, "./node_modules/").replace(/\\/g, "/") + "/";
     config.index_path = Path.resolve(config.base_path, config.index_path, "./../").replace(/\\/g, "/");
     config.ignore = ignore().add(config.ignore);
+    new File(config.dist_path).mkdir();
     if (config.site_url[config.site_url.length - 1] !== "/") {
         config.site_url = config.site_url + "/";
     }
