@@ -426,6 +426,7 @@ let base = {
                 }
                 let result = {[name]: {[name]: info.content}};
                 util.setProp(result, "__name__", name);
+                new File(info.path).copyTo(Path.resolve(config.dist_path, "./" + info.path.substring(config.source_path.length)));
                 return result;
             });
         }
