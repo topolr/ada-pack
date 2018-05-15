@@ -272,39 +272,65 @@ let base = {
                 this.doneMap.push(currentPath);
                 info.content = info.content.replace(/_adajs.view\)\(\{[\d\D]*?\)/g, str => {
                     let map = str.substring(13, str.length - 1);
-                    let mapj = new Function(`return ${map};`)();
-                    ["template", "style"].forEach(key => {
-                        let value = mapj[key];
-                        if (value) {
-                            let path = Path.join(info.path, "./../", value).replace(/\\/g, "/");
-                            if (path.indexOf("node_modules") === -1) {
-                                value = path.substring(config.source_path.length);
-                                parseTasks.push({
-                                    path: Path.resolve(config.dist_path, path.substring(config.source_path.length)),
-                                    current: path,
-                                    value
-                                });
-                            } else {
-                                value = `${THRIDPARTFOLDER}/${path.substring(config.nmodule_path.length)}`;
-                                parseTasks.push({
-                                    path: Path.resolve(config.dist_path, `./${THRIDPARTFOLDER}/${path.substring(config.nmodule_path.length)}`),
-                                    current: path,
-                                    value
-                                });
-                            }
-                            mapj[key] = value;
-                        }
-                    });
-                    let __path = info.path.replace(/\\/g, "/");
-                    if (__path.indexOf("node_modules") === -1) {
-                        mapj.module = __path.substring(config.source_path.length);
-                    } else {
-                        mapj.module = `${THRIDPARTFOLDER}/${__path.substring(config.nmodule_path.length)}`;
-                    }
-                    let result = Reflect.ownKeys(mapj).map(key => {
-                        return `${key}:"${mapj[key]}"`;
-                    });
-                    return `_adajs.view)({${result.join(",")}})`;
+					map = map.replace(/"[\s\S]+?"/g, str => {
+						if (str.indexOf("./") !== -1 || str.indexOf("/") !== -1) {
+							let value = str.substring(1, str.length - 1);
+							let path = Path.join(info.path, "./../", value).replace(/\\/g, "/");
+							if (path.indexOf("node_modules") === -1) {
+								value = path.substring(config.source_path.length);
+								parseTasks.push({
+									path: Path.resolve(config.dist_path, path.substring(config.source_path.length)),
+									current: path,
+									value
+								});
+							} else {
+								value = `${THRIDPARTFOLDER}/${path.substring(config.nmodule_path.length)}`;
+								parseTasks.push({
+									path: Path.resolve(config.dist_path, `./${THRIDPARTFOLDER}/${path.substring(config.nmodule_path.length)}`),
+									current: path,
+									value
+								});
+							}
+							return `"${value}"`;
+						} else {
+							return str;
+						}
+					});
+					return `_adajs.view)(${map})`;
+					// let map = str.substring(13, str.length - 1);
+                    // let mapj = new Function(`return ${map};`)();
+                    // ["template", "style"].forEach(key => {
+                    //     let value = mapj[key];
+                    //     if (value) {
+                    //         let path = Path.join(info.path, "./../", value).replace(/\\/g, "/");
+                    //         if (path.indexOf("node_modules") === -1) {
+                    //             value = path.substring(config.source_path.length);
+                    //             parseTasks.push({
+                    //                 path: Path.resolve(config.dist_path, path.substring(config.source_path.length)),
+                    //                 current: path,
+                    //                 value
+                    //             });
+                    //         } else {
+                    //             value = `${THRIDPARTFOLDER}/${path.substring(config.nmodule_path.length)}`;
+                    //             parseTasks.push({
+                    //                 path: Path.resolve(config.dist_path, `./${THRIDPARTFOLDER}/${path.substring(config.nmodule_path.length)}`),
+                    //                 current: path,
+                    //                 value
+                    //             });
+                    //         }
+                    //         mapj[key] = value;
+                    //     }
+                    // });
+                    // let __path = info.path.replace(/\\/g, "/");
+                    // if (__path.indexOf("node_modules") === -1) {
+                    //     mapj.module = __path.substring(config.source_path.length);
+                    // } else {
+                    //     mapj.module = `${THRIDPARTFOLDER}/${__path.substring(config.nmodule_path.length)}`;
+                    // }
+                    // let result = Reflect.ownKeys(mapj).map(key => {
+                    //     return `${key}:"${mapj[key]}"`;
+                    // });
+                    // return `_adajs.view)({${result.join(",")}})`;
                 });
                 info.content = info.content.replace(/require\(.*?\)/g, (str) => {
                     let a = str.substring(8, str.length - 1).replace(/['|"|`]/g, "").trim();
