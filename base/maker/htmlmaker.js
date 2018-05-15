@@ -1,5 +1,5 @@
 let minify = require('html-minifier').minify;
-let util = require("../util");
+let util = require("../util/util");
 let Path = require("path");
 let File = require("../lib/file");
 

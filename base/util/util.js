@@ -1,6 +1,6 @@
-let File = require("./lib/file");
-let maker = require("./maker/maker");
-let packageInfo = require("./../package.json");
+let File = require("../lib/file");
+let maker = require("../maker/maker");
+let packageInfo = require("../../package.json");
 let colors = require("colors");
 
 let util = {

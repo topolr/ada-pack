@@ -1,6 +1,6 @@
 let File = require("../base/lib/file");
 let Path = require("path");
-let util = require("./../base/util");
+let util = require("../base/util/util");
 let opn = require("opn");
 let ora = require('ora');
 

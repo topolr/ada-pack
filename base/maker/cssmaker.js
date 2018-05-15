@@ -1,5 +1,5 @@
 let uglifycss = require("uglifycss");
-let util = require("../util");
+let util = require("../util/util");
 let postcss = require('postcss');
 let autoprefixer = require('autoprefixer');
 let Path = require("path");
