@@ -175,6 +175,15 @@ let base = {
 							return str;
 						}
 					});
+					let module = "";
+					let __path = info.path.replace(/\\/g, "/");
+					if (__path.indexOf("node_modules") === -1) {
+						module = __path.substring(config.source_path.length);
+					} else {
+						module = `${THRIDPARTFOLDER}/${__path.substring(config.nmodule_path.length)}`;
+					}
+					let t = map.replace(/\n/g, "").replace(/\r/g, "").trim();
+					map = t.substring(0, t.length - 1) + `,module:"${module}"}`;
 					return `_adajs.view)(${map})`;
 					// let map = str.substring(13, str.length - 1);
 					// let mapj = new Function(`return ${map};`)();
