@@ -111,7 +111,7 @@ let base = {
 				this.doneMap.push(currentPath);
 				info.content = info.content.replace(/_adajs.view\)\(\{[\d\D]*?\)/g, str => {
 					let map = str.substring(13, str.length - 1);
-					map = map.replace(/"[\s\S]+?"/g, str => {
+					map = map.replace(/['|"][\s\S]+?['|"]/g, str => {
 						if (str.indexOf("./") !== -1 || str.indexOf("/") !== -1) {
 							let value = str.substring(1, str.length - 1);
 							let path = Path.join(info.path, "./../", value).replace(/\\/g, "/");

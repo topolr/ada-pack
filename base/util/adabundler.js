@@ -1,5 +1,11 @@
 let maker = require("./../maker/maker");
 let util = require("./util");
+let ora = require('ora');
+let File = require("./../lib/file");
+let Path = require("path");
+let queue = require("./../lib/queue");
+let hash = require("./../lib/md5");
+let gzipSize = require('gzip-size');
 
 class AdaBundler {
 	constructor(config) {
