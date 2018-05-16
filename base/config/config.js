@@ -90,7 +90,8 @@ module.exports = {
                 "@babel/plugin-proposal-function-bind",
                 "@babel/plugin-syntax-export-extensions",
                 "@babel/plugin-proposal-do-expressions",
-                "@babel/plugin-proposal-object-rest-spread"
+                "@babel/plugin-proposal-object-rest-spread",
+				"@babel/plugin-external-helpers"
             ]
         },
         uglify: {},

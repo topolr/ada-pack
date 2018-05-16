@@ -74,48 +74,8 @@ let base = {
 		});
 		return files;
 	},
-	getFilePath(config, filePath, path) {
-		let checkPath = function (current) {
-			let file = new File(current);
-			if (file.isExists()) {
-				if (file.isFolder()) {
-					let checkPaths = [Path.resolve(current, "./index.js"), Path.resolve(current, "./index.ts"), Path.resolve(current, "./package.json")];
-					let pathIndex = checkPaths.findIndex(path => new File(path).isExists());
-					if (pathIndex !== -1) {
-						if (pathIndex !== 2) {
-							return checkPaths[pathIndex];
-						} else {
-							return Path.resolve(checkPaths[2], "./../", require(checkPaths[2]).main);
-						}
-					}
-				} else {
-					return current;
-				}
-			} else {
-				let ext = Path.extname(current);
-				if (ext) {
-					return current;
-				} else {
-					let checkPaths = [current + ".js", current + ".ts"];
-					let pathIndex = checkPaths.findIndex(path => new File(path).isExists());
-					if (pathIndex !== -1) {
-						return checkPaths[pathIndex];
-					} else {
-						return checkPaths[0];
-					}
-				}
-			}
-		};
-		let result = "";
-		if (path.startsWith("./") || path.startsWith("../") || path.startsWith("/")) {
-			result = checkPath(Path.resolve(filePath, path)).replace(/\\/g, "/");
-		} else {
-			result = checkPath(Path.resolve(config.nmodule_path, path)).replace(/\\/g, "/");
-		}
-		return result;
-	},
 	getFileContent(config, filePath, path) {
-		let _path = this.getFilePath(config, filePath, path);
+		let _path = util.getFilePath(config, filePath, path);
 		let _file = new File(_path);
 		let hash = _file.hash();
 		if (this.cache[_path] && this.cache[_path].hash === hash) {
@@ -140,7 +100,7 @@ let base = {
 		}
 	},
 	getRequireInfo(config, filePath, path) {
-		let _path = this.getFilePath(config, filePath, path);
+		let _path = util.getFilePath(config, filePath, path);
 		if (!config.ignore.ignores("./" + _path.substring(config.source_path.length))) {
 			return this.getFileContent(config, filePath, path).then(info => {
 				let currentPath = info.path;
@@ -185,45 +145,11 @@ let base = {
 					let t = map.replace(/\n/g, "").replace(/\r/g, "").trim();
 					map = t.substring(0, t.length - 1) + `,module:"${module}"}`;
 					return `_adajs.view)(${map})`;
-					// let map = str.substring(13, str.length - 1);
-					// let mapj = new Function(`return ${map};`)();
-					// ["template", "style"].forEach(key => {
-					//     let value = mapj[key];
-					//     if (value) {
-					//         let path = Path.join(info.path, "./../", value).replace(/\\/g, "/");
-					//         if (path.indexOf("node_modules") === -1) {
-					//             value = path.substring(config.source_path.length);
-					//             parseTasks.push({
-					//                 path: Path.resolve(config.dist_path, path.substring(config.source_path.length)),
-					//                 current: path,
-					//                 value
-					//             });
-					//         } else {
-					//             value = `${THRIDPARTFOLDER}/${path.substring(config.nmodule_path.length)}`;
-					//             parseTasks.push({
-					//                 path: Path.resolve(config.dist_path, `./${THRIDPARTFOLDER}/${path.substring(config.nmodule_path.length)}`),
-					//                 current: path,
-					//                 value
-					//             });
-					//         }
-					//         mapj[key] = value;
-					//     }
-					// });
-					// let __path = info.path.replace(/\\/g, "/");
-					// if (__path.indexOf("node_modules") === -1) {
-					//     mapj.module = __path.substring(config.source_path.length);
-					// } else {
-					//     mapj.module = `${THRIDPARTFOLDER}/${__path.substring(config.nmodule_path.length)}`;
-					// }
-					// let result = Reflect.ownKeys(mapj).map(key => {
-					//     return `${key}:"${mapj[key]}"`;
-					// });
-					// return `_adajs.view)({${result.join(",")}})`;
 				});
 				info.content = info.content.replace(/require\(.*?\)/g, (str) => {
 					let a = str.substring(8, str.length - 1).replace(/['|"|`]/g, "").trim();
 					if (IGNOREMODULES.indexOf(a) === -1) {
-						let m = this.getFilePath(config, Path.resolve(info.path, "./../"), a);
+						let m = util.getFilePath(config, Path.resolve(info.path, "./../"), a);
 						if (this.doneMap.indexOf(m) === -1 && m !== currentPath) {
 							infoTasks.push({
 								filePath: Path.resolve(info.path, "./../"),
@@ -245,7 +171,7 @@ let base = {
 					if (a.startsWith("\"") || a.startsWith("'") || a.startsWith("`")) {
 						a = a.replace(/['|"|`]/g, "").trim();
 						if (IGNOREMODULES.indexOf(a) === -1) {
-							let m = this.getFilePath(config, Path.resolve(info.path, "./../"), a);
+							let m = util.getFilePath(config, Path.resolve(info.path, "./../"), a);
 							let name = "", value = "";
 							if (m.indexOf("node_modules") === -1) {
 								name = m.substring(config.source_path.length);

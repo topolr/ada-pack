@@ -323,7 +323,47 @@ let util = {
     },
     showTips() {
         console.log(colors.blue.bold(` ≡ ADA-PACK ${packageInfo.version} ≡`));
-    }
+    },
+	getFilePath(config, filePath, path) {
+		let checkPath = function (current) {
+			let file = new File(current);
+			if (file.isExists()) {
+				if (file.isFolder()) {
+					let checkPaths = [Path.resolve(current, "./index.js"), Path.resolve(current, "./index.ts"), Path.resolve(current, "./package.json")];
+					let pathIndex = checkPaths.findIndex(path => new File(path).isExists());
+					if (pathIndex !== -1) {
+						if (pathIndex !== 2) {
+							return checkPaths[pathIndex];
+						} else {
+							return Path.resolve(checkPaths[2], "./../", require(checkPaths[2]).main);
+						}
+					}
+				} else {
+					return current;
+				}
+			} else {
+				let ext = Path.extname(current);
+				if (ext) {
+					return current;
+				} else {
+					let checkPaths = [current + ".js", current + ".ts"];
+					let pathIndex = checkPaths.findIndex(path => new File(path).isExists());
+					if (pathIndex !== -1) {
+						return checkPaths[pathIndex];
+					} else {
+						return checkPaths[0];
+					}
+				}
+			}
+		};
+		let result = "";
+		if (path.startsWith("./") || path.startsWith("../") || path.startsWith("/")) {
+			result = checkPath(Path.resolve(filePath, path)).replace(/\\/g, "/");
+		} else {
+			result = checkPath(Path.resolve(config.nmodule_path, path)).replace(/\\/g, "/");
+		}
+		return result;
+	},
 };
 
 module.exports = util;
