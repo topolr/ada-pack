@@ -98,7 +98,6 @@ class file {
             } else {
                 resolve();
             }
-            return ps;
         });
     }
 
