@@ -633,7 +633,11 @@ module.exports = function (option) {
     let ps = Promise.resolve();
     if (config.develop) {
         ps = ps.then(() => {
-            return new File(config.dist_path).remove();
+            if (new File(config.dist_path).isExists()) {
+                return new File(config.dist_path).remove();
+            } else {
+                new File(config.dist_path).mkdir();
+            }
         });
     }
     ps = ps.then(() => {
