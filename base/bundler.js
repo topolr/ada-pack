@@ -631,7 +631,7 @@ module.exports = function (option) {
         config.site_url = config.site_url + "/";
     }
     let ps = Promise.resolve();
-    if (config.develop) {
+    if (!config.develop) {
         ps = ps.then(() => {
             if (new File(config.dist_path).isExists()) {
                 return new File(config.dist_path).remove();
