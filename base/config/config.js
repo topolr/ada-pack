@@ -78,7 +78,7 @@ module.exports = {
             ],
             plugins: [
                 ["@babel/plugin-transform-runtime", {
-                    "helpers": true,
+                    "helpers": false,
                     "polyfill": false,
                     "regenerator": true,
                     "moduleName": "@babel/runtime"
@@ -91,7 +91,7 @@ module.exports = {
                 "@babel/plugin-syntax-export-extensions",
                 "@babel/plugin-proposal-do-expressions",
                 "@babel/plugin-proposal-object-rest-spread",
-				// "@babel/plugin-external-helpers"
+				"@babel/plugin-external-helpers"
             ]
         },
         uglify: {},

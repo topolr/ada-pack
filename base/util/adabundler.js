@@ -113,17 +113,17 @@ class AdaBundler {
 			color: "yellow",
 			text: `NOW BUNDLING ADA CORE [${develop ? "DEVELOP" : "PUBLIC"} MODE]`
 		}).start();
-		// return new File(`${config.projectPath}/node_modules/adajs/index.d.ts`).copyTo(`${config.projectPath}/node_modules/@types/adajs/index.d.ts`).then(() => {
-			// let commandtxt = "";
-			// if (process.platform === "win32") {
-			// 	commandtxt = `node ${config.projectPath}/node_modules/@babel/cli/lib/babel-external-helpers -t var`;
-			// } else {
-			// 	commandtxt = `node ${config.projectPath}/node_modules/.bin/babel-external-helpers -t var`;
-			// }
-			// return this.getBabelHelperCode(commandtxt).then(code => {
-			// 	return maker.minifyCode(config, code);
-			// }).then(_code => {
-			// 	let babelcode = `(function(global){${_code}global.babelHelpers=babelHelpers;})(window);`;
+		return new File(`${config.projectPath}/node_modules/adajs/index.d.ts`).copyTo(`${config.projectPath}/node_modules/@types/adajs/index.d.ts`).then(() => {
+			let commandtxt = "";
+			if (process.platform === "win32") {
+				commandtxt = `node ${config.projectPath}/node_modules/@babel/cli/lib/babel-external-helpers -t var`;
+			} else {
+				commandtxt = `node ${config.projectPath}/node_modules/.bin/babel-external-helpers -t var`;
+			}
+			return this.getBabelHelperCode(commandtxt).then(code => {
+				return maker.minifyCode(config, code);
+			}).then(_code => {
+				let babelcode = `(function(global){${_code}global.babelHelpers=babelHelpers;})(window);`;
 				return this.getCodeMap(path).then(() => {
 					let veison = require(Path.resolve(path, "./../package.json")).version;
 					this.resultmap.push(path);
@@ -141,8 +141,8 @@ class AdaBundler {
 						console.log(` BUNDLE ADA CORE DONE [${develop ? "DEVELOP" : "PUBLIC"} MODE GZIP:${util.getFileSizeAuto(gzipSize.sync(code))}]`.yellow);
 					});
 				});
-			// });
-		// });
+			});
+		});
 	}
 }
 
