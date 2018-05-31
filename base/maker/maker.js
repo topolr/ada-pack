@@ -193,6 +193,7 @@ let Maker = {
 		}).then(() => {
 			let content = new File(appPath).readSync();
 			content = require("@babel/core").transform(content, {
+				filename: appPath,
 				presets: [
 					"@babel/typescript", ["@babel/env", {"targets": {"browsers": "last 2 Chrome versions"}}]
 				],
@@ -211,9 +212,11 @@ let Maker = {
 		});
 
 	},
-	babelCode(config, code) {
+	babelCode(config, code, path) {
 		return base.checkDependence("js", config).then(() => {
-			let content = require("@babel/core").transform(code, config.compiler.babel).code;
+			let ops = Object.assign({}, config.compiler.babel);
+			ops.filename = path;
+			let content = require("@babel/core").transform(code, ops).code;
 			try {
 				content = require("uglify-es").minify(content, Object.assign({}, config.compiler.uglify)).code;
 			} catch (e) {

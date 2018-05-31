@@ -39,7 +39,7 @@ class AdaBundler {
 						if (path.indexOf("node_modules") === -1) {
 							resolve(__code);
 						} else {
-							maker.babelCode(config, __code).then(content => {
+							maker.babelCode(config, __code, path).then(content => {
 								resolve(content);
 							});
 						}
