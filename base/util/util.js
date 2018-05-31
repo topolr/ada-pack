@@ -333,10 +333,10 @@ let util = {
 					let checkPaths = [current + ".js", Path.resolve(current, "./index.js"), Path.resolve(current, "./index.ts"), Path.resolve(current, "./package.json")];
 					let pathIndex = checkPaths.findIndex(path => new File(path).isExists());
 					if (pathIndex !== -1) {
-						if (pathIndex !== 2) {
+						if (pathIndex !== 3) {
 							return checkPaths[pathIndex];
 						} else {
-							return Path.resolve(checkPaths[2], "./../", require(checkPaths[2]).main);
+							return Path.resolve(checkPaths[3], "./../", require(checkPaths[3]).main);
 						}
 					}
 				} else {
