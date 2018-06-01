@@ -131,14 +131,15 @@ class AdaBundler {
 						return `function(module,exports,require,babelHelpers){${this.resultmapcode[path]}}`;
 					});
 					let commet = `/*! adajs[${develop ? "Develop" : "Publish"}] ${veison} https://github.com/topolr/ada | https://github.com/topolr/ada/blob/master/LICENSE */\n`;
-					let code = `${commet}${babelcode}(function (map,moduleName) {var Installed={};var requireModule = function (index) {if (Installed[index]) {return Installed[index].exports;}var module = Installed[index] = {exports: {}};map[index].call(module.exports, module, module.exports, requireModule,window.babelHelpers);return module.exports;};var mod=requireModule(map.length-1);window&&window.Ada.installModule(moduleName,mod);})([${result.join(",")}],"adajs");`;
+					let adacode=`(function (map,moduleName) {var Installed={};var requireModule = function (index) {if (Installed[index]) {return Installed[index].exports;}var module = Installed[index] = {exports: {}};map[index].call(module.exports, module, module.exports, requireModule,window.babelHelpers);return module.exports;};var mod=requireModule(map.length-1);window&&window.Ada.installModule(moduleName,mod);})([${result.join(",")}],"adajs");`;
+					let code = `${commet}${babelcode}${adacode}`;
 					config.adaHash = hash.md5(code).substring(0, 10);
 					code = code.replace(/\/ada\/sse/, `${config.server.protocol}://${config.server.host}${(config.server.port != 80 ? ":" + config.server.port : '')}/ada/sse`);
 					return new File(output).write(code).then(() => {
 						spinner.stop();
 						process.stderr.clearLine();
 						process.stderr.cursorTo(0);
-						console.log(` BUNDLE ADA CORE DONE [${develop ? "DEVELOP" : "PUBLIC"} MODE GZIP:${util.getFileSizeAuto(gzipSize.sync(code))}]`.yellow);
+						console.log(` BUNDLE ADA CORE DONE [${develop ? "DEVELOP" : "PUBLIC"} MODE GZIP:${util.getFileSizeAuto(gzipSize.sync(adacode))} WITHBABEL:${util.getFileSizeAuto(gzipSize.sync(code))}]`.yellow);
 					});
 				});
 			});
