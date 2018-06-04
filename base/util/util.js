@@ -12,7 +12,7 @@ let util = {
 		return (typeof obj === 'function') && obj.constructor === window.Function;
 	},
 	replacePaths(content, fn) {
-		return content.replace(/url\(['"]*.*?["']*\)/gi, function (a) {
+		return content.replace(/url\((['"])(?:(?!\1).)*?\1\)/gi, function (a) {
 			let b = a.substring(4, a.length - 1).trim();
 			let result = a;
 			let aa = false;
@@ -37,7 +37,7 @@ let util = {
 				}
 			}
 			return result;
-		}).replace(/src\=['"].*?['"]/gi, function (a) {
+		}).replace(/src\=(['"])(?:(?!\1).)*?\1/gi, function (a) {
 			a = a.trim();
 			let result = a;
 			if (a.indexOf("<%") === -1) {
@@ -72,7 +72,7 @@ let util = {
 	},
 	findPaths(content) {
 		let r = [];
-		let a = content.match(/url\(['"]*.*?["']*\)/gi);
+		let a = content.match(/url\((['"])(?:(?!\1).)*?\1\)/gi);
 		if (a) {
 			for (let i = 0; i < a.length; i++) {
 				let b = a[i].substring(4, a[i].length - 1).trim();
@@ -86,7 +86,7 @@ let util = {
 				}
 			}
 		}
-		let e = content.match(/src\=['"].*?['"]/gi);
+		let e = content.match(/src\=(['"])(?:(?!\1).)*?\1/gi);
 		if (e) {
 			for (let i = 0; i < e.length; i++) {
 				let a = e[i];
@@ -128,7 +128,7 @@ let util = {
 			src: [],
 			import: []
 		};
-		let a = content.match(/url\(['"]*.*?["']*\)/gi);
+		let a = content.match(/url\((['"])(?:(?!\1).)*?\1\)/gi);
 		if (a) {
 			for (let i = 0; i < a.length; i++) {
 				let b = a[i].substring(4, a[i].length - 1).trim();
@@ -142,7 +142,7 @@ let util = {
 				}
 			}
 		}
-		let e = content.match(/src\=['"].*?['"]/gi);
+		let e = content.match(/src\=(['"])(?:(?!\1).)*?\1/gi);
 		if (e) {
 			for (let i = 0; i < e.length; i++) {
 				let a = e[i];
