@@ -6,12 +6,15 @@ module.exports = function (content, path, option) {
 	return new Promise((resolve, reject) => {
 		try {
 			if (option.develop) {
+				let filename = path.indexOf("node_modules") === -1 ? path.substring(option.source_path.length) : "node_modules/" + path.substring(option.nmodule_path.length);
 				let info = babel.transform(content, Object.assign({
-					filename: path.indexOf("node_modules") === -1 ? path.substring(option.source_path.length) : "node_modules/" + path.substring(option.nmodule_path.length),
-					sourceMaps: "both"
+					filename: filename,
+					sourceMaps: true
 				}, option.compiler.babel));
+				info.map.sources = [option.site_url + filename];
 				content = info.code;
 				content = classPropertiesPollyfill(content);
+				content = content + `\n//# sourceMappingURL=data:application/json;charset=utf-8;base64,${new Buffer(JSON.stringify(info.map)).toString('base64')}`;
 			} else {
 				let ops=Object.assign({},option.compiler.babel);
 				ops.filename=path;
