@@ -11,7 +11,7 @@ module.exports = function (content, path, option) {
 					filename: filename,
 					sourceMaps: true
 				}, option.compiler.babel));
-				info.map.sources = [option.site_url + filename];
+				info.map.sources = [filename];
 				content = info.code;
 				content = classPropertiesPollyfill(content);
 				content = content + `\n//# sourceMappingURL=data:application/json;charset=utf-8;base64,${new Buffer(JSON.stringify(info.map)).toString('base64')}`;
