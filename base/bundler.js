@@ -75,29 +75,10 @@ let base = {
         return files;
     },
     getFileContent(config, filePath, path) {
-        let _path = util.getFilePath(config, filePath, path);
-        let _file = new File(_path);
-        let hash = _file.hash();
-        if (this.cache[_path] && this.cache[_path].hash === hash) {
-            return Promise.resolve(Object.assign({}, this.cache[_path]));
-        } else {
-            return maker.parse(_file.suffix(), _path, _file.readSync(), config).then(content => {
-                this.logs[_path] = "done";
-                this.cache[_path] = {hash, content, path: _path, result: "done"};
-                return {path: _path, content, result: "done"};
-            }).catch(e => {
-                this.logs[_path] = {
-                    name: e.name,
-                    message: e.message,
-                    stack: e.stack
-                };
-                if (_file.suffix() === "js" || _file.suffix() === "ts") {
-                    return {path: _path, content: `console.error(${JSON.stringify(e.message)})`, result: e}
-                } else {
-                    return {path: _path, content: `${JSON.stringify(e.message)}`, result: e}
-                }
-            });
-        }
+        return workerManager.requestPromise({
+            type: "filecontent",
+            parameter: {config, filePath, path}
+        });
     },
     getRequireInfo(config, filePath, path) {
         let _path = util.getFilePath(config, filePath, path);
