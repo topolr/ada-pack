@@ -42,6 +42,11 @@ const WorkerManager = {
 		});
 		this._next();
 	},
+	requestPromise(msg) {
+		return new Promise(resolve => {
+			this.request(msg, resolve);
+		});
+	},
 	_next() {
 		if (cluster.isMaster) {
 			let workerId = Reflect.ownKeys(cluster.workers).find(id => cluster.workers[id].state === STATEWAIT);
@@ -67,7 +72,7 @@ const WorkerManager = {
 		this.queue.delete(id);
 		this.queueIds.splice(this.queueIds.indexOf(id), 1);
 		info && info.fn && info.fn(data);
-		// console.log(`worker[${workerId}] is done task[${id}]`);
+		console.log(`worker[${workerId}] is done task[${id}]`);
 		this._next();
 	}
 };

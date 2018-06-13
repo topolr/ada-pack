@@ -4,10 +4,10 @@ let test = require("./main/worker/test");
 worker.start({test});
 
 for (let i = 0; i < 20; i++) {
-	worker.request({
+	worker.requestPromise({
 		type: "test",
 		parameter: new Date().getTime()
-	}, time => {
+	}).then(time => {
 		console.log("TIME:" + time + "--" + i);
 	});
 }
