@@ -1,5 +1,6 @@
 const cluster = require('cluster');
 const os = require('os');
+const util = require("./util");
 
 const STATEWAIT = "wait";
 const STATEWORK = "work";
@@ -34,7 +35,7 @@ const WorkerManager = {
 		}
 	},
 	request(msg, fn) {
-		let id = "A" + this.total++;
+		let id = util.randomid();
 		this.queueIds.push(id);
 		this.queue.set(id, {
 			msg: msg,
@@ -72,7 +73,7 @@ const WorkerManager = {
 		this.queue.delete(id);
 		this.queueIds.splice(this.queueIds.indexOf(id), 1);
 		info && info.fn && info.fn(data);
-		// console.log(`worker[${workerId}] is done task[${id}]`);
+		console.log(`worker[${workerId}] is done task[${id}]`);
 		this._next();
 	}
 };

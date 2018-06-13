@@ -1,4 +1,4 @@
-let worker = require("./main/index");
+let worker = require("./main/util/worker");
 let test = require("./main/worker/test");
 
 worker.start({test});
