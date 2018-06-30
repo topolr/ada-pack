@@ -240,17 +240,18 @@ let util = {
 	},
 	getAppInfo(appPath) {
 		return maker.installAdapackDependence().then(() => {
-			return maker.appCode(appPath).then(content => {
-				let info = {};
-				let module = {exports: {}};
-				new Function("module", "exports", "require", "__dirname", "__filename", "process", content)(module, module.exports, require, require("path").resolve(appPath, "./../"), appPath, process);
-				if (module.exports.default) {
-					info = module.exports.default;
-				} else {
-					info = module.exports;
-				}
-				return info;
-			});
+            return require(appPath);
+			// return maker.appCode(appPath).then(content => {
+			// 	let info = {};
+			// 	let module = {exports: {}};
+			// 	new Function("module", "exports", "require", "__dirname", "__filename", "process", content)(module, module.exports, require, require("path").resolve(appPath, "./../"), appPath, process);
+			// 	if (module.exports.default) {
+			// 		info = module.exports.default;
+			// 	} else {
+			// 		info = module.exports;
+			// 	}
+			// 	return info;
+			// });
 		});
 	},
 	padEnd(origin, length, dot) {

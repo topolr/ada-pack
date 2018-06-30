@@ -112,10 +112,10 @@ module.exports = {
         path: [],
         option: {}
     },
-    onbeforebundle() {
-        return Promise.resolve();
+    onbeforebundle(config) {
+        return Promise.resolve(config);
     },
-    onbundled() {
+    onbundled(info) {
         return Promise.resolve();
     }
 };
