@@ -599,8 +599,8 @@ let base = {
                 config.complete = null;
             }
             return {map, log: this.logs};
-        }).then(() => {
-            return config.onbundled();
+        }).then(info => {
+            return config.onbundled().then(() => info);
         }).catch(e => console.log(e));
     }
 };
