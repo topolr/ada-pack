@@ -599,6 +599,8 @@ let base = {
                 config.complete = null;
             }
             return {map, log: this.logs};
+        }).then(() => {
+            return config.onbundled();
         }).catch(e => console.log(e));
     }
 };
@@ -642,6 +644,8 @@ module.exports = function (option) {
     }
     ps = ps.then(() => {
         return maker.installAllDependence(config.source_path, config).then(() => {
+            return config.onbeforebundle(config);
+        }).then(() => {
             return base.bundleAda(config.develop).then(() => {
                 return action;
             });

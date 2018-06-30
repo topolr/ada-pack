@@ -91,7 +91,7 @@ module.exports = {
                 "@babel/plugin-syntax-export-extensions",
                 "@babel/plugin-proposal-do-expressions",
                 "@babel/plugin-proposal-object-rest-spread",
-				"@babel/plugin-external-helpers"
+                "@babel/plugin-external-helpers"
             ]
         },
         uglify: {},
@@ -111,5 +111,11 @@ module.exports = {
         server: "",
         path: [],
         option: {}
+    },
+    onbeforebundle() {
+        return Promise.resolve();
+    },
+    onbundled() {
+        return Promise.resolve();
     }
 };
