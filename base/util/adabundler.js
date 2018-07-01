@@ -34,7 +34,7 @@ class AdaBundler {
                 } else {
                     let __code = file.readSync();
                     if (!config.develop) {
-                        __code = __code.replace(/\$\$Log\(.*\);/g, "");
+                        __code = __code.replace(/\$\$log\(.*\);/g, "");
                     }
                     if (__code.trim().length === 0) {
                         resolve("module.exports={};");
