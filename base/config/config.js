@@ -79,9 +79,8 @@ module.exports = {
             plugins: [
                 ["@babel/plugin-transform-runtime", {
                     "helpers": false,
-                    "polyfill": false,
                     "regenerator": true,
-                    "moduleName": "@babel/runtime"
+                    "corejs": 2
                 }],
                 ["@babel/plugin-proposal-decorators", {"legacy": true}],
                 ["@babel/plugin-proposal-class-properties", {"loose": true}],

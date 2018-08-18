@@ -9,7 +9,7 @@ const Mapped = {
 		dependence: {
 			"@babel/cli": "^7.0.0-beta.47",
 			"@babel/core": "^7.0.0-beta.37",
-			"@babel/runtime": "^7.0.0-beta.38",
+			"@babel/runtime-corejs2": "^7.0.0-beta.38",
 			"@babel/plugin-external-helpers": "^7.0.0-beta.47",
 			"@babel/plugin-transform-runtime": "^7.0.0-beta.38",
 			"@babel/plugin-proposal-class-properties": "^7.0.0-beta.37",
@@ -76,7 +76,7 @@ const Mapped = {
 		dependence: {
 			"@babel/cli": "^7.0.0-beta.47",
 			"@babel/core": "^7.0.0-beta.37",
-			"@babel/runtime": "^7.0.0-beta.38",
+            "@babel/runtime-corejs2": "^7.0.0-beta.38",
 			"@babel/plugin-external-helpers": "^7.0.0-beta.47",
 			"@babel/plugin-transform-runtime": "^7.0.0-beta.38",
 			"@babel/plugin-proposal-class-properties": "^7.0.0-beta.37",

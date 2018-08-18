@@ -636,7 +636,9 @@ module.exports = function (option) {
     if (!config.develop) {
         ps = ps.then(() => {
             if (new File(config.dist_path).isExists()) {
-                return new File(config.dist_path).remove();
+                return new File(config.dist_path).remove().then(() => {
+                    new File(config.dist_path).mkdir();
+                });
             } else {
                 new File(config.dist_path).mkdir();
             }
