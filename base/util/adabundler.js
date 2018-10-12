@@ -9,8 +9,8 @@ let gzipSize = require('gzip-size');
 
 class AdaBundler {
     constructor(config) {
-        this.resultmap = [];
-        this.resultmapcode = {};
+        this.resultmap = ["nothing"];
+        this.resultmapcode = {"nothing": "module.exports={}"};
         this.contentCache = {};
         this.config = config;
     }
@@ -63,20 +63,28 @@ class AdaBundler {
             let paths = [];
             code = code.replace(/require\(.*?\)/g, (one) => {
                 if (one.indexOf("${") === -1 && one.indexOf("+") === -1 && one.indexOf(".concat(") === -1) {
-                    let a = one.substring(8, one.length - 1).replace(/['|"|`]/g, "").trim();
-                    let _path = util.getFilePath(config, Path.resolve(path, "./../"), a);
-                    let index = this.resultmap.indexOf(_path);
-                    if (index === -1) {
-                        paths.push(_path);
-                        this.resultmap.push(_path);
-                        index = this.resultmap.length - 1;
+                    if (["fs", "path", "request"].indexOf(one) === -1 && path.indexOf("/context/server") === -1) {
+                        let a = one.substring(8, one.length - 1).replace(/['|"|`]/g, "").trim();
+                        let _path = util.getFilePath(config, Path.resolve(path, "./../"), a);
+                        let index = this.resultmap.indexOf(_path);
+                        if (index === -1) {
+                            paths.push(_path);
+                            this.resultmap.push(_path);
+                            index = this.resultmap.length - 1;
+                        }
+                        return `require(${index})`;
+                    } else {
+                        return "require(0)";
                     }
-                    return `require(${index})`;
                 } else {
                     return one;
                 }
             });
-            this.resultmapcode[path] = code;
+            if (path.indexOf("/context/server") !== -1) {
+                this.resultmapcode[path] = "module.exports={}";
+            } else {
+                this.resultmapcode[path] = code;
+            }
             return paths;
         } else {
             return [];
@@ -116,41 +124,25 @@ class AdaBundler {
             color: "yellow",
             text: `NOW BUNDLING ADA CORE [${develop ? "DEVELOP" : "PUBLIC"} MODE]`
         }).start();
-        return new File(`${config.projectPath}/node_modules/adajs/index.d.ts`).copyTo(`${config.projectPath}/node_modules/@types/adajs/index.d.ts`).then(() => {
-            let commandtxt = "";
-            if (process.platform === "win32") {
-                commandtxt = `node ${config.projectPath}/node_modules/@babel/cli/lib/babel-external-helpers -t var`;
-            } else {
-                commandtxt = `node ${config.projectPath}/node_modules/.bin/babel-external-helpers -t var`;
-            }
-            return this.getBabelHelperCode(commandtxt).then(code => {
-                return maker.minifyCode(config, code);
-            }).then(_code => {
-                let babelcode = `(function(global){${_code}global.babelHelpers=babelHelpers;})(window);`;
-                return this.getCodeMap(path).then(() => {
-                    let packageInfo = require(Path.resolve(path, "./../package.json"));
-                    let veison = packageInfo.version,
-                        babelVersion = require(`${config.projectPath}/node_modules/@babel/cli/package.json`).version;
-                    this.resultmap.push(path);
-                    let result = this.resultmap.map(path => {
-                        return `function(module,exports,require,babelHelpers){${this.resultmapcode[path]}}`;
-                    });
-                    let commet = `/*! adajs[${develop ? "Develop" : "Publish"}] ${veison} https://github.com/topolr/ada | https://github.com/topolr/ada/blob/master/LICENSE */`;
-                    let adacode = `(function (map,moduleName) {var Installed={};var requireModule = function (index) {if (Installed[index]) {return Installed[index].exports;}var module = Installed[index] = {exports: {}};map[index].call(module.exports, module, module.exports, requireModule,window.babelHelpers);return module.exports;};var mod=requireModule(map.length-1);window&&window.Ada.installModule(moduleName,mod);})([${result.join(",")}],"adajs");`;
-                    let code = `${commet}
-/* babelHelper version:${babelVersion} */
-${babelcode}
-/* ada core */
+        return this.getCodeMap(path).then(() => {
+            let packageInfo = require(Path.resolve(path, "./../package.json"));
+            let veison = packageInfo.version,
+                babelVersion = require(`${config.projectPath}/node_modules/@babel/cli/package.json`).version;
+            this.resultmap.push(path);
+            let result = this.resultmap.map(path => {
+                return `function(module,exports,require){${this.resultmapcode[path]}}`;
+            });
+            let commet = `/*! adajs[${develop ? "Develop" : "Publish"}] ${veison} https://github.com/topolr/ada | https://github.com/topolr/ada/blob/master/LICENSE */`;
+            let adacode = `(function (map,moduleName) {var Installed={};var requireModule = function (index) {if (Installed[index]) {return Installed[index].exports;}var module = Installed[index] = {exports: {}};map[index].call(module.exports, module, module.exports, requireModule,window.babelHelpers);return module.exports;};var mod=requireModule(map.length-1);Ada.installModule(moduleName,mod);})([${result.join(",")}],"adajs");`;
+            let code = `${commet}
 ${adacode}`;
-                    config.adaHash = hash.md5(code).substring(0, 10);
-                    code = code.replace(/\/ada\/sse/, `${config.server.protocol}://${config.server.host}${(config.server.port != 80 ? ":" + config.server.port : '')}/ada/sse`);
-                    return new File(output).write(code).then(() => {
-                        spinner.stop();
-                        process.stderr.clearLine();
-                        process.stderr.cursorTo(0);
-                        console.log(` BUNDLE ADA CORE DONE [${develop ? "DEVELOP" : "PUBLIC"} MODE GZIP:${util.getFileSizeAuto(gzipSize.sync(adacode))} WITHBABEL:${util.getFileSizeAuto(gzipSize.sync(code))}]`.yellow);
-                    });
-                });
+            config.adaHash = hash.md5(code).substring(0, 10);
+            code = code.replace(/\/ada\/sse/, `${config.server.protocol}://${config.server.host}${(config.server.port != 80 ? ":" + config.server.port : '')}/ada/sse`);
+            return new File(output).write(code).then(() => {
+                spinner.stop();
+                process.stderr.clearLine();
+                process.stderr.cursorTo(0);
+                console.log(` BUNDLE ADA CORE DONE [${develop ? "DEVELOP" : "PUBLIC"} MODE GZIP:${util.getFileSizeAuto(gzipSize.sync(adacode))}]`.yellow);
             });
         });
     }
