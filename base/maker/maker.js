@@ -3,6 +3,7 @@ let queue = require("./../lib/queue");
 let Path = require("path");
 let colors = require("colors");
 let ora = require('ora');
+let Config = require("./../config/config");
 
 const Mapped = {
 	js: {
@@ -11,7 +12,6 @@ const Mapped = {
 			"@babel/cli": "^7.1.0",
 			"@babel/core": "^7.1.0",
 			"@babel/runtime-corejs2": "^7.1.2",
-			"@babel/plugin-external-helpers": "^7.0.0",
 			"@babel/plugin-proposal-class-properties": "^7.1.0",
 			"@babel/plugin-proposal-decorators": "^7.0.0-beta.52",
 			"@babel/plugin-proposal-do-expressions": "^7.0.0",
@@ -81,7 +81,6 @@ const Mapped = {
 			"@babel/cli": "^7.1.0",
 			"@babel/core": "^7.1.0",
 			"@babel/runtime-corejs2": "^7.1.2",
-			"@babel/plugin-external-helpers": "^7.0.0",
 			"@babel/plugin-proposal-class-properties": "^7.1.0",
 			"@babel/plugin-proposal-decorators": "^7.0.0-beta.52",
 			"@babel/plugin-proposal-do-expressions": "^7.0.0",
@@ -198,15 +197,8 @@ let Maker = {
 			let content = new File(appPath).readSync();
 			content = require("@babel/core").transform(content, {
 				filename: appPath,
-				presets: [
-					"@babel/typescript", ["@babel/env", {"targets": {"browsers": "last 2 Chrome versions"}}]
-				],
-				plugins: [
-					["@babel/plugin-proposal-decorators", {"legacy": true}],
-					["@babel/plugin-proposal-class-properties", {"loose": true}],
-					"@babel/transform-async-to-generator",
-					"@babel/syntax-dynamic-import"
-				]
+				presets: Config.compiler.babel.presets,
+				plugins: Config.compiler.babel.plugins
 			}).code;
 			try {
 				content = require("uglify-es").minify(content).code;
@@ -214,7 +206,6 @@ let Maker = {
 			}
 			return content;
 		});
-
 	},
 	babelCode(config, code, path) {
 		return base.checkDependence("js", config).then(() => {
