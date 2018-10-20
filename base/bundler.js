@@ -109,6 +109,47 @@ let base = {
                 let result = {};
                 let name = "";
                 this.doneMap.push(currentPath);
+                info.content = info.content.replace(/_adajs.root\)\([\d\D]*?\)/g, str => {
+                    let map = str.substring(13, str.length - 1);
+                    if (map) {
+                        map = map.replace(/['|"][\s\S]+?['|"]/g, str => {
+                            if (str.indexOf("./") !== -1 || str.indexOf("/") !== -1) {
+                                let value = str.substring(1, str.length - 1);
+                                let path = Path.join(info.path, "./../", value).replace(/\\/g, "/");
+                                if (path.indexOf("node_modules") === -1) {
+                                    value = path.substring(config.source_path.length);
+                                    parseTasks.push({
+                                        path: Path.resolve(config.dist_path, path.substring(config.source_path.length)),
+                                        current: path,
+                                        value
+                                    });
+                                } else {
+                                    value = `${THRIDPARTFOLDER}/${path.substring(config.nmodule_path.length)}`;
+                                    parseTasks.push({
+                                        path: Path.resolve(config.dist_path, `./${THRIDPARTFOLDER}/${path.substring(config.nmodule_path.length)}`),
+                                        current: path,
+                                        value
+                                    });
+                                }
+                                return `"${value}"`;
+                            } else {
+                                return str;
+                            }
+                        });
+                    } else {
+                        map = "{root:true}";
+                    }
+                    let module = "";
+                    let __path = info.path.replace(/\\/g, "/");
+                    if (__path.indexOf("node_modules") === -1) {
+                        module = __path.substring(config.source_path.length);
+                    } else {
+                        module = `${THRIDPARTFOLDER}/${__path.substring(config.nmodule_path.length)}`;
+                    }
+                    let t = map.replace(/\n/g, "").replace(/\r/g, "").trim();
+                    map = t.substring(0, t.length - 1) + `,module:"${module}"}`;
+                    return `_adajs.root)(${map})`;
+                });
                 info.content = info.content.replace(/_adajs.view\)\(\{[\d\D]*?\)/g, str => {
                     let map = str.substring(13, str.length - 1);
                     map = map.replace(/['|"][\s\S]+?['|"]/g, str => {
