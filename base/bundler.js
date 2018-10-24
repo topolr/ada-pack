@@ -461,7 +461,7 @@ let base = {
                 new File(path).renameSync(Path.resolve(config.dist_path, util.getHashPath(a, b)));
             }
         });
-        new File(Path.resolve(config.dist_path, "./ada.js")).renameSync(Path.resolve(config.dist_path, `./ada-${config.adaHash}.js`));
+        new File(Path.resolve(config.dist_path, "./ada.js")).renameSync(Path.resolve(config.dist_path, `./ada.${config.adaHash}.js`));
     },
     logResult() {
         let success = [], error = {};
