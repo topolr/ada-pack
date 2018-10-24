@@ -407,6 +407,10 @@ let base = {
         if (config.icons.length > 0) {
             iconsContent += `<link rel="shortcut icon" href="${config.site_url + config.icons[0].src}">`;
         }
+        let linkContent = page.link.map(path => {
+            let props = Reflect.ownKeys(path).map(key => `${key}="${path[key]}"`).join(" ");
+            return `<link ${props}>`;
+        }).join("");
         let styleContent = page.style.map(path => {
             if (util.isObject(path)) {
                 path.rel = "stylesheet";
@@ -424,7 +428,7 @@ let base = {
                 return `<script src="${path}"></script>`;
             }
         }).join("");
-        let content = `<!DOCTYPE html><html><head><link rel="manifest" href="manifest.json"><meta charset="${page.charset}"><title>${config.name}</title>${metaContent}${iconsContent}${styleContent}${scriptContent}<script src="${config._adaPath}"></script><script>${config.regist_service ? workerRegistCode : ""}</script><script>Ada.boot(${JSON.stringify(config.ada)});</script></head><body></body></html>`;
+        let content = `<!DOCTYPE html><html><head><link rel="manifest" href="manifest.json"><meta charset="${page.charset}"><title>${config.name}</title>${metaContent}${iconsContent}${styleContent}${linkContent}${scriptContent}<script src="${config._adaPath}"></script><script>${config.regist_service ? workerRegistCode : ""}</script><script>Ada.boot(${JSON.stringify(config.ada)});</script></head><body></body></html>`;
         return Promise.all(config.icons.map(icon => {
             return new File(Path.resolve(config.source_path, icon.src)).copyTo(Path.resolve(config.dist_path, icon.src));
         })).then(() => {

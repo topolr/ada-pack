@@ -30,6 +30,7 @@ module.exports = {
             {name: 'apple_mobile_web_app_status_bar_style', content: "white"},
             {name: 'apple_mobile_web_app_capable', content: "yes"}
         ],
+        link: [],
         style: [],
         script: []
     },
