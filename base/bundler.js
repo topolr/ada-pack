@@ -394,11 +394,12 @@ let base = {
         });
 
         let page = config.page;
-        page.meta.theme_color = config.theme_color;
-        page.meta.description = config.description;
-        page.meta.keywords = config.keywords;
-        let metaContent = Reflect.ownKeys(page.meta).map(key => {
-            return `<meta name="${key.replace(/_/g, "-")}" content="${page.meta[key]}">`;
+        page.meta.push({name: "theme_color", content: config.theme_color});
+        page.meta.push({name: "description", content: config.description});
+        page.meta.push({name: "keywords", content: config.keywords});
+        let metaContent = page.meta.map(item => {
+            let props = Reflect.ownKeys(item).map(key => `${key}="${item[key]}"`).join(" ");
+            return `<meta ${props}>`;
         }).join("");
         let iconsContent = config.icons.map(info => {
             return `<link rel="apple-touch-icon-precomposed" sizes="${info.sizes}" href="${config.site_url + info.src}">`;
@@ -407,10 +408,21 @@ let base = {
             iconsContent += `<link rel="shortcut icon" href="${config.site_url + config.icons[0].src}">`;
         }
         let styleContent = page.style.map(path => {
-            return `<link rel="stylesheet" href="${path}">`;
+            if (util.isObject(path)) {
+                path.rel = "stylesheet";
+                let props = Reflect.ownKeys(path).map(key => `${key}="${path[key]}"`).join(" ");
+                return `<link ${props}>`;
+            } else {
+                return `<link rel="stylesheet" href="${path}">`;
+            }
         }).join("");
         let scriptContent = page.script.map(path => {
-            return `<script src="${path}"></script>`;
+            if (util.isObject(path)) {
+                let props = Reflect.ownKeys(path).map(key => `${key}="${path[key]}"`).join(" ");
+                return `<script ${props}></script>`;
+            } else {
+                return `<script src="${path}"></script>`;
+            }
         }).join("");
         let content = `<!DOCTYPE html><html><head><link rel="manifest" href="manifest.json"><meta charset="${page.charset}"><title>${config.name}</title>${metaContent}${iconsContent}${styleContent}${scriptContent}<script src="${config._adaPath}"></script><script>${config.regist_service ? workerRegistCode : ""}</script><script>Ada.boot(${JSON.stringify(config.ada)});</script></head><body></body></html>`;
         return Promise.all(config.icons.map(icon => {
@@ -604,7 +616,7 @@ let base = {
                     if (config.develop) {
                         config._adaPath = config.site_url + "ada.js";
                     } else {
-                        config._adaPath = `${config.site_url}ada-${config.adaHash}.js`;
+                        config._adaPath = `${config.site_url}ada.${config.adaHash}.js`;
                     }
                     config.ada = {
                         basePath: config.site_url,
