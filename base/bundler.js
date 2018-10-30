@@ -109,6 +109,47 @@ let base = {
                 let result = {};
                 let name = "";
                 this.doneMap.push(currentPath);
+                info.content = info.content.replace(/_adajs.root\)\([\d\D]*?\)/g, str => {
+                    let map = str.substring(13, str.length - 1);
+                    if (map) {
+                        map = map.replace(/['|"][\s\S]+?['|"]/g, str => {
+                            if (str.indexOf("./") !== -1 || str.indexOf("/") !== -1) {
+                                let value = str.substring(1, str.length - 1);
+                                let path = Path.join(info.path, "./../", value).replace(/\\/g, "/");
+                                if (path.indexOf("node_modules") === -1) {
+                                    value = path.substring(config.source_path.length);
+                                    parseTasks.push({
+                                        path: Path.resolve(config.dist_path, path.substring(config.source_path.length)),
+                                        current: path,
+                                        value
+                                    });
+                                } else {
+                                    value = `${THRIDPARTFOLDER}/${path.substring(config.nmodule_path.length)}`;
+                                    parseTasks.push({
+                                        path: Path.resolve(config.dist_path, `./${THRIDPARTFOLDER}/${path.substring(config.nmodule_path.length)}`),
+                                        current: path,
+                                        value
+                                    });
+                                }
+                                return `"${value}"`;
+                            } else {
+                                return str;
+                            }
+                        });
+                    } else {
+                        map = "{root:true}";
+                    }
+                    let module = "";
+                    let __path = info.path.replace(/\\/g, "/");
+                    if (__path.indexOf("node_modules") === -1) {
+                        module = __path.substring(config.source_path.length);
+                    } else {
+                        module = `${THRIDPARTFOLDER}/${__path.substring(config.nmodule_path.length)}`;
+                    }
+                    let t = map.replace(/\n/g, "").replace(/\r/g, "").trim();
+                    map = t.substring(0, t.length - 1) + `,module:"${module}"}`;
+                    return `_adajs.root)(${map})`;
+                });
                 info.content = info.content.replace(/_adajs.view\)\(\{[\d\D]*?\)/g, str => {
                     let map = str.substring(13, str.length - 1);
                     map = map.replace(/['|"][\s\S]+?['|"]/g, str => {
@@ -353,11 +394,12 @@ let base = {
         });
 
         let page = config.page;
-        page.meta.theme_color = config.theme_color;
-        page.meta.description = config.description;
-        page.meta.keywords = config.keywords;
-        let metaContent = Reflect.ownKeys(page.meta).map(key => {
-            return `<meta name="${key.replace(/_/g, "-")}" content="${page.meta[key]}">`;
+        page.meta.push({name: "theme_color", content: config.theme_color});
+        page.meta.push({name: "description", content: config.description});
+        page.meta.push({name: "keywords", content: config.keywords});
+        let metaContent = page.meta.map(item => {
+            let props = Reflect.ownKeys(item).map(key => `${key}="${item[key]}"`).join(" ");
+            return `<meta ${props}>`;
         }).join("");
         let iconsContent = config.icons.map(info => {
             return `<link rel="apple-touch-icon-precomposed" sizes="${info.sizes}" href="${config.site_url + info.src}">`;
@@ -365,13 +407,28 @@ let base = {
         if (config.icons.length > 0) {
             iconsContent += `<link rel="shortcut icon" href="${config.site_url + config.icons[0].src}">`;
         }
+        let linkContent = page.link.map(path => {
+            let props = Reflect.ownKeys(path).map(key => `${key}="${path[key]}"`).join(" ");
+            return `<link ${props}>`;
+        }).join("");
         let styleContent = page.style.map(path => {
-            return `<link rel="stylesheet" href="${path}">`;
+            if (util.isObject(path)) {
+                path.rel = "stylesheet";
+                let props = Reflect.ownKeys(path).map(key => `${key}="${path[key]}"`).join(" ");
+                return `<link ${props}>`;
+            } else {
+                return `<link rel="stylesheet" href="${path}">`;
+            }
         }).join("");
         let scriptContent = page.script.map(path => {
-            return `<script src="${path}"></script>`;
+            if (util.isObject(path)) {
+                let props = Reflect.ownKeys(path).map(key => `${key}="${path[key]}"`).join(" ");
+                return `<script ${props}></script>`;
+            } else {
+                return `<script src="${path}"></script>`;
+            }
         }).join("");
-        let content = `<!DOCTYPE html><html><head><link rel="manifest" href="manifest.json"><meta charset="${page.charset}"><title>${config.name}</title>${metaContent}${iconsContent}${styleContent}${scriptContent}<script src="${config._adaPath}"></script><script>${config.regist_service ? workerRegistCode : ""}</script><script>Ada.boot(${JSON.stringify(config.ada)});</script></head><body></body></html>`;
+        let content = `<!DOCTYPE html><html><head><link rel="manifest" href="manifest.json"><meta charset="${page.charset}"><title>${config.name}</title>${metaContent}${iconsContent}${styleContent}${linkContent}${scriptContent}<script src="${config._adaPath}"></script><script>${config.regist_service ? workerRegistCode : ""}</script><script>Ada.boot(${JSON.stringify(config.ada)});</script></head><body></body></html>`;
         return Promise.all(config.icons.map(icon => {
             return new File(Path.resolve(config.source_path, icon.src)).copyTo(Path.resolve(config.dist_path, icon.src));
         })).then(() => {
@@ -404,7 +461,7 @@ let base = {
                 new File(path).renameSync(Path.resolve(config.dist_path, util.getHashPath(a, b)));
             }
         });
-        new File(Path.resolve(config.dist_path, "./ada.js")).renameSync(Path.resolve(config.dist_path, `./ada-${config.adaHash}.js`));
+        new File(Path.resolve(config.dist_path, "./ada.js")).renameSync(Path.resolve(config.dist_path, `./ada.${config.adaHash}.js`));
     },
     logResult() {
         let success = [], error = {};
@@ -563,7 +620,7 @@ let base = {
                     if (config.develop) {
                         config._adaPath = config.site_url + "ada.js";
                     } else {
-                        config._adaPath = `${config.site_url}ada-${config.adaHash}.js`;
+                        config._adaPath = `${config.site_url}ada.${config.adaHash}.js`;
                     }
                     config.ada = {
                         basePath: config.site_url,

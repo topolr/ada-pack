@@ -24,12 +24,13 @@ module.exports = {
     ignore: [],
     page: {
         charset: "UTF-8",
-        meta: {
-            viewport: "width=device-width, initial-scale=1.0, minimum-scale=1.0, user-scalable=no",
-            format_detection: "telephone=no",
-            apple_mobile_web_app_status_bar_style: "white",
-            apple_mobile_web_app_capable: "yes"
-        },
+        meta: [
+            {name: 'viewport', content: "width=device-width, initial-scale=1.0, minimum-scale=1.0, user-scalable=no"},
+            {name: 'format_detection', content: "telephone=no"},
+            {name: 'apple_mobile_web_app_status_bar_style', content: "white"},
+            {name: 'apple_mobile_web_app_capable', content: "yes"}
+        ],
+        link: [],
         style: [],
         script: []
     },
@@ -74,7 +75,7 @@ module.exports = {
     compiler: {
         babel: {
             presets: [
-                "@babel/typescript", ["@babel/env", {"targets": {"chrome": "29"}}]
+                "@babel/typescript", ["@babel/env", {"targets": {"chrome": "59"}}]
             ],
             plugins: [
                 ["@babel/plugin-transform-runtime", {
@@ -84,12 +85,11 @@ module.exports = {
                 ["@babel/plugin-proposal-decorators", {"legacy": true}],
                 ["@babel/plugin-proposal-class-properties", {"loose": true}],
                 "@babel/transform-async-to-generator",
-                "@babel/syntax-dynamic-import",
+                "@babel/plugin-syntax-dynamic-import",
                 "@babel/plugin-proposal-function-bind",
                 "@babel/plugin-syntax-export-extensions",
                 "@babel/plugin-proposal-do-expressions",
-                "@babel/plugin-proposal-object-rest-spread",
-                "@babel/plugin-external-helpers"
+                "@babel/plugin-proposal-object-rest-spread"
             ]
         },
         uglify: {},

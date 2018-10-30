@@ -3,27 +3,29 @@ let queue = require("./../lib/queue");
 let Path = require("path");
 let colors = require("colors");
 let ora = require('ora');
+let Config = require("./../config/config");
 
 const Mapped = {
 	js: {
 		dependence: {
-			"@babel/cli": "^7.0.0-beta.47",
-			"@babel/core": "^7.0.0-beta.37",
-			"@babel/runtime-corejs2": "^7.0.0-beta.38",
-			"@babel/plugin-external-helpers": "^7.0.0-beta.47",
-			"@babel/plugin-transform-runtime": "^7.0.0-beta.38",
-			"@babel/plugin-proposal-class-properties": "^7.0.0-beta.37",
-			"@babel/plugin-proposal-decorators": "^7.0.0-beta.37",
-			"@babel/plugin-proposal-do-expressions": "^7.0.0-beta.37",
-			"@babel/plugin-proposal-function-bind": "^7.0.0-beta.37",
-			"@babel/plugin-proposal-object-rest-spread": "^7.0.0-beta.37",
-			"@babel/plugin-syntax-dynamic-import": "^7.0.0-beta.37",
+			"uglify-es": "^3.3.8",
+			"@babel/cli": "^7.1.0",
+			"@babel/core": "^7.1.0",
+			"@babel/runtime-corejs2": "^7.1.2",
+			"@babel/plugin-proposal-class-properties": "^7.1.0",
+			"@babel/plugin-proposal-decorators": "^7.0.0-beta.52",
+			"@babel/plugin-proposal-do-expressions": "^7.0.0",
+			"@babel/plugin-proposal-function-bind": "^7.0.0",
+			"@babel/plugin-proposal-object-rest-spread": "^7.0.0",
+			"@babel/plugin-syntax-dynamic-import": "^7.0.0",
 			"@babel/plugin-syntax-export-extensions": "^7.0.0-beta.32",
-			"@babel/plugin-transform-async-to-generator": "^7.0.0-beta.37",
-			"@babel/polyfill": "^7.0.0-beta.37",
-			"@babel/preset-env": "^7.0.0-beta.37",
-			"@babel/preset-typescript": "^7.0.0-beta.37",
-			"uglify-es": "^3.3.8"
+			"@babel/plugin-transform-async-to-generator": "^7.1.0",
+			"@babel/plugin-transform-runtime": "^7.1.0",
+			"@babel/polyfill": "^7.0.0",
+			"@babel/preset-env": "^7.1.0",
+			"@babel/preset-typescript": "^7.1.0",
+			"@babel/register": "^7.0.0",
+			"@babel/runtime": "^7.0.0",
 		},
 		maker: "./jsmaker"
 	},
@@ -74,24 +76,25 @@ const Mapped = {
 	},
 	ts: {
 		dependence: {
-			"@babel/cli": "^7.0.0-beta.47",
-			"@babel/core": "^7.0.0-beta.37",
-            "@babel/runtime-corejs2": "^7.0.0-beta.38",
-			"@babel/plugin-external-helpers": "^7.0.0-beta.47",
-			"@babel/plugin-transform-runtime": "^7.0.0-beta.38",
-			"@babel/plugin-proposal-class-properties": "^7.0.0-beta.37",
-			"@babel/plugin-proposal-decorators": "^7.0.0-beta.37",
-			"@babel/plugin-proposal-do-expressions": "^7.0.0-beta.37",
-			"@babel/plugin-proposal-function-bind": "^7.0.0-beta.37",
-			"@babel/plugin-proposal-object-rest-spread": "^7.0.0-beta.37",
-			"@babel/plugin-syntax-dynamic-import": "^7.0.0-beta.37",
-			"@babel/plugin-syntax-export-extensions": "^7.0.0-beta.32",
-			"@babel/plugin-transform-async-to-generator": "^7.0.0-beta.37",
-			"@babel/polyfill": "^7.0.0-beta.37",
-			"@babel/preset-env": "^7.0.0-beta.37",
-			"@babel/preset-typescript": "^7.0.0-beta.37",
+			"typescript": "^2.6.2",
 			"uglify-es": "^3.3.8",
-			"typescript": "^2.6.2"
+			"@babel/cli": "^7.1.0",
+			"@babel/core": "^7.1.0",
+			"@babel/runtime-corejs2": "^7.1.2",
+			"@babel/plugin-proposal-class-properties": "^7.1.0",
+			"@babel/plugin-proposal-decorators": "^7.0.0-beta.52",
+			"@babel/plugin-proposal-do-expressions": "^7.0.0",
+			"@babel/plugin-proposal-function-bind": "^7.0.0",
+			"@babel/plugin-proposal-object-rest-spread": "^7.0.0",
+			"@babel/plugin-syntax-dynamic-import": "^7.0.0",
+			"@babel/plugin-syntax-export-extensions": "^7.0.0-beta.32",
+			"@babel/plugin-transform-async-to-generator": "^7.1.0",
+			"@babel/plugin-transform-runtime": "^7.1.0",
+			"@babel/polyfill": "^7.0.0",
+			"@babel/preset-env": "^7.1.0",
+			"@babel/preset-typescript": "^7.1.0",
+			"@babel/register": "^7.0.0",
+			"@babel/runtime": "^7.0.0",
 		},
 		maker: "./tsmaker"
 	}
@@ -194,15 +197,8 @@ let Maker = {
 			let content = new File(appPath).readSync();
 			content = require("@babel/core").transform(content, {
 				filename: appPath,
-				presets: [
-					"@babel/typescript", ["@babel/env", {"targets": {"browsers": "last 2 Chrome versions"}}]
-				],
-				plugins: [
-					["@babel/plugin-proposal-decorators", {"legacy": true}],
-					["@babel/plugin-proposal-class-properties", {"loose": true}],
-					"@babel/transform-async-to-generator",
-					"@babel/syntax-dynamic-import"
-				]
+				presets: Config.compiler.babel.presets,
+				plugins: Config.compiler.babel.plugins
 			}).code;
 			try {
 				content = require("uglify-es").minify(content).code;
@@ -210,7 +206,6 @@ let Maker = {
 			}
 			return content;
 		});
-
 	},
 	babelCode(config, code, path) {
 		return base.checkDependence("js", config).then(() => {
