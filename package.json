@@ -1,7 +1,7 @@
 {
     "name": "ada-pack",
     "version": "3.0.0",
-    "description": "ada pack",
+    "description": "Packer for adajs projects",
     "main": "index.js",
     "scripts": {},
     "repository": {
@@ -12,6 +12,9 @@
     "license": "MIT",
     "bugs": {
         "url": "https://github.com/topolr/ada-pack/issues"
+    },
+    "bin": {
+        "adapack": "./bin/cli.js"
     },
     "homepage": "https://github.com/topolr/ada-pack#readme",
     "dependencies": {

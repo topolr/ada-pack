@@ -1,10 +1,10 @@
-let File = require("../base/lib/file");
+let File = require("../../base/lib/file");
 let Path = require("path");
-let util = require("../base/util/util");
+let util = require("../../base/util/util");
 
 function publish() {
     util.showTips();
-    let projectPath = Path.resolve(__dirname, "./../../../");
+    let projectPath = process.cwd();
     let packagePath = Path.resolve(projectPath, "./package.json");
     let packageInfo = JSON.parse(new File(packagePath).readSync());
     if (!packageInfo["ada-publish"]) {
@@ -20,7 +20,14 @@ function publish() {
     if (!new File(appPath).isExists()) {
         appPath = Path.resolve(projectPath, "./app.js");
     }
-    return require("./../index").publish(appPath);
+    return require("../../index").publish(appPath);
 }
 
-publish();
+module.exports = {
+	command: "publish",
+	desc: "publish project",
+	paras: [],
+	fn: function () {
+		publish();
+	}
+};
