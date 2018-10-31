@@ -4,7 +4,6 @@ let util = require("../../base/util/util");
 let ora = require('ora');
 
 function runDev() {
-	util.showTips();
 	let projectPath = process.cwd();
 	let express = require(Path.resolve(projectPath, "./node_modules/express"));
 	let packagePath = Path.resolve(projectPath, "./package.json");
@@ -24,34 +23,6 @@ function runDev() {
 	}
 	return util.getAppInfo(appPath).then(appInfo => {
 		let ps = Promise.resolve();
-		if (appInfo.proxy && appInfo.proxy.server) {
-			let proxy = new File(Path.resolve(projectPath, "./node_modules/http-proxy-middleware"));
-			if (!proxy.isExists()) {
-				ps = ps.then(() => {
-					return new Promise((resolve, reject) => {
-						let name = "http-proxy-middleware";
-						let spinner = ora({
-							color: "yellow",
-							text: `INSTALL MODULE [ ${name} ]`
-						}).start();
-						let args = ["install", name, "--save-dev"];
-						require("child_process").exec(`npm ${args.join(" ")}`, {
-							encoding: "utf-8",
-							cwd: projectPath
-						}, (error, stdout, stderr) => {
-							if (error) {
-								spinner.fail(`INSTALL MODULE [ ${name} ]`);
-								console.log(`Please run > npm install`.red, `${name}`.white, `to install the module`.red);
-								reject(name);
-							} else {
-								spinner.succeed(`INSTALL MODULE [ ${name} ]`);
-								resolve(name);
-							}
-						});
-					});
-				});
-			}
-		}
 		ps.then(() => {
 			if (!appInfo.server) {
 				appInfo.server = {
@@ -87,7 +58,6 @@ function runDev() {
 			app.get('*', function (req, res) {
 				res.send(require("fs").readFileSync(Path.resolve(distPath, "./index.html"), "utf-8"));
 			});
-
 			app.listen(port, () => {
 				process.send({type: "done"});
 			});
