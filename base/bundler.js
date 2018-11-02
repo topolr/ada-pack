@@ -11,7 +11,7 @@ let gzipSize = require('gzip-size');
 let ignore = require('ignore');
 let ora = require('ora');
 let AdaBundler = require("./util/adabundler");
-let EntryBundler = require("./util/adabundler");
+let EntryBundler = require("./util/entryb");
 
 const THRIDPARTFOLDER = "node_modules";
 const IGNOREMODULES = ["fs", "path", "util", "http", "url", "zlib", "https", "events", "crypto", "adajs"];
