@@ -99,23 +99,17 @@ class EntryBundler {
 		});
 	}
 
-	bundle(path, output, develop) {
+	bundle(path) {
 		let config = this.config;
 		path = path.replace(/\\/g, "/");
 		return this.getCodeMap(path).then(() => {
-			let packageInfo = require(Path.resolve(path, "./../package.json")), veison = packageInfo.version;
 			this.resultmap.push(path);
 			let result = this.resultmap.map(path => {
 				return `function(module,exports,require){${this.resultmapcode[path]}}`;
 			});
-			let code = `(function (map){var I={};var R = function (i) {if (I[i]) {return I[i].exports;}var module = I[i] = {exports: {}};map[i].call(module.exports, module, module.exports, R);return module.exports;};return R(map.length-1);})([${result.join(",")}])`;
+			let code = `(function(p){var a={};var r=function(i){if(a[i]){return a[i].exports;}var m=a[i]={exports:{}};p[i].call(m.exports,m,m.exports,r);return m.exports;};return r(p.length-1);})([${result.join(",")}])`;
 			config.entryHash = hash.md5(code).substring(0, 10);
-			return new File(output).write(code).then(() => {
-				spinner.stop();
-				process.stderr.clearLine();
-				process.stderr.cursorTo(0);
-				console.log(` BUNDLE INITER DONE [${develop ? "DEVELOP" : "PUBLIC"} MODE GZIP:${util.getFileSizeAuto(gzipSize.sync(adacode))}]`.yellow);
-			});
+			return code;
 		});
 	}
 }
