@@ -434,11 +434,11 @@ let base = {
 			return new File(Path.resolve(config.source_path, icon.src)).copyTo(Path.resolve(config.dist_path, icon.src));
 		})).then(() => {
 			if (config.initer) {
-				return new EntryBundler(config).bundle(Path.resolve(config.source_path, config.initer));
+				return new EntryBundler(config).bundle(Path.resolve(config.base_path, config.initer));
 			}
 			return "";
 		}).then(initerStr => {
-			let content = `<!DOCTYPE html><html><head><link rel="manifest" href="manifest.json"><meta charset="${page.charset}"><title>${config.name}</title>${metaContent}${iconsContent}${styleContent}${linkContent}${scriptContent}<script src="${config._adaPath}"></script><script>${config.regist_service ? workerRegistCode : ""}</script><script>${initerStr ? 'Ada.init(' + initerStr + ')' : ''}Ada.boot(${JSON.stringify(config.ada)});</script></head><body></body></html>`;
+			let content = `<!DOCTYPE html><html><head><link rel="manifest" href="manifest.json"><meta charset="${page.charset}"><title>${config.name}</title>${metaContent}${iconsContent}${styleContent}${linkContent}${scriptContent}<script src="${config._adaPath}"></script><script>${config.regist_service ? workerRegistCode : ""}</script><script>${initerStr ? 'Ada.init(' + initerStr + ');' : ''}Ada.boot(${JSON.stringify(config.ada)});</script></head><body></body></html>`;
 			if (manifest.icons) {
 				manifest.icons.forEach(icon => {
 					icon.src = config.site_url + icon.src;
