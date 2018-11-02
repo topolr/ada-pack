@@ -13,6 +13,7 @@ module.exports = {
     theme_color: "#fff",
     description: "ada web framework.",
     main: "./src/root.js",
+    initer:"",
     entry_path: "",
     entry_auto: true,
     ada_autobundle: true,
