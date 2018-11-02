@@ -1,4 +1,10 @@
 let EntryBundler = require("./entryb");
+let ora = require("ora");
+let util = require("./util");
+let File = require("./../lib/file");
+let Path = require("path");
+let hash = require("./../lib/md5");
+let gzipSize = require('gzip-size');
 
 class AdaBundler extends EntryBundler {
 	bundle(path, output, develop) {
