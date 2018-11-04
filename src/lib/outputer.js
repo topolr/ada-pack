@@ -30,7 +30,7 @@ class Pack {
     }
 
     getMapName() {
-        return util.getMappedPath(this._name.substring(this._sourceMap.config.sourcePath.length).replace(/\//g, "-").replace(/\\/g, "-"));
+        return util.getMappedPath("package-" + this._name.substring(this._sourceMap.config.sourcePath.length).replace(/\//g, "-").replace(/\\/g, "-"));
     }
 
     getHash() {
