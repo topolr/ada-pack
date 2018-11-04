@@ -4,10 +4,12 @@ let Path = require("path");
 let ignore = require('ignore');
 let Outputer = require("./outputer");
 let Maker = require("./maker");
-let BaseEntity = require("./entity/base");
 let ExcutorEntity = require("./entity/excutor");
 let StyleEntity = require("./entity/style");
 let HtmlEntity = require("./entity/html");
+let BinaryEntity = require("./entity/binary");
+let TextEntity = require("./entity/text");
+let isbinaryfile = require("isbinaryfile");
 
 class SourceMap {
     constructor(config) {
@@ -38,7 +40,7 @@ class SourceMap {
 
     static getDependencesOf(entry) {
         let entity = this.getEntity(entry), result = new Set();
-        if (entity) {
+        if (entity && entity instanceof TextEntity) {
             entity.dependence.forEach(path => {
                 result.add(path);
                 SourceMap.getDependencesOf.call(this, path).forEach(k => result.add(k));
@@ -49,21 +51,25 @@ class SourceMap {
 
     static mapEntity(path) {
         let entity = this.setEntity(path);
-        return entity.getDependenceInfo().then(dependences => {
-            return dependences.reduce((a, dependence) => {
-                return a.then(() => {
-                    return SourceMap.mapEntity.call(this, dependence);
-                });
-            }, Promise.resolve());
-        });
+        if (entity instanceof TextEntity) {
+            return entity.getDependenceInfo().then(dependences => {
+                return dependences.reduce((a, dependence) => {
+                    return a.then(() => {
+                        return SourceMap.mapEntity.call(this, dependence);
+                    });
+                }, Promise.resolve());
+            });
+        } else {
+            return Promise.resolve();
+        }
     }
 
     getMapName(path) {
-        let str = "";
+        let str = "", config = this.config;
         if (path.indexOf("node_modules/") === -1) {
-            str = path.substring(this.config.sourcePath.length);
+            str = path.substring(config.sourcePath.length);
         } else {
-            str = "node_modules" + path.substring(this.config.nmodulePath.length);
+            str = "node_modules" + path.substring(config.nmodulePath.length);
         }
         return str;
     }
@@ -71,14 +77,19 @@ class SourceMap {
     setEntity(path) {
         if (!this.hasEntity(path)) {
             let entity = null;
-            if ([".js", ".ts"].indexOf(Path.extname(path)) !== -1) {
-                entity = new ExcutorEntity(this, path);
-            } else if ([".css", ".less", ".scss"].indexOf(Path.extname(path)) !== -1) {
-                entity = new StyleEntity(this, path);
-            } else if ([".html"].indexOf(Path.extname(path)) !== -1) {
-                entity = new HtmlEntity(this, path);
+            if (!isbinaryfile.sync(path)) {
+                let suffix = Path.extname(path);
+                if ([".js", ".ts"].indexOf(suffix) !== -1) {
+                    entity = new ExcutorEntity(this, path);
+                } else if ([".css", ".less", ".scss"].indexOf(suffix) !== -1) {
+                    entity = new StyleEntity(this, path);
+                } else if ([".html"].indexOf(suffix) !== -1) {
+                    entity = new HtmlEntity(this, path);
+                } else {
+                    entity = new TextEntity(this, path);
+                }
             } else {
-                entity = new BaseEntity(this, path);
+                entity = new BinaryEntity(this, path);
             }
             this._map[this.getMapName(path)] = entity;
             return entity;
@@ -151,6 +162,9 @@ class SourceMap {
     }
 
     removeFiles(files) {
+        files.forEach(file => {
+            delete this._map[this.getMapName(file)];
+        });
         return this.map();
     }
 

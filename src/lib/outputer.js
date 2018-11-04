@@ -1,5 +1,4 @@
 let hash = require("./../util/md5");
-let isbinaryfile = require("isbinaryfile");
 let gzipSize = require('gzip-size');
 let ora = require('ora');
 let AdaBundler = require("./bundler/ada");
@@ -7,6 +6,7 @@ let EntryBundler = require("./bundler/entry");
 let File = require("./../util/file");
 let Path = require("path");
 let util = require("./../util/helper");
+let BinaryEntity = require("./entity/binary");
 
 class Pack {
     constructor(sourceMap, name, files) {
@@ -19,8 +19,8 @@ class Pack {
         this._content = {};
         this._files.map(file => {
             let entity = this._sourceMap.getEntity(file);
-            if (!entity.isBinaryFile()) {
-                this._content[entity.getMapName()] = {
+            if (!(entity instanceof BinaryEntity)) {
+                this._content[entity.mapName] = {
                     hash: entity.getHash(),
                     code: entity.getContent()
                 }
@@ -68,11 +68,9 @@ class Outputer {
         let map = {packages: {}};
         Reflect.ownKeys(this._sourceMap._map).forEach(key => {
             let entity = this._sourceMap._map[key];
-            if (entity.isMaked()) {
-                let name = entity.getMapName();
-                let hash = entity.getHash();
-                map[name] = hash;
-            }
+            let name = entity.getMapName();
+            let hash = entity.getHash();
+            map[name] = hash;
         });
         Reflect.ownKeys(this._packs).forEach(key => {
             let pack = this._packs[key];
@@ -125,12 +123,10 @@ class Outputer {
         return Reflect.ownKeys(this._sourceMap._map).reduce((a, key) => {
             return a.then(() => {
                 let entity = this._sourceMap._map[key];
-                if (entity.isBinaryFile()) {
+                if (entity instanceof BinaryEntity) {
                     return new File(entity.path).copyTo(entity.getDistPath());
                 } else {
-                    if (entity.isMaked()) {
-                        return new File(entity.getDistPath()).write(entity.getContent());
-                    }
+                    return new File(entity.getDistPath()).write(entity.getContent());
                 }
             });
         }, Promise.resolve());

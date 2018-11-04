@@ -1,7 +1,5 @@
-let BaseEntity = require("./base");
+let BaseEntity = require("./text");
 let {ENTITYNONE, ENTITYREADY} = require("./const");
-let hash = require("./../../util/md5");
-let gzipSize = require('gzip-size');
 let util = require("./../../util/helper");
 let Path = require("path");
 let File = require("./../../util/file");
@@ -45,22 +43,6 @@ class StyleEntity extends BaseEntity {
         } else {
             return Promise.resolve(this.dependence);
         }
-    }
-
-    getContent() {
-        return this.content;
-    }
-
-    getHash() {
-        return hash.md5(this.getContent()).substring(0, 8);
-    }
-
-    getGzipSize() {
-        return gzipSize(this.getContent());
-    }
-
-    getFileSize() {
-        return util.getFileSizeAuto(this.getContent());
     }
 }
 

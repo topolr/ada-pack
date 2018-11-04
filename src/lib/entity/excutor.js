@@ -1,12 +1,9 @@
-let BaseEntity = require("./base");
+let TextEntity = require("./text");
 let {ENTITYNONE, ENTITYREADY, THRIDPARTFOLDER, IGNOREMODULES} = require("./const");
-let hash = require("./../../util/md5");
-let gzipSize = require('gzip-size');
-let util = require("./../../util/helper");
 let Path = require("path");
 let File = require("./../../util/file");
 
-class ExcutorEntity extends BaseEntity {
+class ExcutorEntity extends TextEntity {
     getDependenceInfo() {
         if (this.state === ENTITYNONE) {
             let config = this.sourceMap.config;
@@ -122,22 +119,6 @@ class ExcutorEntity extends BaseEntity {
         } else {
             return Promise.resolve(this.dependence);
         }
-    }
-
-    getContent() {
-        return this.content;
-    }
-
-    getHash() {
-        return hash.md5(this.getContent()).substring(0, 8);
-    }
-
-    getGzipSize() {
-        return gzipSize(this.getContent());
-    }
-
-    getFileSize() {
-        return util.getFileSizeAuto(this.getContent());
     }
 }
 
