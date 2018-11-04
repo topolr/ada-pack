@@ -1,10 +1,10 @@
-let BaseEntity = require("./text");
+let TextEntity = require("./text");
 let {ENTITYNONE, ENTITYREADY} = require("./const");
 let util = require("./../../util/helper");
 let Path = require("path");
 let File = require("./../../util/file");
 
-class StyleEntity extends BaseEntity {
+class StyleEntity extends TextEntity {
     getDependenceInfo() {
         if (this.state === ENTITYNONE) {
             let config = this.sourceMap.config;
