@@ -1,15 +1,15 @@
-let maker = require("../maker");
 let util = require("./../../util/helper");
-let File = require("../../../base/lib/file");
+let File = require("../../util/file");
 let Path = require("path");
-let queue = require("../../../base/lib/queue");
+let queue = require("../../util/queue");
 
 class EntryPacker {
-    constructor(config) {
+    constructor(config, maker) {
         this.resultmap = ["nothing"];
         this.resultmapcode = {"nothing": "module.exports={}"};
         this.contentCache = {};
         this.config = config;
+        this.maker = maker;
     }
 
     getFileCode(path) {
@@ -20,11 +20,11 @@ class EntryPacker {
                 if (suffix === "html") {
                     resolve(`module.exports=${JSON.stringify(file.readSync().replace(/\n/g, '').replace(/\r/g, '').replace(/\n\r/g, ''))}`);
                 } else if (suffix === "less") {
-                    maker.lessCode(file.readSync()).then(code => {
+                    this.maker.lessCode(file.readSync()).then(code => {
                         resolve(`module.exports={active:function(){var _a = document.createElement("style");_a.setAttribute("media", "screen");_a.setAttribute("type", "text/css");_a.appendChild(document.createTextNode(${JSON.stringify(code)}));document.head.appendChild(_a);}};`);
                     });
                 } else if (suffix === "icon") {
-                    maker.minifyIcon(file.readSync()).then(({name, code}) => {
+                    this.maker.minifyIcon(file.readSync()).then(({name, code}) => {
                         let result = `var active=function(){var c=document.getElementById("ada-icon-container");if(!c){var c=document.createElement("div");c.setAttribute("id","ada-icon-container");c.style.cssText="width:0;height:0;";document.body.appendChild(c);}if(!document.getElementById("${name}")){var a=document.createElement("div");a.innerHTML=${JSON.stringify(code)};c.appendChild(a.childNodes[0]);}};module.exports={active:function(){if(/complete|loaded|interactive/.test(window.document.readyState)){active();}else{window.addEventListener("DOMContentLoaded",function(){active();});}},getIconId:function(){return "${name}";}};`;
                         resolve(result);
                     });
@@ -39,9 +39,7 @@ class EntryPacker {
                         if (path.indexOf("node_modules") === -1) {
                             resolve(__code);
                         } else {
-                            maker.babelCode(config, __code, path).then(content => {
-                                resolve(content);
-                            });
+                            resolve(this.maker.babelCode(__code, path));
                         }
                     }
                 }

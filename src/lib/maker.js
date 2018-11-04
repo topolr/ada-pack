@@ -8,12 +8,16 @@ class Maker {
         this._config = config;
         this._installer = new Installer(config, {
             startInstall(names) {
+                console.log(`start install ${names.join(",")}`);
             },
             beforeInstall(name) {
+                console.log(`before install ${name}`);
             },
             installed(name) {
+                console.log(`installed ${name}`);
             },
             installError(name) {
+                console.log(`install error ${name}`);
             }
         });
     }

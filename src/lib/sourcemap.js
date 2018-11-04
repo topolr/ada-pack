@@ -89,7 +89,7 @@ class SourceMap {
     }
 
     hasEntity(path) {
-        return !!this.map[this.getMapName(path)];
+        return !!this._map[this.getMapName(path)];
     }
 
     getTargetPath(filePath, path) {

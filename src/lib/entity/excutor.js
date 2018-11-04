@@ -4,17 +4,14 @@ let hash = require("./../../util/md5");
 let gzipSize = require('gzip-size');
 let util = require("./../../util/helper");
 let Path = require("path");
+let File = require("./../../util/file");
 
 class ExcutorEntity extends BaseEntity {
-    constructor(sourceMap, path) {
-        super(sourceMap, path);
-        this.dependences = new Set();
-    }
-
     getDependenceInfo() {
         if (this.state === ENTITYNONE) {
             let config = this.sourceMap.config;
             if (config.ignore.ignores("./" + this.path.substring(config.sourcePath.length))) {
+                this.content = new File(this.path).readSync();
                 return Promise.resolve(this.dependence);
             } else {
                 return this.sourceMap.maker.make(this.path).then(content => {

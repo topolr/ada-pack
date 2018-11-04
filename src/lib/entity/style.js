@@ -11,6 +11,7 @@ class StyleEntity extends BaseEntity {
         if (this.state === ENTITYNONE) {
             let config = this.sourceMap.config;
             if (config.ignore.ignores("./" + this.path.substring(config.sourcePath.length))) {
+                this.content = new File(this.path).readSync();
                 return Promise.resolve(this.dependence);
             } else {
                 return this.sourceMap.maker.make(this.path).then(content => {
