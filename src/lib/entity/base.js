@@ -18,10 +18,6 @@ class BaseEntity {
         this.mapName = str;
     }
 
-    isMaked() {
-        return this.state !== ENTITYNONE;
-    }
-
     getHash() {
         return new File(this.path).hash().substring(0, 8);
     }

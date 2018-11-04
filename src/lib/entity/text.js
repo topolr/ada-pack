@@ -12,10 +12,6 @@ class TextEntity extends BaseEntity {
         this.state = ENTITYNONE;
     }
 
-    isMaked() {
-        return this.state !== ENTITYNONE;
-    }
-
     getDependenceInfo() {
         return this.sourceMap.maker.make(this.path).then(content => {
             this.state = ENTITYREADY;
