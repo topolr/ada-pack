@@ -1,4 +1,4 @@
-let {ENTITYNONE, THRIDPARTFOLDER} = require("./const");
+let {ENTITYNONE, ENTITYREADY, THRIDPARTFOLDER} = require("./const");
 let util = require("./../../util/helper");
 let File = require("./../../util/file");
 let Path = require("path");
@@ -23,6 +23,7 @@ class BaseEntity {
     }
 
     getDependenceInfo() {
+        this.state = ENTITYREADY;
         return Promise.resolve(this.dependence);
     }
 
