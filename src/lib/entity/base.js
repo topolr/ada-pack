@@ -18,6 +18,10 @@ class BaseEntity {
         return isbinaryfile.sync(this.path);
     }
 
+    isMaked() {
+        return this.state !== ENTITYNONE;
+    }
+
     getDependenceInfo() {
         return Promise.resolve(this.dependence);
     }

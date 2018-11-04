@@ -12,13 +12,14 @@ module.exports = {
     manifest: {
         name: "ada",
         icons: [],
-        shortName: "ada",
-        startURL: "/",
+        short_name: "ada",
+        start_url: "/",
         display: "standalone",
-        backgroundColor: "#fff",
-        themeColor: "#fff",
+        background_color: "#fff",
+        theme_color: "#fff",
         description: "ada web framework.",
-        relatedApplications: [{"platform": "web"}],
+        related_applications: [{"platform": "web"}],
+        keywords: ""
     },
     page: {
         charset: "UTF-8",
