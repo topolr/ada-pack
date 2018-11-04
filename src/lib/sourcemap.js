@@ -7,6 +7,7 @@ let Maker = require("./maker");
 let BaseEntity = require("./entity/base");
 let ExcutorEntity = require("./entity/excutor");
 let StyleEntity = require("./entity/style");
+let HtmlEntity = require("./entity/html");
 
 class SourceMap {
     constructor(config) {
@@ -74,6 +75,8 @@ class SourceMap {
                 entity = new ExcutorEntity(this, path);
             } else if ([".css", ".less", ".scss"].indexOf(Path.extname(path)) !== -1) {
                 entity = new StyleEntity(this, path);
+            } else if ([".html"].indexOf(Path.extname(path)) !== -1) {
+                entity = new HtmlEntity(this, path);
             } else {
                 entity = new BaseEntity(this, path);
             }

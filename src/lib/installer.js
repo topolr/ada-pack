@@ -83,14 +83,18 @@ class Installer {
 
     readyTypeModules(type) {
         let map = this.config.dependence, target = [];
-        Reflect.ownKeys(map[type].dependence).forEach(name => {
-            if (target.indexOf(name) === -1) {
-                target.push(name);
-            }
-        });
-        return this.checkInstallModules(target).then(result => {
-            return this.installModules(result);
-        });
+        if (map[type]) {
+            Reflect.ownKeys(map[type].dependence).forEach(name => {
+                if (target.indexOf(name) === -1) {
+                    target.push(name);
+                }
+            });
+            return this.checkInstallModules(target).then(result => {
+                return this.installModules(result);
+            });
+        } else {
+            return Promise.resolve();
+        }
     }
 
     readyProjectModules() {

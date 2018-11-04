@@ -32,9 +32,13 @@ class Maker {
 
     make(path) {
         let type = Path.extname(path).substring(1), content = new File(path).readSync();
-        return this.installer.readyTypeModules(type).then(() => {
-            return this.config.dependence[type].maker(content, path, this.config);
-        });
+        if (this.config.dependence[type]) {
+            return this.installer.readyTypeModules(type).then(() => {
+                return this.config.dependence[type].maker(content, path, this.config);
+            });
+        } else {
+            return Promise.resolve(content);
+        }
     }
 
     babelCode(code, path) {

@@ -1,6 +1,7 @@
 let {ENTITYNONE, ENTITYREADY, THRIDPARTFOLDER} = require("./const");
 let util = require("./../../util/helper");
 let File = require("./../../util/file");
+let hash = require("./../../util/md5");
 let Path = require("path");
 let isbinaryfile = require("isbinaryfile");
 
@@ -23,18 +24,29 @@ class BaseEntity {
     }
 
     getDependenceInfo() {
-        this.state = ENTITYREADY;
-        return Promise.resolve(this.dependence);
+        if (!this.isBinaryFile()) {
+            return this.sourceMap.maker.make(this.path).then(content => {
+                this.state = ENTITYREADY;
+                this.content = content;
+                return this.dependence;
+            });
+        } else {
+            return Promise.resolve(this.dependence);
+        }
     }
 
     getContent() {
-        if (this.isBinaryFile()) {
-            return this.sourceMap.maker.make(this.path).catch(e => this.errorLog = e);
+        if (!this.isBinaryFile()) {
+            return this.content;
         }
     }
 
     getHash() {
-        return new File(this.path).hash().substring(0, 8);
+        if (!this.isBinaryFile()) {
+            return new File(this.path).hash().substring(0, 8);
+        } else {
+            return hash.md5(this.content).substring(0, 8);
+        }
     }
 
     getMapName() {
