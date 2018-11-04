@@ -58,8 +58,8 @@ module.exports = {
                                 fn && fn({
                                     type: "add",
                                     files: a.add.map(a => a.substring(Path.resolve(basePath, config.source_path).length + 1).replace(/\\/g, "/")),
-                                    map: packer.sourceMap.getSourceMap(),
-                                    log: packer.sourceMap.getLogInfo()
+                                    map: packer.sourceMap.outputer.getSourceMap(),
+                                    log: packer.sourceMap.outputer.getLogInfo()
                                 });
                             });
                         } else if (a.edit) {
@@ -67,8 +67,8 @@ module.exports = {
                                 fn && fn({
                                     type: "edit",
                                     files: a.edit.map(a => a.substring(Path.resolve(basePath, config.source_path).length + 1).replace(/\\/g, "/")),
-                                    map: packer.sourceMap.getSourceMap(),
-                                    log: packer.sourceMap.getLogInfo()
+                                    map: packer.sourceMap.outputer.getSourceMap(),
+                                    log: packer.sourceMap.outputer.getLogInfo()
                                 });
                             });
                         } else if (a.remove) {
@@ -76,8 +76,8 @@ module.exports = {
                                 fn && fn({
                                     type: "remove",
                                     files: a.remove.map(a => a.substring(Path.resolve(basePath, config.source_path).length + 1).replace(/\\/g, "/")),
-                                    map: packer.sourceMap.getSourceMap(),
-                                    log: packer.sourceMap.getLogInfo()
+                                    map: packer.sourceMap.outputer.getSourceMap(),
+                                    log: packer.sourceMap.outputer.getLogInfo()
                                 });
                             });
                         }

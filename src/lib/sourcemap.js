@@ -31,6 +31,10 @@ class SourceMap {
         return this._entries;
     }
 
+    get outputer() {
+        return this._outputer;
+    }
+
     static getDependencesOf(entry) {
         let entity = this.getEntity(entry), result = new Set();
         if (entity) {
@@ -145,12 +149,6 @@ class SourceMap {
 
     removeFiles(files) {
         return this.map();
-    }
-
-    getSourceMap() {
-    }
-
-    getLogInfo() {
     }
 
     map() {

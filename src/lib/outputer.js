@@ -4,11 +4,15 @@ let gzipSize = require('gzip-size');
 let ora = require('ora');
 let AdaBundler = require("./bundler/ada");
 let EntryBundler = require("./bundler/entry");
+let File = require("./../util/file");
+let Path = require("path");
+let util = require("./../util/helper");
 
 class Pack {
-    constructor(sourceMap, files) {
+    constructor(sourceMap, name, files) {
         this._sourceMap = sourceMap;
         this._files = files;
+        this._name = name;
     }
 
     getContent() {
@@ -23,6 +27,10 @@ class Pack {
             }
         });
         return JSON.stringify(this._content);
+    }
+
+    getMapName() {
+        return util.getMappedPath("package-" + this._name.replace(/\//g, "-").replace(/\\/g, "-"));
     }
 
     getHash() {
@@ -46,7 +54,7 @@ class Outputer {
         this._adaBunlder = new AdaBundler(config);
         this._packs = {};
         Reflect.ownKeys(this._sourceMap._entryDependenceMap).forEach(key => {
-            this._packs[key] = new Pack(sourceMap, this._sourceMap._entryDependenceMap[key]);
+            this._packs[key] = new Pack(sourceMap, key, this._sourceMap._entryDependenceMap[key]);
         });
     }
 
@@ -54,11 +62,45 @@ class Outputer {
         return this._config;
     }
 
+    getSourceMap() {
+        let map = {};
+        Reflect.ownKeys(this._sourceMap._map).forEach(key => {
+            let entity = map[key] = this._sourceMap._map[key];
+            let name = entity.getMapName();
+            let hash = entity.getHash();
+            map[name] = hash;
+        });
+        Reflect.ownKeys(this._packs).forEach(key => {
+            let pack = this._packs[key];
+            let name = pack.getMapName(), hash = pack.getHash();
+            map[name]=hash;
+        });
+    }
+
+    getLogInfo() {
+    }
+
+    outputAda() {
+    }
+
     outputFiles() {
+        return Reflect.ownKeys(this._sourceMap._map).reduce((a, entity) => {
+            return a.then(() => {
+                if (entity.isBinaryFile()) {
+                    return new File(entity.path).copyTo(entity.getDistPath());
+                } else {
+                    return new File(entity.getDistPath()).write(entity.getContent());
+                }
+            });
+        }, Promise.resolve());
     }
 
     outputPackFiles() {
-
+        return Reflect.ownKeys(this._packs).reduce((a, pack) => {
+            return a.then(() => {
+                return new File(Path.resolve(this._sourceMap.config.distPath, `./${pack.getMapName()}.js`)).write(pack.getContent());
+            });
+        }, Promise.resolve());
     }
 
     outputPWAFile() {

@@ -39,6 +39,10 @@ class BaseEntity {
         this.state = ENTITYNONE;
         this.errorLog = null;
     }
+
+    getDistPath() {
+        return this.sourceMap.config.distPath + this.path.substring(this.sourceMap.config.basePath);
+    }
 }
 
 module.exports = BaseEntity;
