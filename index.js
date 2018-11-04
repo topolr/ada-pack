@@ -1,112 +1,93 @@
-let bundler = require("./base/bundler");
+let colors = require("colors");
 let path = require("path");
 let chokidar = require('chokidar');
 let Path = require("path");
-let colors = require("colors");
-let util = require("./base/util/util");
-let maker = require("./base/maker/maker");
-
-let waiter = {
-    _data: {},
-    _tid: null,
-    _time: 500,
-    _fn: null,
-    _times: 0,
-    add: function (type, path) {
-        if (!this._data[type]) {
-            this._data[type] = [];
-        }
-        if (this._data[type].indexOf(path) === -1) {
-            this._data[type].push(path);
-        }
-        if (this.tid !== null) {
-            clearTimeout(this.tid);
-        }
-        setTimeout(() => {
-            let _has = false;
-            for (let i in this._data) {
-                _has = true;
-            }
-            if (_has) {
-                this._fn && this._fn(this._data, this._times);
-                this._times++;
-            }
-            this._data = {};
-            this._tid = null;
-        }, this._time);
-        return this;
-    },
-    setHandler: function (fn) {
-        this._fn = fn;
-        return this;
-    }
-};
+let Packer = require("./src/index");
 
 module.exports = {
-    develop(appPath = "", fn) {
+    develop(config, fn) {
         return new Promise((resolve, reject) => {
-            util.getAppInfo(appPath).then(config => {
-                let basePath = path.resolve(appPath, "./../");
-                bundler(Object.assign({
-                    base_path: basePath,
-                    develop: true,
-                    projectPath: path.resolve(__dirname, "./../../"),
-                    complete() {
-                        resolve();
+            let waiter = {
+                _data: {},
+                _tid: null,
+                _time: 500,
+                _fn: null,
+                _times: 0,
+                add: function (type, path) {
+                    if (!this._data[type]) {
+                        this._data[type] = [];
                     }
-                }, config)).then(_bundler => {
-                    chokidar.watch(path.resolve(basePath, config.source_path), {ignored: /[\/\\]\./}).on('change', function (path) {
-                        waiter.add("edit", path);
-                    }).on('add', function (path) {
-                        waiter.add("add", path);
-                    }).on('unlink', function (path) {
-                        waiter.add("remove", path);
-                    }).on("ready", function () {
-                        waiter.setHandler(function (a, times) {
-                            if (a.add) {
-                                _bundler.addFiles(a.add).then((info) => {
-                                    fn && fn({
-                                        type: "add",
-                                        files: a.add.map(a => a.substring(Path.resolve(basePath, config.source_path).length + 1).replace(/\\/g, "/")),
-                                        map: info.map,
-                                        log: info.log
-                                    });
+                    if (this._data[type].indexOf(path) === -1) {
+                        this._data[type].push(path);
+                    }
+                    if (this.tid !== null) {
+                        clearTimeout(this.tid);
+                    }
+                    setTimeout(() => {
+                        let _has = false;
+                        for (let i in this._data) {
+                            _has = true;
+                        }
+                        if (_has) {
+                            this._fn && this._fn(this._data, this._times);
+                            this._times++;
+                        }
+                        this._data = {};
+                        this._tid = null;
+                    }, this._time);
+                    return this;
+                },
+                setHandler: function (fn) {
+                    this._fn = fn;
+                    return this;
+                }
+            };
+            let packer = new Packer(Object.assign(config, {develop: true}));
+            let basePath = config.basePath;
+            packer.pack().then(() => {
+                chokidar.watch(path.resolve(basePath, config.sourcePath), {ignored: /[\/\\]\./}).on('change', function (path) {
+                    waiter.add("edit", path);
+                }).on('add', function (path) {
+                    waiter.add("add", path);
+                }).on('unlink', function (path) {
+                    waiter.add("remove", path);
+                }).on("ready", function () {
+                    waiter.setHandler(function (a, times) {
+                        if (a.add) {
+                            packer.sourceMap.addFiles(a.add).then((info) => {
+                                fn && fn({
+                                    type: "add",
+                                    files: a.add.map(a => a.substring(Path.resolve(basePath, config.source_path).length + 1).replace(/\\/g, "/")),
+                                    map: packer.sourceMap.getSourceMap(),
+                                    log: packer.sourceMap.getLogInfo()
                                 });
-                            } else if (a.edit) {
-                                _bundler.editFiles(a.edit).then((info) => {
-                                    fn && fn({
-                                        type: "edit",
-                                        files: a.edit.map(a => a.substring(Path.resolve(basePath, config.source_path).length + 1).replace(/\\/g, "/")),
-                                        map: info.map,
-                                        log: info.log
-                                    });
+                            });
+                        } else if (a.edit) {
+                            packer.sourceMap.editFiles(a.edit).then((info) => {
+                                fn && fn({
+                                    type: "edit",
+                                    files: a.edit.map(a => a.substring(Path.resolve(basePath, config.source_path).length + 1).replace(/\\/g, "/")),
+                                    map: packer.sourceMap.getSourceMap(),
+                                    log: packer.sourceMap.getLogInfo()
                                 });
-                            } else if (a.remove) {
-                                _bundler.editFiles(a.remove).then((info) => {
-                                    fn && fn({
-                                        type: "remove",
-                                        files: a.remove.map(a => a.substring(Path.resolve(basePath, config.source_path).length + 1).replace(/\\/g, "/")),
-                                        map: info.map,
-                                        log: info.log
-                                    });
+                            });
+                        } else if (a.remove) {
+                            packer.sourceMap.editFiles(a.remove).then((info) => {
+                                fn && fn({
+                                    type: "remove",
+                                    files: a.remove.map(a => a.substring(Path.resolve(basePath, config.source_path).length + 1).replace(/\\/g, "/")),
+                                    map: packer.sourceMap.getSourceMap(),
+                                    log: packer.sourceMap.getLogInfo()
                                 });
-                            }
-                        });
+                            });
+                        }
                     });
                 });
-            });
+                resolve();
+            }, () => reject);
         });
     },
-    publish(appPath = "") {
-        util.getAppInfo(appPath).then(config => {
-            let basePath = path.resolve(appPath, "./../");
-            return bundler(Object.assign({
-                base_path: basePath,
-                develop: false,
-                projectPath: path.resolve(__dirname, "./../../")
-            }, config)).then(_bundler => {
-                return _bundler.publish();
-            });
-        });
+    publish(config) {
+        return new Packer(Object.assign(config, {develop: false})).pack();
     }
 };

@@ -20,11 +20,38 @@
   "dependencies": {
     "chokidar": "^1.7.0",
     "colors": "^1.1.2",
+    "detect-installed": "^2.0.4",
     "gzip-size": "^4.1.0",
     "ignore": "^3.3.7",
     "isbinaryfile": "^3.0.2",
     "opn": "^5.1.0",
     "ora": "^2.0.0"
   },
-  "devDependencies": {}
+  "devDependencies": {
+    "@babel/cli": "^7.1.2",
+    "@babel/core": "^7.1.2",
+    "@babel/plugin-external-helpers": "^7.0.0",
+    "@babel/plugin-proposal-class-properties": "^7.1.0",
+    "@babel/plugin-proposal-decorators": "^7.1.2",
+    "@babel/plugin-proposal-do-expressions": "^7.0.0",
+    "@babel/plugin-proposal-function-bind": "^7.0.0",
+    "@babel/plugin-proposal-object-rest-spread": "^7.0.0",
+    "@babel/plugin-syntax-dynamic-import": "^7.0.0",
+    "@babel/plugin-syntax-export-extensions": "^7.0.0-beta.32",
+    "@babel/plugin-transform-async-to-generator": "^7.1.0",
+    "@babel/plugin-transform-runtime": "^7.1.0",
+    "@babel/polyfill": "^7.0.0",
+    "@babel/preset-env": "^7.1.0",
+    "@babel/preset-typescript": "^7.1.0",
+    "@babel/register": "^7.0.0",
+    "@babel/runtime": "^7.1.2",
+    "@babel/runtime-corejs2": "^7.1.2",
+    "autoprefixer": "^8.6.2",
+    "express": "^4.16.2",
+    "html-minifier": "^3.5.17",
+    "less": "^3.0.4",
+    "node-sass": "^4.9.0",
+    "uglify-es": "^3.3.9",
+    "uglifycss": "0.0.29"
+  }
 }

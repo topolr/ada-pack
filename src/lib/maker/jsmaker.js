@@ -1,6 +1,6 @@
 let babel = require("@babel/core");
 let UglifyJS = require("uglify-es");
-let classPropertiesPollyfill = require("./../pollyfills/class-properties");
+let classPropertiesPollyfill = require("../../pollyfills/class-properties");
 
 module.exports = function (content, path, option) {
 	return new Promise((resolve, reject) => {
