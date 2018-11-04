@@ -31,7 +31,7 @@ class Packer {
         } else {
             new File(config.distPath).mkdir();
         }
-        return this.sourceMap.map();
+        return pa.then(() => this.sourceMap.map());
     }
 }
 
