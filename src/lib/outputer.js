@@ -101,6 +101,13 @@ class Outputer {
         }
     }
 
+    outputIniter() {
+        return this._entryBunlder.getBundleCode(this._sourceMap.config.initerPath);
+    }
+
+    outputWorker() {
+    }
+
     outputFiles() {
         return Reflect.ownKeys(this._sourceMap._map).reduce((a, key) => {
             return a.then(() => {
@@ -168,10 +175,14 @@ class Outputer {
             map: this.getSourceMap(),
             root: config.mainEntryPath.substring(config.sourcePath.length)
         };
-        let content = `<!DOCTYPE html><html><head><link rel="manifest" href="manifest.json"><meta charset="${page.charset}"><title>${config.manifest.name}</title>${metaContent}${iconsContent}${styleContent}${linkContent}${scriptContent}<script src="${this._adaURL}"></script><script>Ada.boot(${JSON.stringify(bootMap)});</script></head><body></body></html>`;
         return Promise.all(config.icons.map(icon => {
             return new File(Path.resolve(config.sourcePath, icon.src)).copyTo(Path.resolve(config.distPath, icon.src));
         })).then(() => {
+            if (config.initerPath) {
+                return this.outputIniter();
+            }
+        }).then((initer) => {
+            let content = `<!DOCTYPE html><html><head><link rel="manifest" href="manifest.json"><meta charset="${page.charset}"><title>${config.manifest.name}</title>${metaContent}${iconsContent}${styleContent}${linkContent}${scriptContent}<script src="${this._adaURL}"></script><script>${initer ? "Ada.init(" + initer + ");" : ""}Ada.boot(${JSON.stringify(bootMap)});</script></head><body></body></html>`;
             if (manifest.icons) {
                 manifest.icons.forEach(icon => {
                     icon.src = config.siteURL + icon.src;
