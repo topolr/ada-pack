@@ -12,14 +12,15 @@ class Pack {
     }
 
     getContent() {
-        this._content = this._files.map(file => {
+        this._content = {};
+        this._files.map(file => {
             let entity = this._sourceMap.getEntity(file);
-            return {
-                [entity.getMapName()]: {
+            if (!entity.isBinaryFile()) {
+                this._content[entity.getMapName()] = {
                     hash: entity.getHash(),
                     code: entity.getContent()
                 }
-            };
+            }
         });
         return JSON.stringify(this._content);
     }
