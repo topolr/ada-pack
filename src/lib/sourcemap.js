@@ -173,11 +173,6 @@ class SourceMap {
                     this._entryDependenceMap[entry] = SourceMap.getDependencesOf.call(this, entry);
                 });
             }).then(() => {
-                new File(this.config.sourcePath).scan().forEach(item => {
-                    if (!this.hasEntity(item)) {
-                        this.setEntity(item);
-                    }
-                });
                 this._outputer.output();
             });
         });

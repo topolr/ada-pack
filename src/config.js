@@ -7,7 +7,8 @@ module.exports = {
     main: "./src/root.js",
     initer: "",
     worker: "",
-    entryPath: "",
+    entryPath: "./src/entries",
+    staticPath: "./src/static",
     ignore: [],
     manifest: {
         name: "ada",

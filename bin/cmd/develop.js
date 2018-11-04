@@ -1,4 +1,4 @@
-let File = require("../../base/lib/file");
+let File = require("../../src/util/file");
 let Path = require("path");
 let helper = require("../../src/util/helper");
 let opn = require("opn");
@@ -25,8 +25,8 @@ module.exports = {
     paras: [],
     fn: function () {
         let waitTime = 5000;
-        let express = require(Path.resolve(projectPath, "./node_modules/express"));
-        let appInfo = helper.getAppInfo(process.cwd());
+        let appInfo = helper.getAppInfo("/Users/wangjinliang/git/ada");
+        let express = require(Path.resolve(appInfo.projectPath, "./node_modules/express"));
         let ps = Promise.resolve();
         if (appInfo.proxy && appInfo.proxy.server) {
             let proxy = new File(Path.resolve(appInfo.projectPath, "./node_modules/http-proxy-middleware"));

@@ -108,6 +108,19 @@ class Outputer {
     outputWorker() {
     }
 
+    outputStatic() {
+        let config = this._sourceMap.config, file = new File(config.staticPath);
+        if (file.isExists()) {
+            return file.scan().reduce((a, path) => {
+                return a.then(() => {
+                    return new File(path).copyTo(config.distPath + path.substring(config.sourcePath.length));
+                });
+            }, Promise.resolve());
+        } else {
+            return Promise.resolve();
+        }
+    }
+
     outputFiles() {
         return Reflect.ownKeys(this._sourceMap._map).reduce((a, key) => {
             return a.then(() => {
@@ -202,6 +215,8 @@ class Outputer {
             return this.outputPackFiles();
         }).then(() => {
             return this.outputIndex();
+        }).then(() => {
+            return this.outputStatic();
         });
     }
 }

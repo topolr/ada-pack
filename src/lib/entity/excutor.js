@@ -18,7 +18,7 @@ class ExcutorEntity extends BaseEntity {
                     this.content = content;
                     this.state = ENTITYREADY;
                 }).then(() => {
-                    this.content.replace(/_adajs.root\)\([\d\D]*?\)/g, str => {
+                    this.content = this.content.replace(/_adajs.root\)\([\d\D]*?\)/g, str => {
                         let map = str.substring(13, str.length - 1);
                         if (map) {
                             map = map.replace(/['|"][\s\S]+?['|"]/g, str => {
@@ -47,7 +47,7 @@ class ExcutorEntity extends BaseEntity {
                         map = t.substring(0, t.length - 1) + `,module:"${module}"}`;
                         return `_adajs.root)(${map})`;
                     });
-                    this.content.replace(/_adajs.view\)\(\{[\d\D]*?\)/g, str => {
+                    this.content = this.content.replace(/_adajs.view\)\(\{[\d\D]*?\)/g, str => {
                         let map = str.substring(13, str.length - 1);
                         if (map) {
                             map = map.replace(/['|"][\s\S]+?['|"]/g, str => {
@@ -74,7 +74,7 @@ class ExcutorEntity extends BaseEntity {
                         map = t.substring(0, t.length - 1) + `,module:"${module}"}`;
                         return `_adajs.view)(${map})`;
                     });
-                    this.content.replace(/require\(.*?\)/g, (str) => {
+                    this.content = this.content.replace(/require\(.*?\)/g, (str) => {
                         let a = str.substring(8, str.length - 1).replace(/['|"|`]/g, "").trim();
                         if (IGNOREMODULES.indexOf(a) === -1) {
                             let m = this.sourceMap.getTargetPath(Path.resolve(this.path, "./../"), a);
@@ -89,7 +89,7 @@ class ExcutorEntity extends BaseEntity {
                             }
                         }
                     });
-                    this.content.replace(/import\(.*?\)/g, (str) => {
+                    this.content = this.content.replace(/import\(.*?\)/g, (str) => {
                         let a = str.substring(7, str.length - 1);
                         if (IGNOREMODULES.indexOf(a) === -1) {
                             if (a.startsWith("\"") || a.startsWith("'") || a.startsWith("`")) {

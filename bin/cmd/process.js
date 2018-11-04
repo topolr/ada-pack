@@ -1,4 +1,4 @@
-let File = require("../../base/lib/file");
+let File = require("../../src/util/file");
 let Path = require("path");
 let helper = require("../../src/util/helper");
 

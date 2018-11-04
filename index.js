@@ -57,7 +57,7 @@ module.exports = {
                             packer.sourceMap.addFiles(a.add).then((info) => {
                                 fn && fn({
                                     type: "add",
-                                    files: a.add.map(a => a.substring(Path.resolve(basePath, config.source_path).length + 1).replace(/\\/g, "/")),
+                                    files: a.add.map(a => a.substring(Path.resolve(basePath, config.sourcePath).length + 1).replace(/\\/g, "/")),
                                     map: packer.sourceMap.outputer.getSourceMap(),
                                     log: packer.sourceMap.outputer.getLogInfo()
                                 });
@@ -66,7 +66,7 @@ module.exports = {
                             packer.sourceMap.editFiles(a.edit).then((info) => {
                                 fn && fn({
                                     type: "edit",
-                                    files: a.edit.map(a => a.substring(Path.resolve(basePath, config.source_path).length + 1).replace(/\\/g, "/")),
+                                    files: a.edit.map(a => a.substring(Path.resolve(basePath, config.sourcePath).length + 1).replace(/\\/g, "/")),
                                     map: packer.sourceMap.outputer.getSourceMap(),
                                     log: packer.sourceMap.outputer.getLogInfo()
                                 });
@@ -75,7 +75,7 @@ module.exports = {
                             packer.sourceMap.editFiles(a.remove).then((info) => {
                                 fn && fn({
                                     type: "remove",
-                                    files: a.remove.map(a => a.substring(Path.resolve(basePath, config.source_path).length + 1).replace(/\\/g, "/")),
+                                    files: a.remove.map(a => a.substring(Path.resolve(basePath, config.sourcePath).length + 1).replace(/\\/g, "/")),
                                     map: packer.sourceMap.outputer.getSourceMap(),
                                     log: packer.sourceMap.outputer.getLogInfo()
                                 });
@@ -84,7 +84,9 @@ module.exports = {
                     });
                 });
                 resolve();
-            }, () => reject);
+            }, (e) => {
+                reject(e);
+            });
         });
     },
     publish(config) {
