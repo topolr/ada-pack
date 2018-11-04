@@ -1,4 +1,4 @@
-let {ENTITYNONE, ENTITYREADY, THRIDPARTFOLDER} = require("./const");
+let {ENTITYNONE, ENTITYREADY} = require("./const");
 let hash = require("./../../util/md5");
 let BaseEntity = require("./base");
 let gzipSize = require('gzip-size');
@@ -13,11 +13,15 @@ class TextEntity extends BaseEntity {
     }
 
     getDependenceInfo() {
-        return this.sourceMap.maker.make(this.path).then(content => {
-            this.state = ENTITYREADY;
-            this.content = content;
-            return this.dependence;
-        });
+        if (this.state === ENTITYNONE) {
+            return this.sourceMap.maker.make(this.path).then(content => {
+                this.state = ENTITYREADY;
+                this.content = content;
+                return this.dependence;
+            });
+        } else {
+            return Promise.resolve(this.dependence);
+        }
     }
 
     getContent() {
