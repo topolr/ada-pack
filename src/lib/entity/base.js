@@ -1,6 +1,7 @@
 let {ENTITYNONE, THRIDPARTFOLDER} = require("./const");
 let util = require("./../../util/helper");
 let File = require("./../../util/file");
+let Path = require("path");
 let isbinaryfile = require("isbinaryfile");
 
 class BaseEntity {
@@ -38,14 +39,22 @@ class BaseEntity {
     reset() {
         this.state = ENTITYNONE;
         this.errorLog = null;
+        this.content = null;
+        this.dependence = [];
     }
 
     getDistPath() {
+        let r = "";
         if (this.path.indexOf("node_modules/") === -1) {
-            return this.sourceMap.config.distPath + this.path.substring(this.sourceMap.config.sourcePath.length);
+            r = this.sourceMap.config.distPath + this.path.substring(this.sourceMap.config.sourcePath.length);
         } else {
-            return this.sourceMap.config.distPath + `${THRIDPARTFOLDER}/` + this.path.substring(this.sourceMap.config.nmodulePath.length);
+            r = this.sourceMap.config.distPath + `${THRIDPARTFOLDER}/` + this.path.substring(this.sourceMap.config.nmodulePath.length);
         }
+        if (!this.sourceMap.config.develop) {
+            let suffix = Path.extname(r);
+            r = Path.resolve(r, "./../", `${this.getHash()}${suffix}`);
+        }
+        return r;
     }
 }
 
