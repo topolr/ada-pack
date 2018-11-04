@@ -10,6 +10,7 @@ class BaseEntity {
         this.content = null;
         this.dependence = [];
         this.state = ENTITYNONE;
+        this.errorLog = null;
     }
 
     isBinaryFile() {
@@ -22,7 +23,7 @@ class BaseEntity {
 
     getContent() {
         if (this.isBinaryFile()) {
-            return this.sourceMap.maker.make(this.path);
+            return this.sourceMap.maker.make(this.path).catch(e => this.errorLog = e);
         }
     }
 
@@ -34,8 +35,9 @@ class BaseEntity {
         return util.getMappedPath(this.path);
     }
 
-    edit() {
+    reset() {
         this.state = ENTITYNONE;
+        this.errorLog = null;
     }
 }
 

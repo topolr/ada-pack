@@ -37,7 +37,7 @@ class StyleEntity extends BaseEntity {
                     });
                 }).then(() => {
                     return this.dependence;
-                });
+                }).catch(e => this.errorLog = e);
             }
         } else {
             return Promise.resolve(this.dependence);

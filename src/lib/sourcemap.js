@@ -133,7 +133,7 @@ class SourceMap {
         files.forEach(file => {
             let et = this.getEntity(file);
             if (et) {
-                et.edit();
+                et.reset();
             }
         });
         return this.map();
@@ -154,32 +154,34 @@ class SourceMap {
     }
 
     map() {
-        let entries = [], entry = new File(this.config.entryPath);
-        if (new File(this.config.mainEntryPath).isExists()) {
-            entries.push(this.config.mainEntryPath);
-        }
-        if (entry.isExists()) {
-            entries = entries.concat(new File(this.config.entryPath).scan().filter(path => {
-                let suffix = Path.extname(path);
-                return suffix === ".js" || suffix === ".ts";
-            }).map(path => path.replace(/\\/g, "/").replace(/[\/]+/g, "/")));
-        }
-        this._entries = entries;
-        return entries.reduce((a, entry) => {
-            return a.then(() => {
-                return SourceMap.mapEntity.call(this, entry);
+        return this.maker.installer.readyProjectModules().then(() => {
+            let entries = [], entry = new File(this.config.entryPath);
+            if (new File(this.config.mainEntryPath).isExists()) {
+                entries.push(this.config.mainEntryPath);
+            }
+            if (entry.isExists()) {
+                entries = entries.concat(new File(this.config.entryPath).scan().filter(path => {
+                    let suffix = Path.extname(path);
+                    return suffix === ".js" || suffix === ".ts";
+                }).map(path => path.replace(/\\/g, "/").replace(/[\/]+/g, "/")));
+            }
+            this._entries = entries;
+            return entries.reduce((a, entry) => {
+                return a.then(() => {
+                    return SourceMap.mapEntity.call(this, entry);
+                });
+            }, Promise.resolve()).then(() => {
+                this.entries.forEach(entry => {
+                    this._entryDependenceMap[entry] = SourceMap.getDependencesOf.call(this, entry);
+                });
+            }).then(() => {
+                new File(this.config.sourcePath).scan().forEach(item => {
+                    if (!this.hasEntity(item)) {
+                        this.setEntity(item);
+                    }
+                });
+                this._outputer.output();
             });
-        }, Promise.resolve()).then(() => {
-            this.entries.forEach(entry => {
-                this._entryDependenceMap[entry] = SourceMap.getDependencesOf.call(this, entry);
-            });
-        }).then(() => {
-            new File(this.config.sourcePath).scan().forEach(item => {
-                if (!this.hasEntity(item)) {
-                    this.setEntity(item);
-                }
-            });
-            this._outputer.output();
         });
     }
 }

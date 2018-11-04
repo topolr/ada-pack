@@ -31,7 +31,7 @@ class Packer {
         } else {
             new File(config.distPath).mkdir();
         }
-        return ps.then(() => this.sourceMap.maker.installer.readyProjectModules());
+        return this.sourceMap.map();
     }
 }
 
