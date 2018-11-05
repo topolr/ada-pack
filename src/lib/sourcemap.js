@@ -195,6 +195,13 @@ class SourceMap {
 					this.entries.forEach(entry => {
 						this._entryDependenceMap[entry] = SourceMap.getDependencesOf.call(this, entry);
 					});
+					let all = [];
+					Reflect.ownKeys(this._entryDependenceMap).forEach(entry => {
+						all = all.concat(this._entryDependenceMap[entry]);
+					});
+					Reflect.ownKeys(this._map).filter(key => all.indexOf(key) === -1).forEach(key => {
+						delete this._map[key];
+					});
 				}).then(() => {
 					return this.config.hooker.excute("afterMap", {
 						map: this._map,
