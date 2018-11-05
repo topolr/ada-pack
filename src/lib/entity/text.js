@@ -14,17 +14,24 @@ class TextEntity extends BaseEntity {
 
     getDependenceInfo() {
         if (this.state === ENTITYNONE) {
+            let config = this.sourceMap.config;
             return new Promise(resolve => {
-                this.sourceMap.maker.make(this.path).then(content => {
-                    this.state = ENTITYREADY;
-                    this.content = content;
-                    this.errorLog = null;
-                    this.output = false;
-                    resolve(this.dependence);
-                }).catch(e => {
-                    this.errorLog = e;
-                    this.content = "";
-                    resolve(this.dependence);
+                config.hooker.excute("beforeMake", this).then(() => {
+                    this.sourceMap.maker.make(this.path).then(content => {
+                        this.state = ENTITYREADY;
+                        this.content = content;
+                        this.errorLog = null;
+                        this.output = false;
+                        config.hooker.excute("afterMake", this).then(() => {
+                            resolve(this.dependence);
+                        });
+                    }).catch(e => {
+                        this.errorLog = e;
+                        this.content = "";
+                        config.hooker.excute("errorMake", this).then(() => {
+                            resolve(this.dependence);
+                        });
+                    });
                 });
             });
         } else {

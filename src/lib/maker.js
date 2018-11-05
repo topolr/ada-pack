@@ -18,19 +18,13 @@ class Maker {
 
     make(path) {
         let type = Path.extname(path).substring(1), content = new File(path).readSync();
-        let info = {path, content};
-        return this.config.hooker.excute("beforeMake", info).then(() => {
-            if (this.config.dependence[type]) {
-                return this.installer.readyTypeModules(type).then(() => {
-                    return this.config.dependence[type].maker(info.content, path, this.config);
-                }).then(content => {
-                    let endInfo = {path, content};
-                    return this.config.hooker.excute("afterMake", endInfo).then(() => endInfo.content);
-                });
-            } else {
-                return Promise.resolve(info.content);
-            }
-        });
+        if (this.config.dependence[type]) {
+            return this.installer.readyTypeModules(type).then(() => {
+                return this.config.dependence[type].maker(content, path, this.config);
+            });
+        } else {
+            return Promise.resolve(content);
+        }
     }
 
     babelCode(code, path) {

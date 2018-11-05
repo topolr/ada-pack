@@ -41,12 +41,12 @@ module.exports = function (hooker) {
     }).hook("outputPack", pack => {
         console.log(`[ADA-PACK]`.grey, `ENTRY  [`.green, pack.packName, `] [`.green, pack.getFileSize(), `|`.green, pack.getGzipSize(), `]`.green);
     }).hook("outputIndex", () => {
-    }).hook("afterOutput", () => {
-    }).hook("afterPack", (info, sourceMap) => {
+    }).hook("afterOutput", (info, sourceMap) => {
         sourceMap.outputer.getLogInfo().forEach((info) => {
             console.log(`[ADA-PACK]`.grey, `MAKE ERROR [`.red, info.name, `]`.red);
             console.log(info.error);
         });
+    }).hook("afterPack", (info, sourceMap) => {
     }).hook("fileEdit", () => {
         console.log(`[ADA-PACK]`.grey, `EDIT FILE ${util.formatDate()}`.grey);
     }).hook("fileAdd", () => {

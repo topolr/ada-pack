@@ -12,35 +12,42 @@ class StyleEntity extends TextEntity {
                 this.content = new File(this.path).readSync();
                 return Promise.resolve(this.dependence);
             } else {
+                let config = this.sourceMap.config;
                 return new Promise(resolve => {
-                    this.sourceMap.maker.make(this.path).then(content => {
-                        this.content = content;
-                        this.state = ENTITYREADY;
-                        this.content = util.replacePaths(this.content, (_path) => {
-                            let r = "";
-                            let o = Path.resolve(this.path, "./../", _path).replace(/\\/g, "/");
-                            if (o.indexOf("node_modules") === -1) {
-                                r = Path.resolve(this.path, "./../", _path).substring(this.sourceMap.config.sourcePath.length).replace(/\\/g, "/");
-                            } else {
-                                r = "node_modules/" + Path.resolve(this.path, "./../", _path).substring(this.sourceMap.config.nmodulePath.length).replace(/\\/g, "/");
-                            }
-                            if (this.dependence.indexOf(o) === -1) {
-                                this.dependence.push(o);
-                            }
-                            if (this.sourceMap.config.develop) {
-                                return this.sourceMap.config.siteURL + r;
-                            } else {
-                                let hash = new File(o).hash().substring(0, 8);
-                                return this.sourceMap.config.siteURL + util.getHashPath(r, hash);
-                            }
+                    config.hooker.excute("beforeMake", this).then(() => {
+                        this.sourceMap.maker.make(this.path).then(content => {
+                            this.content = content;
+                            this.state = ENTITYREADY;
+                            this.errorLog = null;
+                            this.output = false;
+                            config.hooker.excute("afterMake", this).then(() => {
+                                this.content = util.replacePaths(this.content, (_path) => {
+                                    let r = "";
+                                    let o = Path.resolve(this.path, "./../", _path).replace(/\\/g, "/");
+                                    if (o.indexOf("node_modules") === -1) {
+                                        r = Path.resolve(this.path, "./../", _path).substring(this.sourceMap.config.sourcePath.length).replace(/\\/g, "/");
+                                    } else {
+                                        r = "node_modules/" + Path.resolve(this.path, "./../", _path).substring(this.sourceMap.config.nmodulePath.length).replace(/\\/g, "/");
+                                    }
+                                    if (this.dependence.indexOf(o) === -1) {
+                                        this.dependence.push(o);
+                                    }
+                                    if (this.sourceMap.config.develop) {
+                                        return this.sourceMap.config.siteURL + r;
+                                    } else {
+                                        let hash = new File(o).hash().substring(0, 8);
+                                        return this.sourceMap.config.siteURL + util.getHashPath(r, hash);
+                                    }
+                                });
+                                resolve(this.dependence);
+                            });
+                        }).catch(e => {
+                            this.errorLog = e;
+                            this.content = "";
+                            config.hooker.excute("errorMake", this).then(() => {
+                                resolve(this.dependence);
+                            });
                         });
-                        this.errorLog = null;
-                        this.output = false;
-                        resolve(this.dependence);
-                    }).catch(e => {
-                        this.errorLog = e;
-                        this.content = "";
-                        resolve(this.dependence);
                     });
                 });
             }
