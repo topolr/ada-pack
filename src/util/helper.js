@@ -1,5 +1,4 @@
 let File = require("./file");
-let packageInfo = require("../../package.json");
 let colors = require("colors");
 let Path = require("path");
 let Config = require("./../config");
@@ -192,9 +191,6 @@ let util = {
 			}
 		}
 		return target;
-	},
-	showTips() {
-		console.log(colors.blue.bold(` ≡ ADA-PACK ${packageInfo.version} ≡`));
 	},
 	getFilePath(config, filePath, path) {
 		let checkPath = function (current) {

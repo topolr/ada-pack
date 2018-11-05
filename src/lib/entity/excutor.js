@@ -117,6 +117,7 @@ class ExcutorEntity extends TextEntity {
 						}
 					});
 				}).then(() => {
+					this.errorLog = null;
 					return this.dependence;
 				}).catch(e => this.errorLog = e);
 			}

@@ -1,9 +1,9 @@
-var map = require("./../../package.json");
+let map = require("./../../package.json");
 module.exports = {
-    command: "version",
-    desc: "version",
-    paras: [],
-    fn: function () {
-        console.log(` version ${map.version}`.yellow);
-    }
+	command: "version",
+	desc: "version",
+	paras: [],
+	fn: function () {
+		console.log(` version ${map.version}`.yellow);
+	}
 };
