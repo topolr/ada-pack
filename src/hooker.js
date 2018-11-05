@@ -35,6 +35,7 @@ module.exports = function (hooker) {
 		// process.stderr.clearLine();
 		// process.stderr.cursorTo(0);
 		console.log(`[ADA-PACK]`.grey, ` OUTPUT [ `.green, entity.path, ` ]`.green);
+	}).hook("outputPack", () => {
 	}).hook("outputIndex", () => {
 	}).hook("afterOutput", () => {
 	}).hook("afterPack", () => {
