@@ -57,8 +57,10 @@ class Outputer {
 		this._adaBunlder = new AdaBundler(config, this._sourceMap.maker);
 		this._packs = {};
 		this._adaURL = "";
+		this._workerURL = "";
 		this._adaDone = false;
 		this._initerCode = "";
+		this._workerDone = false;
 	}
 
 	get config() {
@@ -142,11 +144,33 @@ class Outputer {
 				});
 			});
 		} else {
-			return Promise.resolve(this._initerCode);
+			return Promise.resolve();
 		}
 	}
 
 	outputWorker() {
+		let config = this._sourceMap.config;
+		if (!this._workerDone && config.worker.path) {
+			return config.hooker.excute("beforeWorker").then(() => {
+				return this._entryBunlder.getBundleCode(config.workerPath).then(code => {
+					let h = hash.md5(code).substring(0, 8);
+					let info = {
+						code,
+						hash: h,
+						url: config.siteURL + config.develop ? "service.worker.js" : `service.worker.${h}.js`,
+						path: Path.resolve(config.distPath, config.develop ? "./service.worker.js" : `./service.worker.${h}.js`)
+					};
+					return config.hooker.excute("afterWorker", info).then(() => {
+						this._workerDone = true;
+						this._workerURL = info.url;
+					}).then(() => {
+						return new File(info.path).write(info.code);
+					});
+				});
+			});
+		} else {
+			return Promise.resolve();
+		}
 	}
 
 	outputStatic() {
@@ -239,11 +263,19 @@ class Outputer {
 			return Promise.all(config.icons.map(icon => {
 				return new File(Path.resolve(config.sourcePath, icon.src)).copyTo(Path.resolve(config.distPath, icon.src));
 			})).then(() => {
+				if (config.worker.path) {
+					return this.outputWorker();
+				}
+			}).then(() => {
 				if (config.initerPath) {
 					return this.outputIniter();
 				}
 			}).then((initer) => {
-				let content = `<!DOCTYPE html><html><head><link rel="manifest" href="manifest.json"><meta charset="${page.charset}"><title>${config.manifest.name}</title>${metaContent}${iconsContent}${styleContent}${linkContent}${scriptContent}<script src="${this._adaURL}"></script><script>${initer ? "Ada.init(" + initer + ");" : ""}Ada.boot(${JSON.stringify(hookInfo.map)});</script></head><body></body></html>`;
+				let workerCode = "";
+				if (config.worer.path) {
+					workerCode = `<script>if('serviceWorker' in navigator){navigator.serviceWorker.register('${this._workerURL}', { scope: '${config.worker.scope}' }).then(function(reg) {console.log('Registration succeeded. Scope is ' + reg.scope);}).catch(function(error) {console.log('Registration failed with ' + error);});}</script>`
+				}
+				let content = `<!DOCTYPE html><html><head><link rel="manifest" href="manifest.json"><meta charset="${page.charset}"><title>${config.manifest.name}</title>${metaContent}${iconsContent}${styleContent}${linkContent}${scriptContent}<script src="${this._adaURL}"></script><script>${initer ? "Ada.init(" + initer + ");" : ""}Ada.boot(${JSON.stringify(hookInfo.map)});</script>${workerCode ? workerCode : ''}</head><body></body></html>`;
 				if (hookInfo.manifest.icons) {
 					hookInfo.manifest.icons.forEach(icon => {
 						icon.src = config.siteURL + icon.src;

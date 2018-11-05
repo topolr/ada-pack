@@ -6,7 +6,10 @@ module.exports = {
 	siteURL: "/",
 	main: "./src/root.js",
 	initer: "",
-	worker: "",
+	worker: {
+		scope: "/",
+		path: ""
+	},
 	entryPath: "./src/entries",
 	staticPath: "./src/static",
 	ignore: [],

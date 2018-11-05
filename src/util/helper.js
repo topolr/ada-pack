@@ -258,7 +258,7 @@ let util = {
 		config.entryPath = Path.join(config.basePath, config.entryPath).replace(/\\/g, "/");
 		config.mainEntryPath = Path.join(config.basePath, config.main).replace(/\\/g, "/");
 		config.initerPath = Path.join(config.basePath, config.initer).replace(/\\/g, "/");
-		config.workerPath = Path.join(config.basePath, config.worker).replace(/\\/g, "/");
+		config.workerPath = Path.join(config.basePath, config.worker ? config.worker.path : "").replace(/\\/g, "/");
 		config.staticPath = Path.join(config.basePath, config.staticPath).replace(/\\/g, "/");
 		["projectPath", "basePath", "distPath", "sourcePath", "entryPath", "staticPath", "nmodulePath"].forEach(name => {
 			if (!config[name].endsWith("/")) {
