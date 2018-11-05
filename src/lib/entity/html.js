@@ -38,6 +38,7 @@ class StyleEntity extends TextEntity {
 					});
 				}).then(() => {
 					this.errorLog = null;
+					this.output = false;
 					return this.dependence;
 				}).catch(e => this.errorLog = e);
 			}

@@ -187,10 +187,11 @@ class Outputer {
 	}
 
 	outputFiles() {
-		return Reflect.ownKeys(this._sourceMap._map).reduce((a, key) => {
+		return Reflect.ownKeys(this._sourceMap._map).filter(key => this._sourceMap._map[key].output !== true).reduce((a, key) => {
 			return a.then(() => {
 				let entity = this._sourceMap._map[key];
 				return this.config.hooker.excute("outputFile", entity).then(() => {
+					entity.output = true;
 					if (entity instanceof BinaryEntity) {
 						return new File(entity.path).copyTo(entity.getDistPath());
 					} else {

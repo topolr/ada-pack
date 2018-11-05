@@ -18,6 +18,7 @@ class TextEntity extends BaseEntity {
 				this.state = ENTITYREADY;
 				this.content = content;
 				this.errorLog = null;
+				this.output = false;
 				return this.dependence;
 			}).catch(e => this.errorLog = e);
 		} else {
@@ -37,6 +38,7 @@ class TextEntity extends BaseEntity {
 		this.state = ENTITYNONE;
 		this.errorLog = null;
 		this.content = null;
+		this.output = false;
 		this.dependence = [];
 	}
 
