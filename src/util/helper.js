@@ -131,6 +131,15 @@ let util = {
 	getMappedPath(path) {
 		return `P${Math.abs(util.hashCode(path.replace(/\\/g, "/")))}`;
 	},
+	getByteLen(normal_val) {
+		normal_val = String(normal_val);
+		let byteLen = 0;
+		for (let i = 0; i < normal_val.length; i++) {
+			let c = normal_val.charCodeAt(i);
+			byteLen += c < (1 << 7) ? 1 : c < (1 << 11) ? 2 : c < (1 << 16) ? 3 : c < (1 << 21) ? 4 : c < (1 << 26) ? 5 : c < (1 << 31) ? 6 : Number.NaN;
+		}
+		return byteLen;
+	},
 	getFileSizeAuto(size, radmon) {
 		let v = 0, unit = "BYTE", byteSize = size;
 		radmon = radmon || 0;

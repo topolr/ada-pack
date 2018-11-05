@@ -15,7 +15,7 @@ module.exports = function (hooker) {
 	}).hook("beforeMake", (info) => {
 		// process.stderr.clearLine();
 		// process.stderr.cursorTo(0);
-		console.log(`[ADA-PACK]`.grey, ` MAKE [ `.green, info.path, ` ]`.green);
+		// console.log(`[ADA-PACK]`.grey, ` MAKE [ `.green, info.path, ` ]`.green);
 	}).hook("afterMake", (info) => {
 	}).hook("afterMap", (info) => {
 	}).hook("beforeOutput", () => {
@@ -34,8 +34,9 @@ module.exports = function (hooker) {
 	}).hook().hook("outputFile", (entity) => {
 		// process.stderr.clearLine();
 		// process.stderr.cursorTo(0);
-		console.log(`[ADA-PACK]`.grey, ` OUTPUT [ `.green, entity.path, ` ]`.green);
-	}).hook("outputPack", () => {
+		// console.log(`[ADA-PACK]`.grey, ` OUTPUT [ `.green, entity.path, ` ]`.green);
+	}).hook("outputPack", pack => {
+		console.log(`[ADA-PACK]`.grey, `PACK [`.green, pack.packName, `] Size [`.green, pack.getFileSize(), `] Gzip [`.green, pack.getGzipSize(), `]`.green);
 	}).hook("outputIndex", () => {
 	}).hook("afterOutput", () => {
 	}).hook("afterPack", () => {

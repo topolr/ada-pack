@@ -12,24 +12,34 @@ class Pack {
 		this._sourceMap = sourceMap;
 		this._files = files;
 		this._name = name;
+		this._packName = "package-" + this._name.substring(this._sourceMap.config.sourcePath.length).replace(/\//g, "-").replace(/\\/g, "-");
+		this._result = "";
+	}
+
+	get packName() {
+		return this._packName;
 	}
 
 	getContent() {
-		this._content = {};
-		this._files.map(file => {
-			let entity = this._sourceMap.getEntity(file);
-			if (!(entity instanceof BinaryEntity)) {
-				this._content[entity.getMapName()] = {
-					hash: entity.getHash(),
-					code: entity.getContent()
+		if (!this._result) {
+			this._content = {};
+			this._files.map(file => {
+				let entity = this._sourceMap.getEntity(file);
+				if (!(entity instanceof BinaryEntity)) {
+					this._content[entity.getMapName()] = {
+						hash: entity.getHash(),
+						code: entity.getContent()
+					}
 				}
-			}
-		});
-		return `Ada.unpack(${JSON.stringify(this._content)})`;
+			});
+
+			this._result = `Ada.unpack(${JSON.stringify(this._content)})`;
+		}
+		return this._result;
 	}
 
 	getMapName() {
-		return util.getMappedPath("package-" + this._name.substring(this._sourceMap.config.sourcePath.length).replace(/\//g, "-").replace(/\\/g, "-"));
+		return util.getMappedPath(this.packName);
 	}
 
 	getHash() {
@@ -41,11 +51,11 @@ class Pack {
 	}
 
 	getGzipSize() {
-		return gzipSize(this.getContent());
+		return util.getFileSizeAuto(gzipSize.sync(this.getContent()));
 	}
 
 	getFileSize() {
-		return util.getFileSizeAuto(this.getContent());
+		return util.getFileSizeAuto(util.getByteLen(this.getContent()));
 	}
 }
 
@@ -53,14 +63,12 @@ class Outputer {
 	constructor(config, sourceMap) {
 		this._config = config;
 		this._sourceMap = sourceMap;
-		this._entryBunlder = new EntryBundler(config, this._sourceMap.maker);
+		this._initerBundler = new EntryBundler(config, this._sourceMap.maker);
+		this._workerBundler = new EntryBundler(config, this._sourceMap.maker);
 		this._adaBunlder = new AdaBundler(config, this._sourceMap.maker);
 		this._packs = {};
 		this._adaURL = "";
 		this._workerURL = "";
-		this._adaDone = false;
-		this._initerCode = "";
-		this._workerDone = false;
 	}
 
 	get config() {
@@ -95,34 +103,25 @@ class Outputer {
 	}
 
 	outputAda() {
-		if (!this._adaDone) {
+		if (!this._adaBunlder.ready) {
 			return this.config.hooker.excute("beforeAda").then(() => {
 				if (this._sourceMap.config.develop) {
 					return this._adaBunlder.getBundleCode(Path.resolve(this._sourceMap.config.nmodulePath, "./adajs/develop.js")).then(code => {
-						let info = {
-							code,
-							url: this._sourceMap.config.siteURL + "ada.js",
-							path: Path.resolve(this._sourceMap.config.distPath, "./ada.js")
-						};
-						return this.config.hooker.excute("afterAda", info).then(() => {
-							this._adaURL = info.url;
-							this._adaDone = true;
-							return new File(info.path).write(info.code);
+						let url = this._sourceMap.config.siteURL + "ada.js";
+						let path = Path.resolve(this._sourceMap.config.distPath, "./ada.js");
+						return this.config.hooker.excute("afterAda", this._adaBunlder).then(() => {
+							this._adaURL = url;
+							return new File(path).write(this._adaBunlder.getContent());
 						});
 					});
 				} else {
 					return this._adaBunlder.getBundleCode(Path.resolve(this._sourceMap.config.nmodulePath, "./adajs/index.js")).then(code => {
 						let h = hash.md5(code).substring(0, 8);
-						let info = {
-							code,
-							hash: h,
-							url: this._sourceMap.config.siteURL + `ada.${h}.js`,
-							path: Path.resolve(this._sourceMap.config.distPath, `./ada.${h}.js`)
-						};
-						return this.config.hooker.excute("afterAda", info).then(() => {
-							this._adaURL = info.url;
-							this._adaDone = true;
-							return new File(info.path).write(info.code);
+						let url = this._sourceMap.config.siteURL + `ada.${h}.js`;
+						let path = Path.resolve(this._sourceMap.config.distPath, `./ada.${h}.js`);
+						return this.config.hooker.excute("afterAda", this._adaBunlder).then(() => {
+							this._adaURL = url;
+							return new File(path).write(this._adaBunlder.getContent());
 						});
 					});
 				}
@@ -133,38 +132,31 @@ class Outputer {
 	}
 
 	outputIniter() {
-		if (!this._initerCode) {
+		if (!this._initerBundler.ready) {
 			return this.config.hooker.excute("beforeIniter").then(() => {
-				return this._entryBunlder.getBundleCode(this._sourceMap.config.initerPath).then(code => {
-					let info = {code};
-					return this.config.hooker.excute("afterIniter", info).then(() => {
-						this._initerCode = info.code;
-						return info.code;
+				return this._initerBundler.getBundleCode(this._sourceMap.config.initerPath).then(code => {
+					return this.config.hooker.excute("afterIniter", this._initerBundler).then(() => {
+						return this._initerBundler.getContent();
 					});
 				});
 			});
 		} else {
-			return Promise.resolve();
+			return Promise.resolve(this._initerBundler.getContent());
 		}
 	}
 
 	outputWorker() {
 		let config = this._sourceMap.config;
-		if (!this._workerDone && config.worker.path) {
+		if (!this._workerBundler.ready && config.worker.path) {
 			return config.hooker.excute("beforeWorker").then(() => {
-				return this._entryBunlder.getBundleCode(config.workerPath).then(code => {
+				return this._workerBundler.getBundleCode(config.workerPath).then(code => {
 					let h = hash.md5(code).substring(0, 8);
-					let info = {
-						code,
-						hash: h,
-						url: config.siteURL + config.develop ? "service.worker.js" : `service.worker.${h}.js`,
-						path: Path.resolve(config.distPath, config.develop ? "./service.worker.js" : `./service.worker.${h}.js`)
-					};
-					return config.hooker.excute("afterWorker", info).then(() => {
-						this._workerDone = true;
-						this._workerURL = info.url;
+					let url = config.siteURL + config.develop ? "service.worker.js" : `service.worker.${h}.js`;
+					let path = Path.resolve(config.distPath, config.develop ? "./service.worker.js" : `./service.worker.${h}.js`);
+					return config.hooker.excute("afterWorker", this._workerBundler).then(() => {
+						this._workerURL = url;
 					}).then(() => {
-						return new File(info.path).write(info.code);
+						return new File(path).write(this._workerBundler.getContent());
 					});
 				});
 			});
