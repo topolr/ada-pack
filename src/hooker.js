@@ -18,7 +18,13 @@ module.exports = function (hooker) {
 	}).hook("afterMap", (info) => {
 	}).hook("beforeOutput", () => {
 		outputSpinner = ora({color: "yellow", text: "Output Source"}).start();
-	}).hook("beforeAda",()=>{
+	}).hook("beforeAda", () => {
+
+	}).hook("afterAda", () => {
+
+	}).hook("beforeIniter", () => {
+
+	}).hook("afterIniter", () => {
 
 	}).hook().hook("outputFile", () => {
 

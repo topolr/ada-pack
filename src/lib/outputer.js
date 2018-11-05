@@ -57,6 +57,8 @@ class Outputer {
 		this._adaBunlder = new AdaBundler(config, this._sourceMap.maker);
 		this._packs = {};
 		this._adaURL = "";
+		this._adaDone = false;
+		this._initerCode = "";
 	}
 
 	get config() {
@@ -91,44 +93,57 @@ class Outputer {
 	}
 
 	outputAda() {
-		return this.config.hooker.excute("beforeAda").then(() => {
-			if (this._sourceMap.config.develop) {
-				return this._adaBunlder.getBundleCode(Path.resolve(this._sourceMap.config.nmodulePath, "./adajs/develop.js")).then(code => {
-					let info = {
-						code,
-						url: this._sourceMap.config.siteURL + "ada.js",
-						path: Path.resolve(this._sourceMap.config.distPath, "./ada.js")
-					};
-					return this.config.hooker.excute("afterAda", info).then(() => {
-						this._adaURL = info.url;
-						return new File(info.path).write(info.code);
+		if (!this._adaDone) {
+			return this.config.hooker.excute("beforeAda").then(() => {
+				if (this._sourceMap.config.develop) {
+					return this._adaBunlder.getBundleCode(Path.resolve(this._sourceMap.config.nmodulePath, "./adajs/develop.js")).then(code => {
+						let info = {
+							code,
+							url: this._sourceMap.config.siteURL + "ada.js",
+							path: Path.resolve(this._sourceMap.config.distPath, "./ada.js")
+						};
+						return this.config.hooker.excute("afterAda", info).then(() => {
+							this._adaURL = info.url;
+							this._adaDone = true;
+							return new File(info.path).write(info.code);
+						});
 					});
-				});
-			} else {
-				return this._adaBunlder.getBundleCode(Path.resolve(this._sourceMap.config.nmodulePath, "./adajs/index.js")).then(code => {
-					let h = hash.md5(code).substring(0, 8);
-					let info = {
-						code,
-						hash: h,
-						url: this._sourceMap.config.siteURL + `ada.${h}.js`,
-						path: Path.resolve(this._sourceMap.config.distPath, `./ada.${h}.js`)
-					};
-					return this.config.hooker.excute("afterAda", info).then(() => {
-						this._adaURL = info.url;
-						return new File(info.path).write(info.code);
+				} else {
+					return this._adaBunlder.getBundleCode(Path.resolve(this._sourceMap.config.nmodulePath, "./adajs/index.js")).then(code => {
+						let h = hash.md5(code).substring(0, 8);
+						let info = {
+							code,
+							hash: h,
+							url: this._sourceMap.config.siteURL + `ada.${h}.js`,
+							path: Path.resolve(this._sourceMap.config.distPath, `./ada.${h}.js`)
+						};
+						return this.config.hooker.excute("afterAda", info).then(() => {
+							this._adaURL = info.url;
+							this._adaDone = true;
+							return new File(info.path).write(info.code);
+						});
 					});
-				});
-			}
-		});
+				}
+			});
+		} else {
+			return Promise.resolve();
+		}
 	}
 
 	outputIniter() {
-		return this.config.hooker.excute("beforeIniter").then(() => {
-			return this._entryBunlder.getBundleCode(this._sourceMap.config.initerPath).then(code => {
-				let info = {code};
-				return this.config.hooker.excute("afterIniter", info).then(() => info.code);
+		if (!this._initerCode) {
+			return this.config.hooker.excute("beforeIniter").then(() => {
+				return this._entryBunlder.getBundleCode(this._sourceMap.config.initerPath).then(code => {
+					let info = {code};
+					return this.config.hooker.excute("afterIniter", info).then(() => {
+						this._initerCode = info.code;
+						return info.code;
+					});
+				});
 			});
-		});
+		} else {
+			return Promise.resolve(this._initerCode);
+		}
 	}
 
 	outputWorker() {
