@@ -173,6 +173,17 @@ class SourceMap {
 		});
 	}
 
+	cleanUnuseSource() {
+		let all = [...this._entries];
+		Reflect.ownKeys(this._entryDependenceMap).forEach(entry => {
+			all = all.concat(this._entryDependenceMap[entry]);
+		});
+		all = all.map(path => this.getMapName(path));
+		Reflect.ownKeys(this._map).filter(key => all.indexOf(key) === -1).forEach(key => {
+			delete this._map[key];
+		});
+	}
+
 	map() {
 		return this.config.hooker.excute("beforeMap").then(() => {
 			return this.maker.installer.readyProjectModules().then(() => {
@@ -195,13 +206,7 @@ class SourceMap {
 					this.entries.forEach(entry => {
 						this._entryDependenceMap[entry] = SourceMap.getDependencesOf.call(this, entry);
 					});
-					let all = [];
-					Reflect.ownKeys(this._entryDependenceMap).forEach(entry => {
-						all = all.concat(this._entryDependenceMap[entry]);
-					});
-					Reflect.ownKeys(this._map).filter(key => all.indexOf(key) === -1).forEach(key => {
-						delete this._map[key];
-					});
+					this.cleanUnuseSource();
 				}).then(() => {
 					return this.config.hooker.excute("afterMap", {
 						map: this._map,
