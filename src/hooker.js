@@ -2,7 +2,9 @@ let colors = require("colors");
 let ora = require('ora');
 
 module.exports = function (hooker) {
-	let outputSpinner = null;
+	let adaSpinner = null;
+	let initerSpinner = null;
+	let workerSpinner = null;
 	hooker.hook("beforePack", () => {
 		console.log(` ≡ ADA-PACK ${require("./../package").version} ≡`.blue);
 	}).hook("startInstall", (names) => {
@@ -17,23 +19,24 @@ module.exports = function (hooker) {
 	}).hook("afterMake", (info) => {
 	}).hook("afterMap", (info) => {
 	}).hook("beforeOutput", () => {
-		outputSpinner = ora({color: "yellow", text: "Output Source"}).start();
 	}).hook("beforeAda", () => {
-
+		adaSpinner = ora({color: "yellow", text: "PACK ADA CORE"}).start();
 	}).hook("afterAda", () => {
-
+		adaSpinner && adaSpinner.succeed();
 	}).hook("beforeIniter", () => {
-
+		initerSpinner = ora({color: "yellow", text: "PACK INITER CODE"}).start();
 	}).hook("afterIniter", () => {
-
-	}).hook().hook("outputFile", () => {
-
+		initerSpinner && initerSpinner.succeed();
+	}).hook("beforeWorker", () => {
+		workerSpinner = ora({color: "yellow", text: "PACK WORKER"}).start();
+	}).hook("afterWorker", () => {
+		workerSpinner && workerSpinner.succeed();
+	}).hook().hook("outputFile", (entity) => {
+		process.stderr.clearLine();
+		process.stderr.cursorTo(0);
+		process.stderr.write(`[ADA-PACK]`.grey + ` OUTPUT [ `.green + entity.path + ` ]`.green);
 	}).hook("outputIndex", () => {
-
 	}).hook("afterOutput", () => {
-		if (outputSpinner) {
-			outputSpinner.stop();
-		}
 	}).hook("afterPack", () => {
 	});
 };
