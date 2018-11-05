@@ -80,8 +80,8 @@ class Outputer {
 
     getSourceMap() {
         let map = {packages: {}};
-        Reflect.ownKeys(this.sourceMap.map).forEach(key => {
-            let entity = this.sourceMap.map[key];
+        Reflect.ownKeys(this.sourceMap._map).forEach(key => {
+            let entity = this.sourceMap._map[key];
             map[entity.getMapName()] = entity.getHash();
         });
         Reflect.ownKeys(this._packs).forEach(key => {
@@ -94,8 +94,8 @@ class Outputer {
     }
 
     getLogInfo() {
-        return Reflect.ownKeys(this.sourceMap.map).filter(key => !!this.sourceMap.map[key].errorLog).map(key => {
-            let entity = this.sourceMap.map[key];
+        return Reflect.ownKeys(this.sourceMap._map).filter(key => !!this.sourceMap._map[key].errorLog).map(key => {
+            let entity = this.sourceMap._map[key];
             return {
                 name: entity.mapName,
                 error: entity.errorLog
@@ -183,9 +183,9 @@ class Outputer {
 
     outputFiles() {
         let config = this.config;
-        return Reflect.ownKeys(this.sourceMap.map).filter(key => this.sourceMap.map[key].output !== true).reduce((a, key) => {
+        return Reflect.ownKeys(this.sourceMap._map).filter(key => this.sourceMap._map[key].output !== true).reduce((a, key) => {
             return a.then(() => {
-                let entity = this.sourceMap.map[key];
+                let entity = this.sourceMap._map[key];
                 return config.hooker.excute("outputFile", entity).then(() => {
                     entity.output = true;
                     if (entity instanceof BinaryEntity) {

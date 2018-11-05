@@ -21,10 +21,6 @@ class SourceMap {
         this._outputer = new Outputer(config, this);
     }
 
-    get map() {
-        return this._map;
-    }
-
     get config() {
         return this._config;
     }

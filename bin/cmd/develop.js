@@ -25,7 +25,7 @@ module.exports = {
     paras: [],
     fn: function () {
         let waitTime = 5000;
-        let appInfo = helper.getAppInfo("/Users/jinliang/git/ada");
+        let appInfo = helper.getAppInfo("/Users/wangjinliang/git/ada");
         let express = require(Path.resolve(appInfo.projectPath, "./node_modules/express"));
         let ps = Promise.resolve();
         if (appInfo.proxy && appInfo.proxy.server) {
