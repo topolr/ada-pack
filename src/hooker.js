@@ -9,7 +9,7 @@ module.exports = function (hooker) {
     let mapSpinner = null;
     let mapTime = 0;
     hooker.hook("beforePack", () => {
-        console.log(` ADA-PACK  ${require("./../package").version}`.blue);
+        console.log(` ADA-PACK  ${require("./../package").version}`.yellow);
     }).hook("startInstall", (names) => {
     }).hook("beforeInstall", (name) => {
     }).hook("afterInstall", (name) => {
@@ -21,7 +21,7 @@ module.exports = function (hooker) {
     }).hook("afterMake", (info) => {
     }).hook("afterMap", () => {
         mapSpinner && mapSpinner.stop();
-        console.log(`[ADA-PACK]`.grey, `MAP SOURCE [`.green, (new Date().getTime() - mapTime), `ms ]`.green);
+        console.log(`[ADA-PACK]`.grey, `MAPPED [`.green, (new Date().getTime() - mapTime), `ms ]`.green);
     }).hook("beforeOutput", () => {
     }).hook("beforeAda", () => {
         adaSpinner = ora({color: "yellow", text: "BUNDLE ADA CORE"}).start();
@@ -39,7 +39,7 @@ module.exports = function (hooker) {
         workerSpinner && workerSpinner.succeed();
     }).hook().hook("outputFile", (entity) => {
     }).hook("outputPack", pack => {
-        console.log(`[ADA-PACK]`.grey, `ENTRY [`.green, pack.packName, `] [`.green, pack.getFileSize(), `|`.green, pack.getGzipSize(), `]`.green);
+        console.log(`[ADA-PACK]`.grey, `ENTRY  [`.green, pack.packName, `] [`.green, pack.getFileSize(), `|`.green, pack.getGzipSize(), `]`.green);
     }).hook("outputIndex", () => {
     }).hook("afterOutput", () => {
     }).hook("afterPack", (info, sourceMap) => {
