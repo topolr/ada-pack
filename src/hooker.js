@@ -13,9 +13,9 @@ module.exports = function (hooker) {
 	}).hook("installError", (name) => {
 	}).hook("beforeMap", (info) => {
 	}).hook("beforeMake", (info) => {
-		process.stderr.clearLine();
-		process.stderr.cursorTo(0);
-		process.stderr.write(`[ADA-PACK]`.grey + ` MAKE [ `.green + info.path + ` ]`.green);
+		// process.stderr.clearLine();
+		// process.stderr.cursorTo(0);
+		console.log(`[ADA-PACK]`.grey, ` MAKE [ `.green, info.path, ` ]`.green);
 	}).hook("afterMake", (info) => {
 	}).hook("afterMap", (info) => {
 	}).hook("beforeOutput", () => {
@@ -32,11 +32,17 @@ module.exports = function (hooker) {
 	}).hook("afterWorker", () => {
 		workerSpinner && workerSpinner.succeed();
 	}).hook().hook("outputFile", (entity) => {
-		process.stderr.clearLine();
-		process.stderr.cursorTo(0);
-		process.stderr.write(`[ADA-PACK]`.grey + ` OUTPUT [ `.green + entity.path + ` ]`.green);
+		// process.stderr.clearLine();
+		// process.stderr.cursorTo(0);
+		console.log(`[ADA-PACK]`.grey, ` OUTPUT [ `.green, entity.path, ` ]`.green);
 	}).hook("outputIndex", () => {
 	}).hook("afterOutput", () => {
 	}).hook("afterPack", () => {
+	}).hook("fileEdit", () => {
+		console.log('---->file edit')
+	}).hook("fileAdd", () => {
+		console.log('---->file add')
+	}).hook("fileRemove", () => {
+		console.log('---->file remove')
 	});
 };

@@ -153,18 +153,24 @@ class SourceMap {
 				et.reset();
 			}
 		});
-		return this.map();
+		return this.config.hooker.excute("fileEdit", files).then(() => {
+			return this.map();
+		});
 	}
 
 	addFiles(files) {
-		return this.map();
+		return this.config.hooker.excute("fileAdd", files).then(() => {
+			return this.map();
+		});
 	}
 
 	removeFiles(files) {
 		files.forEach(file => {
 			delete this._map[this.getMapName(file)];
 		});
-		return this.map();
+		return this.config.hooker.excute("fileRemove", files).then(() => {
+			return this.map();
+		});
 	}
 
 	map() {
