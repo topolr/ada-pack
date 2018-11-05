@@ -110,31 +110,22 @@ module.exports = {
                 messageQueue.add({type, files, map, log});
             }).then(() => {
                 app.listen(port, () => {
-                    console.log("");
-                    console.log(` ▶ SERVER RUNNING LOCALHOST PORT [: ${port}] `.yellow);
-                    let desc = `    now try to open the page...`;
-                    process.stderr.write(desc.grey);
-                    process.stderr.cursorTo(desc.length);
-                    let count = waitTime / 1000;
-                    let num = 0;
+                    console.log(`[ADA-PACK]`.grey, `RUN SERVER PORT [`.green, port, `]`.green);
+                    let spinner = ora({
+                        color: "yellow",
+                        text: `OPEN OR REFRESH BROWSER`
+                    }).start();
+                    let count = waitTime / 1000, num = 0;
                     let intevalId = setInterval(() => {
                         num += 1;
-                        process.stderr.clearLine();
-                        process.stderr.cursorTo(0);
                         if (connected) {
                             clearInterval(intevalId);
                             messageQueue.add({type: "reload"});
-                            process.stderr.write(`    page is opened,reload it`.grey);
-                            process.stderr.write(`\n`);
+                            spinner.stop();
                         } else if (num === count) {
                             clearInterval(intevalId);
                             opn(`http://${host}:${port}`);
-                            process.stderr.write(`    can not found opened page,open it`.grey);
-                            process.stderr.write(`\n`);
-                        } else {
-                            let rdesc = `    now check [${num}] times ...`;
-                            process.stderr.write(rdesc.grey);
-                            process.stderr.cursorTo(rdesc.length);
+                            spinner.stop();
                         }
                     }, 1000);
                 });

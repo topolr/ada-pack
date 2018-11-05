@@ -257,32 +257,33 @@ class Outputer {
             map: bootMap,
             manifest
         };
-        return this.config.hooker.excute("outputIndex", hookInfo).then(() => {
-            return Promise.all(config.icons.map(icon => {
-                return new File(Path.resolve(config.sourcePath, icon.src)).copyTo(Path.resolve(config.distPath, icon.src));
-            })).then(() => {
-                if (config.worker.path) {
-                    return this.outputWorker();
-                }
-            }).then(() => {
-                if (config.initerPath) {
-                    return this.outputIniter();
-                }
-            }).then((initer) => {
-                let workerCode = "";
-                if (config.worker && config.worker.path) {
-                    workerCode = `<script>if('serviceWorker' in navigator){navigator.serviceWorker.register('${this._workerURL}', { scope: '${config.worker.scope}' }).then(function(reg) {console.log('Registration succeeded. Scope is ' + reg.scope);}).catch(function(error) {console.log('Registration failed with ' + error);});}</script>`
-                }
-                let content = `<!DOCTYPE html><html><head><link rel="manifest" href="manifest.json"><meta charset="${page.charset}"><title>${config.manifest.name}</title>${metaContent}${iconsContent}${styleContent}${linkContent}${scriptContent}<script src="${this._adaURL}"></script><script>${initer ? "Ada.init(" + initer + ");" : ""}Ada.boot(${JSON.stringify(hookInfo.map)});</script>${workerCode ? workerCode : ''}</head><body></body></html>`;
-                if (hookInfo.manifest.icons) {
-                    hookInfo.manifest.icons.forEach(icon => {
-                        icon.src = config.siteURL + icon.src;
-                    });
-                }
-                return Promise.all([
-                    new File(Path.resolve(config.indexPath, "./manifest.json")).write(JSON.stringify(hookInfo.manifest)),
-                    new File(Path.resolve(config.indexPath, "./index.html")).write(content)
-                ]);
+        let ps = Promise.resolve();
+        if (config.worker.path) {
+            ps = ps.then(() => this.outputWorker());
+        }
+        if (config.initerPath) {
+            ps = ps.then(() => this.outputIniter());
+        }
+        return ps.then(() => {
+            return this.config.hooker.excute("outputIndex", hookInfo).then(() => {
+                return Promise.all(config.icons.map(icon => {
+                    return new File(Path.resolve(config.sourcePath, icon.src)).copyTo(Path.resolve(config.distPath, icon.src));
+                })).then(() => {
+                    let workerCode = "", initer = this._initerBundler.getContent();
+                    if (config.worker && config.worker.path) {
+                        workerCode = `<script>if('serviceWorker' in navigator){navigator.serviceWorker.register('${this._workerURL}', { scope: '${config.worker.scope}' }).then(function(reg) {console.log('Registration succeeded. Scope is ' + reg.scope);}).catch(function(error) {console.log('Registration failed with ' + error);});}</script>`
+                    }
+                    let content = `<!DOCTYPE html><html><head><link rel="manifest" href="manifest.json"><meta charset="${page.charset}"><title>${config.manifest.name}</title>${metaContent}${iconsContent}${styleContent}${linkContent}${scriptContent}<script src="${this._adaURL}"></script><script>${initer ? "Ada.init(" + initer + ");" : ""}Ada.boot(${JSON.stringify(hookInfo.map)});</script>${workerCode ? workerCode : ''}</head><body></body></html>`;
+                    if (hookInfo.manifest.icons) {
+                        hookInfo.manifest.icons.forEach(icon => {
+                            icon.src = config.siteURL + icon.src;
+                        });
+                    }
+                    return Promise.all([
+                        new File(Path.resolve(config.indexPath, "./manifest.json")).write(JSON.stringify(hookInfo.manifest)),
+                        new File(Path.resolve(config.indexPath, "./index.html")).write(content)
+                    ]);
+                });
             });
         });
     }
@@ -292,9 +293,9 @@ class Outputer {
             return this.outputAda().then(() => {
                 return this.outputFiles();
             }).then(() => {
-                return this.outputPackFiles();
-            }).then(() => {
                 return this.outputIndex();
+            }).then(() => {
+                return this.outputPackFiles();
             }).then(() => {
                 return this.outputStatic();
             }).then(() => {
