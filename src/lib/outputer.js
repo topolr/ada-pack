@@ -20,7 +20,7 @@ class Pack {
         this._files.map(file => {
             let entity = this._sourceMap.getEntity(file);
             if (!(entity instanceof BinaryEntity)) {
-                this._content[entity.mapName] = {
+                this._content[entity.getMapName()] = {
                     hash: entity.getHash(),
                     code: entity.getContent()
                 }

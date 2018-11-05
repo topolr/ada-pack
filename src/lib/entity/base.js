@@ -13,7 +13,7 @@ class BaseEntity {
         if (this.path.indexOf("node_modules/") === -1) {
             str = this.path.substring(this.sourceMap.config.sourcePath.length);
         } else {
-            str = "node_modules" + this.path.substring(this.sourceMap.config.nmodulePath.length);
+            str = "node_modules/" + this.path.substring(this.sourceMap.config.nmodulePath.length);
         }
         this.mapName = str;
     }
