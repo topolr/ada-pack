@@ -43,9 +43,9 @@ module.exports = function (hooker) {
     }).hook("outputIndex", () => {
     }).hook("afterOutput", () => {
     }).hook("afterPack", (info, sourceMap) => {
-        sourceMap.outputer.getLogInfo().forEach(({name, error}) => {
-            console.log(`[ADA-PACK]`.grey, `MAKE ERROR [`.red, name, `]`.red);
-            console.log(error.red);
+        sourceMap.outputer.getLogInfo().forEach((info) => {
+            console.log(`[ADA-PACK]`.grey, `MAKE ERROR [`.red, info.name, `]`.red);
+            console.log(info.error);
         });
     }).hook("fileEdit", () => {
         console.log(`[ADA-PACK]`.grey, `EDIT FILE ${util.formatDate()}`.grey);
