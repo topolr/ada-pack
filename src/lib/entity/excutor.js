@@ -90,6 +90,9 @@ class ExcutorEntity extends TextEntity {
                                             return `require("${name}")`;
                                         }
                                     } else {
+                                        if (a !== "adajs") {
+                                            console.log("[ada-pack] unsupport nodejs built-in modules [" + a + "]");
+                                        }
                                         return str;
                                     }
                                 });
