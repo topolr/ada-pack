@@ -1,6 +1,7 @@
 let jsmaker = require("./jsmaker");
 let Path = require("path");
-module.exports = function (content, path, config) {
+module.exports = function ({content, path, option}) {
+    let config = option;
     return new Promise((resolve, reject) => {
         let file = path.substring(config.source_path.length);
         let args = config.compiler.typescript || ["--target ES6", "--noEmit", "--pretty", "--skipLibCheck", "--experimentalDecorators"];
@@ -12,7 +13,7 @@ module.exports = function (content, path, config) {
                 error.message = stdout || stderr;
                 reject(error);
             } else {
-                jsmaker(content, path, config).then((content) => {
+                jsmaker({content, path, option: config}).then((content) => {
                     resolve(content);
                 }, (e) => {
                     reject(e);

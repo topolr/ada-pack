@@ -1,5 +1,5 @@
 let minify = require('html-minifier').minify;
-module.exports = function (content, option) {
+module.exports = function ({content, path, option}) {
     return new Promise((resolve, reject) => {
         try {
             content = minify(content, {

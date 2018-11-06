@@ -1,7 +1,7 @@
 let sass = require('node-sass');
 let maker = require("./cssmaker");
 let Path = require("path");
-module.exports = function (content, path, option) {
+module.exports = function ({content, path, option}) {
     return new Promise((resolve, reject) => {
         if (option.develop) {
             sass.render(Object.assign({
@@ -40,6 +40,6 @@ module.exports = function (content, path, option) {
             });
         }
     }).then(content => {
-        return maker(content, path, option);
+        return maker({content, path, option});
     });
 };

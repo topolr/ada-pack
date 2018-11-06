@@ -14,6 +14,7 @@ class Pack {
         this._name = name;
         this._packName = "package-" + this._name.substring(this._sourceMap.config.sourcePath.length).replace(/\//g, "-").replace(/\\/g, "-");
         this._result = "";
+        this.getContent();
     }
 
     get packName() {
@@ -32,7 +33,6 @@ class Pack {
                     }
                 }
             });
-
             this._result = `Ada.unpack(${JSON.stringify(this._content)})`;
         }
         return this._result;
@@ -293,9 +293,9 @@ class Outputer {
             return this.outputAda().then(() => {
                 return this.outputFiles();
             }).then(() => {
-                return this.outputIndex();
-            }).then(() => {
                 return this.outputPackFiles();
+            }).then(() => {
+                return this.outputIndex();
             }).then(() => {
                 return this.outputStatic();
             }).then(() => {

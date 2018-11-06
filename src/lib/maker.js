@@ -20,7 +20,17 @@ class Maker {
         let type = Path.extname(path).substring(1), content = new File(path).readSync();
         if (this.config.dependence[type]) {
             return this.installer.readyTypeModules(type).then(() => {
-                return this.config.dependence[type].maker(content, path, this.config);
+                let maker = this.config.dependence[type].maker;
+                if (!Array.isArray(maker)) {
+                    maker = [maker];
+                }
+                return maker.reduce((a, mk) => {
+                    return a.then((code) => {
+                        return mk({content: code, path, option: this.config});
+                    });
+                }, Promise.resolve(content));
+            }).then(code => {
+                return code;
             });
         } else {
             return Promise.resolve(content);

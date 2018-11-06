@@ -2,7 +2,7 @@ let uglifycss = require("uglifycss");
 let postcss = require('postcss');
 let autoprefixer = require('autoprefixer');
 
-module.exports = function (content, path, option) {
+module.exports = function ({content, path, option}) {
     return new Promise((resolve, reject) => {
         let r = content;
         if (!option.develop) {
