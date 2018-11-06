@@ -204,7 +204,7 @@ class SourceMap {
                     });
                 }, Promise.resolve()).then(() => {
                     this.entries.forEach(entry => {
-                        this._entryDependenceMap[entry] = SourceMap.getDependencesOf.call(this, entry);
+                        this._entryDependenceMap[entry] = [entry, ...SourceMap.getDependencesOf.call(this, entry)];
                     });
                     this.cleanUnuseSource();
                 }).then(() => {
