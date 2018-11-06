@@ -24,7 +24,7 @@ module.exports = {
 	paras: [],
 	fn: function () {
 		let waitTime = 5000;
-		let appInfo = helper.getAppInfo("/Users/jinliang/git/ada");
+		let appInfo = helper.getAppInfo("/Users/wangjinliang/git/ada");
 		let port = appInfo.server.port;
 		return require("../../index").develop(appInfo, ({type, files, map, log}) => {
 			messageQueue.add({type, files, map, log});

@@ -8,8 +8,8 @@ module.exports = function (hooker) {
     let workerSpinner = null;
     let mapSpinner = null;
     let mapTime = 0;
-    hooker.hook("beforePack", () => {
-        console.log(` ADA-PACK  ${require("./../package").version}`.yellow);
+    hooker.hook("beforePack", (config) => {
+        console.log(` ADA-PACK `.yellow, `${(config.develop ? 'DEVELOP' : 'PUBLISH')}`, `|`.yellow, `${require("./../package").version}`.magenta);
     }).hook("startInstall", (names) => {
     }).hook("beforeInstall", (name) => {
     }).hook("afterInstall", (name) => {
@@ -21,25 +21,26 @@ module.exports = function (hooker) {
     }).hook("afterMake", (info) => {
     }).hook("afterMap", () => {
         mapSpinner && mapSpinner.stop();
-        console.log(`[ADA-PACK]`.grey, `MAPPED [`.green, (new Date().getTime() - mapTime), `ms ]`.green);
+        console.log(`[ADA-PACK]`.grey, `MAPPING`.green, `|`.green, (new Date().getTime() - mapTime), `ms`.green);
     }).hook("beforeOutput", () => {
     }).hook("beforeAda", () => {
         adaSpinner = ora({color: "yellow", text: "BUNDLE ADA CORE"}).start();
     }).hook("afterAda", bundler => {
         adaSpinner && adaSpinner.stop();
-        console.log(`[ADA-PACK]`.grey, `ADAJS  [`.green, bundler.getFileSize(), `|`.green, bundler.getGzipSize(), `]`.green);
+        console.log(`[ADA-PACK]`.grey, `ADACORE`.green, `|`.green, bundler.time, `ms |`.green, bundler.getFileSize(), `|`.cyan, bundler.getGzipSize());
     }).hook("beforeIniter", () => {
         initerSpinner = ora({color: "yellow", text: "BUNDLE INITER CODE"}).start();
     }).hook("afterIniter", (bundler) => {
         initerSpinner && initerSpinner.stop();
-        console.log(`[ADA-PACK]`.grey, `INITER [`.green, bundler.getFileSize(), `|`.green, bundler.getGzipSize(), `]`.green);
+        console.log(`[ADA-PACK]`.grey, `INITERC`.green, `|`.green, bundler.time, `ms |`.green, bundler.getFileSize(), `|`.cyan, bundler.getGzipSize());
     }).hook("beforeWorker", () => {
         workerSpinner = ora({color: "yellow", text: "BUNDLE WORKER"}).start();
-    }).hook("afterWorker", () => {
+    }).hook("afterWorker", (bundler) => {
         workerSpinner && workerSpinner.succeed();
+        console.log(`[ADA-PACK]`.grey, `WORKERC`.green, `|`.green, bundler.getFileSize(), `|`.cyan, bundler.getGzipSize());
     }).hook().hook("outputFile", (entity) => {
     }).hook("outputPack", pack => {
-        console.log(`[ADA-PACK]`.grey, `ENTRY  [`.green, pack.packName, `] [`.green, pack.getFileSize(), `|`.green, pack.getGzipSize(), `]`.green);
+        console.log(`[ADA-PACK]`.grey, `PACKAGE`.green, `|`.green, pack.packName, `|`.cyan, pack.getFileSize(), `|`.cyan, pack.getGzipSize());
     }).hook("outputIndex", () => {
     }).hook("afterOutput", (info, sourceMap) => {
         sourceMap.outputer.getLogInfo().forEach((info) => {

@@ -21,7 +21,7 @@ class Packer {
     }
 
     pack() {
-        let config = this.config, ps = config.hooker.excute("beforePack");
+        let config = this.config, ps = config.hooker.excute("beforePack",config);
         if (!config.develop) {
             ps = ps.then(() => {
                 if (new File(config.distPath).isExists()) {
