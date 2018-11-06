@@ -24,9 +24,9 @@ module.exports = {
 	paras: [],
 	fn: function () {
 		let waitTime = 5000;
-		let appInfo = helper.getAppInfo("/Users/wangjinliang/git/ada");
+		let appInfo = helper.getAppInfo("/Users/jinliang/git/ada");
 		let port = appInfo.server.port;
-		new DevServer(appInfo).start(app => {
+		new DevServer(appInfo).start().then(app => {
 			app.use("/ada/sse", (req, res) => {
 				res.writeHead(200, {
 					'Connection': 'keep-alive',
