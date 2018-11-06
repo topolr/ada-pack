@@ -20,13 +20,13 @@ class Maker {
         let type = Path.extname(path).substring(1), content = new File(path).readSync();
         if (this.config.dependence[type]) {
             return this.installer.readyTypeModules(type).then(() => {
-                let maker = this.config.dependence[type].maker;
-                if (!Array.isArray(maker)) {
-                    maker = [maker];
+                let makers = this.config.dependence[type].maker;
+                if (!Array.isArray(makers)) {
+                    makers = [makers];
                 }
-                return maker.reduce((a, mk) => {
+                return makers.reduce((a, maker) => {
                     return a.then((code) => {
-                        return mk({content: code, path, option: this.config});
+                        return maker({content: code, path, option: this.config});
                     });
                 }, Promise.resolve(content));
             });
