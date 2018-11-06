@@ -88,8 +88,11 @@ class DevServer {
 			}
 			let port = this.appInfo.server.port || 8080;
 			return ps.then(() => {
-				app.listen(port, () => {
-					console.log(`[ADA-PACK]`.grey, `RUN SERVER PORT [`.green, port, `]`.green);
+				return new Promise(resolve => {
+					app.listen(port, () => {
+						console.log(`[ADA-PACK]`.grey, `RUN SERVER PORT [`.green, port, `]`.green);
+						resolve();
+					});
 				});
 			}).then(() => app);
 		});
