@@ -43,7 +43,7 @@ class DevServer {
 				});
 			}
 		}
-		ps.then(() => {
+		return ps.then(() => {
 			if (!appInfo.server) {
 				appInfo.server = {
 					protocol: "http",
@@ -78,7 +78,6 @@ class DevServer {
 			});
 			return app;
 		});
-		return ps;
 	}
 
 	start(fn) {
@@ -88,12 +87,11 @@ class DevServer {
 				ps = ps.then(() => fn(app));
 			}
 			let port = this.appInfo.server.port || 8080;
-			ps.then(() => {
+			return ps.then(() => {
 				app.listen(port, () => {
 					console.log(`[ADA-PACK]`.grey, `RUN SERVER PORT [`.green, port, `]`.green);
 				});
-			});
-			return ps;
+			}).then(() => app);
 		});
 	}
 }
