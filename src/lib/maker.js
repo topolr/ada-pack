@@ -29,8 +29,6 @@ class Maker {
                         return mk({content: code, path, option: this.config});
                     });
                 }, Promise.resolve(content));
-            }).then(code => {
-                return code;
             });
         } else {
             return Promise.resolve(content);
