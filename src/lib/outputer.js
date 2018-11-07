@@ -259,7 +259,7 @@ class Outputer {
 		};
 		let manifest = {};
 		Reflect.ownKeys(baseInfo).forEach(key => {
-			if (["keywords","meta","link","style","script"].indexOf(key) === -1) {
+			if (["keywords", "meta", "link", "style", "script"].indexOf(key) === -1) {
 				manifest[key] = baseInfo[key];
 			}
 		});
@@ -268,7 +268,7 @@ class Outputer {
 			manifest
 		};
 		let ps = Promise.resolve();
-		if (config.worker.path) {
+		if (config.workerPath) {
 			ps = ps.then(() => this.outputWorker());
 		}
 		if (config.initerPath) {
