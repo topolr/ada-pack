@@ -1,5 +1,5 @@
-let File = require("./file");
 let colors = require("colors");
+let File = require("./file");
 let Path = require("path");
 let Config = require("./../config");
 
@@ -241,19 +241,16 @@ let util = {
 		}
 		return result;
 	},
-	getAppInfo(projectPath) {
+	getAppInfo(projectPath, develop = true) {
 		let packagePath = Path.resolve(projectPath, "./package.json");
 		let packageInfo = require(packagePath);
-		if (!packageInfo["ada-develop"]) {
-			packageInfo["ada-develop"] = {
-				appPath: "./app/app.js"
-			};
+		let adaInfo = packageInfo.ada, appPath = "";
+		if (develop) {
+			appPath = adaInfo.develop ? adaInfo.develop : "./app/app.js";
 		} else {
-			packageInfo["ada-develop"] = Object.assign({
-				appPath: "./app/app.js"
-			}, packageInfo["ada-develop"]);
+			appPath = adaInfo.publish ? adaInfo.publish : "./app/app.js";
 		}
-		let appPath = Path.resolve(packagePath, "./../", packageInfo["ada-develop"].appPath);
+		appPath = Path.resolve(packagePath, "./../", appPath);
 		if (!new File(appPath).isExists()) {
 			appPath = Path.resolve(projectPath, "./app.js");
 		}
