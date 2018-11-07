@@ -276,7 +276,7 @@ class Outputer {
 		}
 		return ps.then(() => {
 			return this.config.hooker.excute("outputIndex", hookInfo).then(() => {
-				return Promise.all(config.icons.map(icon => {
+				return Promise.all(baseInfo.icons.map(icon => {
 					return new File(Path.resolve(config.sourcePath, icon.src)).copyTo(Path.resolve(config.distPath, icon.src));
 				})).then(() => {
 					let workerCode = "", initer = this._initerBundler.getContent();
