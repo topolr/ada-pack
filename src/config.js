@@ -13,7 +13,7 @@ module.exports = {
 	entryPath: "./src/entries",
 	staticPath: "./src/static",
 	ignore: [],
-	manifest: {
+	baseInfo: {
 		name: "ada",
 		icons: [],
 		short_name: "ada",
@@ -23,9 +23,7 @@ module.exports = {
 		theme_color: "#fff",
 		description: "ada web framework.",
 		related_applications: [{"platform": "web"}],
-		keywords: ""
-	},
-	page: {
+		keywords: "",
 		charset: "UTF-8",
 		meta: [
 			{name: 'viewport', content: "width=device-width, initial-scale=1.0, minimum-scale=1.0, user-scalable=no"},
@@ -162,8 +160,8 @@ module.exports = {
 		protocol: "http",
 		host: "localhost",
 		port: "8080",
-		serverPath: "./server.js"
+		serverPath: "./server.js",
+		proxy: null
 	},
-	proxy: [{path: [], option: {}}],
 	hook: []
 };

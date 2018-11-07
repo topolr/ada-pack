@@ -64,14 +64,17 @@ class DevServer {
 			app.get("/", (req, res) => {
 				res.send(require("fs").readFileSync(Path.resolve(distPath, "./index.html"), "utf-8"));
 			});
-			if (appInfo.proxy && appInfo.proxy.server) {
-				let proxyMiddleWare = require(Path.resolve(projectPath, "./node_modules/http-proxy-middleware"));
-				app.use(appInfo.proxy.path, proxyMiddleWare(Object.assign({
-					target: "",
-					changeOrigoin: true
-				}, appInfo.proxy.option, {
-					target: appInfo.proxy.server
-				})));
+			if (appInfo.server.proxy) {
+				let proxyMiddleWare = require(Path.resolve(appInfo.projectPath, "./node_modules/http-proxy-middleware"));
+				let proxies = [];
+				if (!Array.isArray(appInfo.server.proxy)) {
+					proxies = [appInfo.server.proxy];
+				} else {
+					proxies = appInfo.server.proxy;
+				}
+				proxies.forEach(proxy => {
+					app.use(proxyMiddleWare(proxy));
+				});
 			}
 			app.get('*', function (req, res) {
 				res.send(require("fs").readFileSync(Path.resolve(distPath, "./index.html"), "utf-8"));
