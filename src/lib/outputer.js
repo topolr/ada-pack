@@ -207,7 +207,11 @@ class Outputer {
             return a.then(() => {
                 let pack = this._packs[key];
                 return this.config.hooker.excute("outputPack", pack).then(() => {
-                    return new File(Path.resolve(config.distPath, `./${pack.getMapName()}.js`)).write(pack.getContent());
+                    if(config.develop) {
+						return new File(Path.resolve(config.distPath, `./${pack.getMapName()}.js`)).write(pack.getContent());
+					}else{
+						return new File(Path.resolve(config.distPath, `./${pack.getHash()}.js`)).write(pack.getContent());
+                    }
                 });
             });
         }, Promise.resolve());
