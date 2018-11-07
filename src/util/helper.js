@@ -263,7 +263,7 @@ let util = {
 		config.indexPath = Path.join(config.basePath, config.indexPath, "./../").replace(/\\/g, "/");
 		config.entryPath = Path.join(config.basePath, config.entryPath).replace(/\\/g, "/");
 		config.mainEntryPath = Path.join(config.basePath, config.main).replace(/\\/g, "/");
-		if (config.initerPath) {
+		if (config.initer) {
 			config.initerPath = Path.join(config.basePath, config.initer).replace(/\\/g, "/");
 		}
 		if (config.worker && config.worker.path) {
