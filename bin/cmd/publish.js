@@ -5,6 +5,6 @@ module.exports = {
 	desc: "publish project",
 	paras: [],
 	fn: function () {
-		return require("../../index").publish(helper.getAppInfo("/Users/jinliang/git/ada", false));
+		return require("../../index").publish(helper.getAppInfo(process.cwd(), false));
 	}
 };
