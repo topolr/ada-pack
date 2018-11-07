@@ -8,6 +8,8 @@ module.exports = {
 	fn: function (arguments) {
 		let mode = arguments[0], type = mode && mode === 'develop';
 		let appInfo = helper.getAppInfo(process.cwd(), type);
-		new DevServer(appInfo).start();
+		new DevServer(appInfo).start().then(() => {
+			process.send({type: "done"});
+		});
 	}
 };
