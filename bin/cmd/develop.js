@@ -36,7 +36,7 @@ module.exports = {
 						'Content-Type': 'text/event-stream',
 						'Cache-Control': 'no-cache'
 					});
-					res.write(`retry: ${waitTime}\n`);
+					res.write(`retry: 2000\n`);
 					res.write("id: " + Date.now() + "\ndata:{}\n\n");
 					messageQueue.subscribe((info) => {
 						res.write("id: " + Date.now() + "\ndata: " + JSON.stringify(info) + "\n\n");
