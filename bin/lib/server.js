@@ -88,10 +88,6 @@ class DevServer {
             }
             let port = this.appInfo.server.port || 8080;
             return ps.then(() => {
-                let distPath = this.appInfo.distPath;
-                app.get('*', function (req, res) {
-                    res.send(require("fs").readFileSync(Path.resolve(distPath, "./index.html"), "utf-8"));
-                });
                 return new Promise(resolve => {
                     app.listen(port, () => {
                         console.log(`[ADA-PACK]`.grey, `RUN SERVER PORT [`.green, port, `]`.green);
