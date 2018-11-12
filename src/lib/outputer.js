@@ -133,9 +133,9 @@ class Outputer {
 		}
 	}
 
-	outputIniter() {
+	outputIniter(files) {
 		let config = this.config;
-		if (!this._initerBundler.ready) {
+		if (!this._initerBundler.check(files)) {
 			return config.hooker.excute("beforeIniter").then(() => {
 				return this._initerBundler.getBundleCode(config.initerPath).then(() => {
 					return config.hooker.excute("afterIniter", this._initerBundler).then(() => {
@@ -148,9 +148,9 @@ class Outputer {
 		}
 	}
 
-	outputWorker() {
+	outputWorker(files) {
 		let config = this.config;
-		if (!this._workerBundler.ready && config.worker.path) {
+		if (!this._workerBundler.check(files) && config.worker.path) {
 			return config.hooker.excute("beforeWorker").then(() => {
 				return this._workerBundler.getBundleCode(config.workerPath).then(code => {
 					let h = hash.md5(code).substring(0, 8);
@@ -217,7 +217,7 @@ class Outputer {
 		}, Promise.resolve());
 	}
 
-	outputIndex() {
+	outputIndex(files) {
 		let config = this.config;
 		let baseInfo = config.baseInfo;
 		let metaContent = baseInfo.meta.map(item => {
@@ -269,10 +269,10 @@ class Outputer {
 		};
 		let ps = Promise.resolve();
 		if (config.workerPath) {
-			ps = ps.then(() => this.outputWorker());
+			ps = ps.then(() => this.outputWorker(files));
 		}
 		if (config.initerPath) {
-			ps = ps.then(() => this.outputIniter());
+			ps = ps.then(() => this.outputIniter(files));
 		}
 		return ps.then(() => {
 			return this.config.hooker.excute("outputIndex", hookInfo).then(() => {
@@ -298,14 +298,14 @@ class Outputer {
 		});
 	}
 
-	output() {
+	output(files = []) {
 		return this.config.hooker.excute("beforeOutput").then(() => {
 			return this.outputAda().then(() => {
 				return this.outputFiles();
 			}).then(() => {
 				return this.outputPackFiles();
 			}).then(() => {
-				return this.outputIndex();
+				return this.outputIndex(files);
 			}).then(() => {
 				return this.outputStatic();
 			}).then(() => {

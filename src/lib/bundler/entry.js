@@ -128,6 +128,13 @@ class EntryPacker {
 			return this.content;
 		}
 	}
+
+	check(files) {
+		if (this.ready) {
+			console.log(files);
+		}
+		return false;
+	}
 }
 
 module.exports = EntryPacker;

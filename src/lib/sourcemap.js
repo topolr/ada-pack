@@ -154,7 +154,7 @@ class SourceMap {
 			}
 		});
 		return this.config.hooker.excute("fileEdit", files).then(() => {
-			return this.map();
+			return this.map(files);
 		});
 	}
 
@@ -169,7 +169,7 @@ class SourceMap {
 			delete this._map[this.getMapName(file)];
 		});
 		return this.config.hooker.excute("fileRemove", files).then(() => {
-			return this.map();
+			return this.map(files);
 		});
 	}
 
@@ -184,7 +184,7 @@ class SourceMap {
 		});
 	}
 
-	map() {
+	map(files) {
 		return this.config.hooker.excute("beforeMap").then(() => {
 			return this.maker.installer.readyProjectModules().then(() => {
 				let entries = [], entry = new File(this.config.entryPath);
@@ -219,7 +219,7 @@ class SourceMap {
 							entry: this._entries,
 							entryDependenceMap: this._entryDependenceMap
 						}).then(() => {
-							return this._outputer.output();
+							return this._outputer.output(files);
 						});
 					});
 				});
