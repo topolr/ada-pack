@@ -14,6 +14,7 @@ class EntryPacker {
 		this.content = "";
 		this.ready = false;
 		this.time = 0;
+		this.rebuild = false;
 	}
 
 	getFileCode(path) {
@@ -111,27 +112,25 @@ class EntryPacker {
 	}
 
 	getBundleCode(path) {
-		if (!this.content) {
-			path = path.replace(/\\/g, "/");
-			this.time = new Date().getTime();
-			return this.getCodeMap(path).then(() => {
-				this.resultmap.push(path);
-				let result = this.resultmap.map(path => {
-					return `function(module,exports,require){${this.resultmapcode[path]}}`;
-				});
-				this.content = `(function(p){var a={};var r=function(i){if(a[i]){return a[i].exports;}var m=a[i]={exports:{}};p[i].call(m.exports,m,m.exports,r);return m.exports;};return r(p.length-1);})([${result.join(",")}])`;
-				this.ready = true;
-				this.time = new Date().getTime() - this.time;
-				return this.content;
+		path = path.replace(/\\/g, "/");
+		this.time = new Date().getTime();
+		return this.getCodeMap(path).then(() => {
+			this.resultmap.push(path);
+			let result = this.resultmap.map(path => {
+				return `function(module,exports,require){${this.resultmapcode[path]}}`;
 			});
-		} else {
+			this.content = `(function(p){var a={};var r=function(i){if(a[i]){return a[i].exports;}var m=a[i]={exports:{}};p[i].call(m.exports,m,m.exports,r);return m.exports;};return r(p.length-1);})([${result.join(",")}])`;
+			this.ready = true;
+			this.time = new Date().getTime() - this.time;
 			return this.content;
-		}
+		});
 	}
 
 	check(files) {
 		if (this.ready) {
-			console.log(files);
+			let rebuild = files.some(file => this.resultmapcode[file] !== undefined);
+			this.rebuild = rebuild;
+			return !rebuild;
 		}
 		return false;
 	}

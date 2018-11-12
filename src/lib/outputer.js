@@ -150,7 +150,7 @@ class Outputer {
 
 	outputWorker(files) {
 		let config = this.config;
-		if (!this._workerBundler.check(files) && config.worker.path) {
+		if (!this._workerBundler.check(files)) {
 			return config.hooker.excute("beforeWorker").then(() => {
 				return this._workerBundler.getBundleCode(config.workerPath).then(code => {
 					let h = hash.md5(code).substring(0, 8);
@@ -310,6 +310,12 @@ class Outputer {
 				return this.outputStatic();
 			}).then(() => {
 				return this.config.hooker.excute("afterOutput");
+			}).then(() => {
+				if (this._initerBundler.rebuild || this._workerBundler.rebuild) {
+					this.rebuild = true;
+				} else {
+					this.rebuild = false;
+				}
 			});
 		});
 	}
