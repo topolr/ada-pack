@@ -1,6 +1,6 @@
 #!/usr/bin/env node
-let Commnader = require("./lib/commander");
-let commander = new Commnader();
+let {Commander} = require("ada-util");
+let commander = new Commander();
 [
 	require("./cmd/version"),
 	require("./cmd/develop"),
