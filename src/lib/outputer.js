@@ -2,7 +2,7 @@ let hash = require("ada-util/src/md5");
 let gzipSize = require('gzip-size');
 let AdaBundler = require("./bundler/ada");
 let EntryBundler = require("./bundler/entry");
-let {File} = require("ada-util");
+let {File, clone} = require("ada-util");
 let Path = require("path");
 let util = require("./../util/helper");
 let BinaryEntity = require("./entity/binary");
@@ -260,7 +260,7 @@ class Outputer {
 		let manifest = {};
 		Reflect.ownKeys(baseInfo).forEach(key => {
 			if (["keywords", "meta", "link", "style", "script"].indexOf(key) === -1) {
-				manifest[key] = baseInfo[key];
+				manifest[key] = clone(baseInfo[key]);
 			}
 		});
 		let hookInfo = {
