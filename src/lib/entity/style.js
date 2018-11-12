@@ -2,15 +2,14 @@ let TextEntity = require("./text");
 let {ENTITYNONE, ENTITYREADY} = require("./const");
 let util = require("./../../util/helper");
 let Path = require("path");
-let File = require("./../../util/file");
+let {File} = require("ada-util");
 
 class StyleEntity extends TextEntity {
     getDependenceInfo() {
         if (this.state === ENTITYNONE) {
             let config = this.sourceMap.config;
             if (config.ignore.ignores("./" + this.path.substring(config.sourcePath.length))) {
-                this.content = new File(this.path).readSync();
-                return Promise.resolve(this.dependence);
+                return new File(this.path).read().then(content=>this.content=content).then(()=>this.dependence);
             } else {
                 let config = this.sourceMap.config;
                 return new Promise(resolve => {
@@ -35,7 +34,7 @@ class StyleEntity extends TextEntity {
                                     if (this.sourceMap.config.develop) {
                                         return this.sourceMap.config.siteURL + r;
                                     } else {
-                                        let hash = new File(o).hash().substring(0, 8);
+                                        let hash = new File(o).transform().hash().substring(0, 8);
                                         return this.sourceMap.config.siteURL + util.getHashPath(r, hash);
                                     }
                                 });

@@ -1,4 +1,4 @@
-let File = require("../../src/util/file");
+let {File} = require("ada-util");
 let Path = require("path");
 let ora = require('ora');
 
@@ -17,7 +17,7 @@ class DevServer {
         let ps = Promise.resolve();
         if (appInfo.proxy && appInfo.proxy.server) {
             let proxy = new File(Path.resolve(appInfo.projectPath, "./node_modules/http-proxy-middleware"));
-            if (!proxy.isExists()) {
+            if (!proxy.exist) {
                 ps = ps.then(() => {
                     return new Promise((resolve, reject) => {
                         let name = "http-proxy-middleware";
@@ -55,7 +55,7 @@ class DevServer {
             let distPath = appInfo.distPath;
             let serverPath = Path.resolve(appInfo.projectPath, (appInfo.server.serverPath || "./server.js"));
             let app = null;
-            if (!new File(serverPath).isExists()) {
+            if (!new File(serverPath).exist) {
                 app = new express();
             } else {
                 app = require(serverPath);

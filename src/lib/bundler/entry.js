@@ -1,5 +1,5 @@
 let util = require("./../../util/helper");
-let File = require("../../util/file");
+let {File} = require("ada-util");
 let Path = require("path");
 let queue = require("../../util/queue");
 let gzipSize = require('gzip-size');
@@ -19,26 +19,28 @@ class EntryPacker {
 	getFileCode(path) {
 		if (!this.contentCache[path]) {
 			return new Promise((resolve, reject) => {
-				let file = new File(path), suffix = file.suffix();
-				if (suffix === "html") {
-					resolve(`module.exports=${JSON.stringify(file.readSync().replace(/\n/g, '').replace(/\r/g, '').replace(/\n\r/g, ''))}`);
-				} else if (suffix === "less") {
-					this.maker.lessCode(file.readSync()).then(code => {
-						resolve(`module.exports={active:function(){var _a = document.createElement("style");_a.setAttribute("media", "screen");_a.setAttribute("type", "text/css");_a.appendChild(document.createTextNode(${JSON.stringify(code)}));document.head.appendChild(_a);}};`);
-					});
-				} else if (suffix === "icon") {
-					this.maker.minifyIcon(file.readSync()).then(({name, code}) => {
-						let result = `var active=function(){var c=document.getElementById("ada-icon-container");if(!c){var c=document.createElement("div");c.setAttribute("id","ada-icon-container");c.style.cssText="width:0;height:0;";document.body.appendChild(c);}if(!document.getElementById("${name}")){var a=document.createElement("div");a.innerHTML=${JSON.stringify(code)};c.appendChild(a.childNodes[0]);}};module.exports={active:function(){if(/complete|loaded|interactive/.test(window.document.readyState)){active();}else{window.addEventListener("DOMContentLoaded",function(){active();});}},getIconId:function(){return "${name}";}};`;
-						resolve(result);
-					});
-				} else {
-					let __code = file.readSync();
-					if (__code.trim().length === 0) {
-						resolve("module.exports={};");
+				let file = new File(path), suffix = file.suffix;
+				file.read().then(content => {
+					if (suffix === "html") {
+						resolve(`module.exports=${JSON.stringify(content.replace(/\n/g, '').replace(/\r/g, '').replace(/\n\r/g, ''))}`);
+					} else if (suffix === "less") {
+						this.maker.lessCode(content).then(code => {
+							resolve(`module.exports={active:function(){var _a = document.createElement("style");_a.setAttribute("media", "screen");_a.setAttribute("type", "text/css");_a.appendChild(document.createTextNode(${JSON.stringify(code)}));document.head.appendChild(_a);}};`);
+						});
+					} else if (suffix === "icon") {
+						this.maker.minifyIcon(content).then(({name, code}) => {
+							let result = `var active=function(){var c=document.getElementById("ada-icon-container");if(!c){var c=document.createElement("div");c.setAttribute("id","ada-icon-container");c.style.cssText="width:0;height:0;";document.body.appendChild(c);}if(!document.getElementById("${name}")){var a=document.createElement("div");a.innerHTML=${JSON.stringify(code)};c.appendChild(a.childNodes[0]);}};module.exports={active:function(){if(/complete|loaded|interactive/.test(window.document.readyState)){active();}else{window.addEventListener("DOMContentLoaded",function(){active();});}},getIconId:function(){return "${name}";}};`;
+							resolve(result);
+						});
 					} else {
-						resolve(this.maker.babelCode(__code, path));
+						let __code = content;
+						if (__code.trim().length === 0) {
+							resolve("module.exports={};");
+						} else {
+							resolve(this.maker.babelCode(__code, path));
+						}
 					}
-				}
+				});
 			}).then((content) => {
 				this.contentCache[path] = content;
 				return content;

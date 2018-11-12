@@ -18,6 +18,7 @@
   },
   "homepage": "https://github.com/topolr/ada-pack#readme",
   "dependencies": {
+    "ada-util": "git+https://github.com/topolr/ada-util.git",
     "chokidar": "^1.7.0",
     "colors": "^1.1.2",
     "detect-installed": "^2.0.4",

@@ -1,5 +1,5 @@
 let {ENTITYNONE, ENTITYREADY, THRIDPARTFOLDER} = require("./const");
-let File = require("./../../util/file");
+let {SyncFile} = require("ada-util");
 let Path = require("path");
 let util = require("./../../util/helper");
 
@@ -20,7 +20,7 @@ class BaseEntity {
 	}
 
 	getHash() {
-		return new File(this.path).hash().substring(0, 8);
+		return new SyncFile(this.path).hash().substring(0, 8);
 	}
 
 	getMapName() {

@@ -1,8 +1,8 @@
-let hash = require("./../util/md5");
+let hash = require("ada-util/src/md5");
 let gzipSize = require('gzip-size');
 let AdaBundler = require("./bundler/ada");
 let EntryBundler = require("./bundler/entry");
-let File = require("./../util/file");
+let {File} = require("ada-util");
 let Path = require("path");
 let util = require("./../util/helper");
 let BinaryEntity = require("./entity/binary");
@@ -170,12 +170,12 @@ class Outputer {
 
 	outputStatic() {
 		let config = this.config, file = new File(config.staticPath);
-		if (file.isExists()) {
-			return file.scan().reduce((a, path) => {
+		if (file.exist) {
+			return file.getAllSubFilePaths().then(paths => paths.reduce((a, path) => {
 				return a.then(() => {
 					return new File(path).copyTo(config.distPath + path.substring(config.sourcePath.length));
 				});
-			}, Promise.resolve());
+			}, Promise.resolve()));
 		} else {
 			return Promise.resolve();
 		}

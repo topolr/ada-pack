@@ -1,5 +1,5 @@
 let colors = require("colors");
-let File = require("./file");
+let {SyncFile} = require("ada-util");
 let Path = require("path");
 let Config = require("./../config");
 
@@ -203,11 +203,11 @@ let util = {
 	},
 	getFilePath(config, filePath, path) {
 		let checkPath = function (current) {
-			let file = new File(current);
-			if (file.isExists()) {
+			let file = new SyncFile(current);
+			if (file.exist) {
 				if (file.isFolder()) {
 					let checkPaths = [current + ".js", Path.resolve(current, "./index.js"), Path.resolve(current, "./index.ts"), Path.resolve(current, "./package.json")];
-					let pathIndex = checkPaths.findIndex(path => new File(path).isExists());
+					let pathIndex = checkPaths.findIndex(path => new SyncFile(path).exist);
 					if (pathIndex !== -1) {
 						if (pathIndex !== 3) {
 							return checkPaths[pathIndex];
@@ -224,7 +224,7 @@ let util = {
 					return current;
 				} else {
 					let checkPaths = [current + ".js", current + ".ts"];
-					let pathIndex = checkPaths.findIndex(path => new File(path).isExists());
+					let pathIndex = checkPaths.findIndex(path => new SyncFile(path).exist);
 					if (pathIndex !== -1) {
 						return checkPaths[pathIndex];
 					} else {
@@ -251,7 +251,7 @@ let util = {
 			appPath = adaInfo.publish ? adaInfo.publish : "./app/app.js";
 		}
 		appPath = Path.resolve(packagePath, "./../", appPath);
-		if (!new File(appPath).isExists()) {
+		if (!new SyncFile(appPath).exist) {
 			appPath = Path.resolve(projectPath, "./app.js");
 		}
 		let config = this.extend(true, {}, Config, require(appPath));
