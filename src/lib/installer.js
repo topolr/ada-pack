@@ -46,13 +46,15 @@ class Installer {
 	getUnInstallModules() {
 		let map = this.config.dependence, target = [];
 		return this.getFileTypesOfProject().then(projects => projects.filter(type => !!map[type]).forEach(type => {
+			console.log(type)
 			map[type].dependence.forEach(name => {
 				if (target.indexOf(name) === -1) {
 					target.push(name);
 				}
 			});
+		})).then(() => {
 			return this.checkInstallModules(target);
-		}));
+		});
 	}
 
 	installModules(result) {

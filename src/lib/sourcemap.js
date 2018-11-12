@@ -194,7 +194,7 @@ class SourceMap {
 				}
 				if (entry.exist) {
 					ps = ps.then(() => {
-						return new File(this.config.entryPath).getAllSubFilePaths().filter(paths => paths.filter(path => {
+						return new File(this.config.entryPath).getAllSubFilePaths().then(paths => paths.filter(path => {
 							let suffix = Path.extname(path);
 							return suffix === ".js" || suffix === ".ts";
 						}).map(path => path.replace(/\\/g, "/").replace(/[\/]+/g, "/"))).then(a => {

@@ -19,7 +19,7 @@ class EntryPacker {
 	getFileCode(path) {
 		if (!this.contentCache[path]) {
 			return new Promise((resolve, reject) => {
-				let file = new File(path), suffix = file.suffix;
+				let file = new File(path), suffix = file.suffix.substring(1);
 				file.read().then(content => {
 					if (suffix === "html") {
 						resolve(`module.exports=${JSON.stringify(content.replace(/\n/g, '').replace(/\r/g, '').replace(/\n\r/g, ''))}`);
