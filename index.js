@@ -58,7 +58,7 @@ module.exports = {
 								packer.sourceMap.addFiles(a.add).then((info) => {
 									let infos = packer.sourceMap.outputer.getLogInfo();
 									fn && fn({
-										type: packer.sourceMap.outputer.rebuild ? "refresh" : "add",
+										type: packer.sourceMap.outputer.rebuild ? "reload" : "add",
 										files: a.add.map(a => a.substring(Path.resolve(basePath, config.sourcePath).length + 1).replace(/\\/g, "/")),
 										map: packer.sourceMap.outputer.getSourceMap(),
 										log: infos.length > 0 ? infos : null
@@ -68,7 +68,7 @@ module.exports = {
 								packer.sourceMap.editFiles(a.edit).then((info) => {
 									let infos = packer.sourceMap.outputer.getLogInfo();
 									fn && fn({
-										type: packer.sourceMap.outputer.rebuild ? "refresh" : "edit",
+										type: packer.sourceMap.outputer.rebuild ? "reload" : "edit",
 										files: a.edit.map(a => a.substring(Path.resolve(basePath, config.sourcePath).length + 1).replace(/\\/g, "/")),
 										map: packer.sourceMap.outputer.getSourceMap(),
 										log: infos.length > 0 ? infos : null
@@ -78,7 +78,7 @@ module.exports = {
 								packer.sourceMap.editFiles(a.remove).then((info) => {
 									let infos = packer.sourceMap.outputer.getLogInfo();
 									fn && fn({
-										type: packer.sourceMap.outputer.rebuild ? "refresh" : "remove",
+										type: packer.sourceMap.outputer.rebuild ? "reload" : "remove",
 										files: a.remove.map(a => a.substring(Path.resolve(basePath, config.sourcePath).length + 1).replace(/\\/g, "/")),
 										map: packer.sourceMap.outputer.getSourceMap(),
 										log: infos.length > 0 ? infos : null
