@@ -185,8 +185,8 @@ class SourceMap {
 	}
 
 	map(files) {
-		return this.config.hooker.excute("beforeMap").then(() => {
-			return this.maker.installer.readyProjectModules().then(() => {
+		return this.maker.installer.readyProjectModules().then(() => {
+			return this.config.hooker.excute("beforeMap").then(() => {
 				let entries = [], entry = new File(this.config.entryPath);
 				let ps = Promise.resolve();
 				if (new File(this.config.mainEntryPath).exist) {

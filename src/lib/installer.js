@@ -6,16 +6,16 @@ class Installer {
 	constructor(config) {
 		this._config = config;
 		this._onstartinstall = (names) => {
-			config.hooker.excute("startInstall", names);
+			return config.hooker.excute("startInstall", names);
 		};
 		this._onbeforeinstall = (name) => {
-			config.hooker.excute("beforeInstall", name);
+			return config.hooker.excute("beforeInstall", name);
 		};
 		this._oninstalled = (name) => {
-			config.hooker.excute("afterInstall", name);
+			return config.hooker.excute("afterInstall", name);
 		};
 		this._oninstallerror = (name) => {
-			config.hooker.excute("installError", name);
+			return config.hooker.excute("installError", name);
 		};
 		this._installed = [];
 	}
@@ -25,7 +25,7 @@ class Installer {
 	}
 
 	getFileTypesOfProject() {
-		return new File(this.config.sourcePath).getAllSubFilePaths().then(paths => paths.map(path => Path.extname(path)));
+		return new File(this.config.sourcePath).getAllSubFilePaths().then(paths => paths.map(path => Path.extname(path)).filter(a => !!a).map(a => a.substring(1)));
 	}
 
 	checkInstallModules(names) {
@@ -33,7 +33,7 @@ class Installer {
 		return names.reduce((a, name) => {
 			return a.then(() => {
 				return detectInstalled(name).then(exists => {
-					if (exists) {
+					if (!exists) {
 						if (result.indexOf(name) === -1) {
 							result.push(name);
 						}
@@ -45,9 +45,10 @@ class Installer {
 
 	getUnInstallModules() {
 		let map = this.config.dependence, target = [];
-		return this.getFileTypesOfProject().then(projects => projects.filter(type => !!map[type]).forEach(type => {
-			console.log(type)
-			map[type].dependence.forEach(name => {
+		return this.getFileTypesOfProject().then(types => types.filter(type => {
+			return !!map[type];
+		}).forEach(type => {
+			Reflect.ownKeys(map[type].dependence).forEach(name => {
 				if (target.indexOf(name) === -1) {
 					target.push(name);
 				}
