@@ -151,7 +151,9 @@ module.exports = {
 		},
 		uglify: {},
 		uglifycss: {},
-		autoprefixer: {},
+		postcss: [
+			{autoprefixer: {}}
+		],
 		sass: {},
 		minifier: {},
 		typescript: ["--target ESNext", "--noEmit", "--pretty", "--skipLibCheck", "--experimentalDecorators"]
