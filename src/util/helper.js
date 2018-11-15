@@ -269,9 +269,11 @@ let util = {
 		if (config.worker && config.worker.path) {
 			config.workerPath = Path.join(config.basePath, config.worker.path).replace(/\\/g, "/");
 		}
-		config.staticPath = Path.join(config.basePath, config.staticPath).replace(/\\/g, "/");
+		if (config.staticPath) {
+			config.staticPath = Path.join(config.basePath, config.staticPath).replace(/\\/g, "/");
+		}
 		["projectPath", "basePath", "distPath", "sourcePath", "entryPath", "staticPath", "nmodulePath"].forEach(name => {
-			if (!config[name].endsWith("/")) {
+			if (config[name] && !config[name].endsWith("/")) {
 				config[name] = config[name] + "/";
 			}
 		});
