@@ -27,6 +27,9 @@ class Maker {
 					}
 					return makers.reduce((a, maker) => {
 						return a.then((code) => {
+							if (typeof maker === 'string') {
+								maker = require(maker);
+							}
 							return maker({content: code, path, option: this.config});
 						});
 					}, Promise.resolve(content));

@@ -57,7 +57,7 @@ module.exports = {
 				"@babel/register": "^7.0.0",
 				"@babel/runtime": "^7.0.0",
 			},
-			maker: require("./lib/maker/jsmaker")
+			maker: "./maker/jsmaker"
 		},
 		css: {
 			dependence: {
@@ -66,7 +66,7 @@ module.exports = {
 				"uglifycss": "^0.0.25",
 				"html-minifier": "^3.5.6"
 			},
-			maker: require("./lib/maker/cssmaker")
+			maker: "./maker/cssmaker"
 		},
 		scss: {
 			dependence: {
@@ -76,7 +76,7 @@ module.exports = {
 				"node-sass": "^3.10.1",
 				"html-minifier": "^3.5.6"
 			},
-			maker: require("./lib/maker/sassmaker")
+			maker: "./maker/sassmaker"
 		},
 		less: {
 			dependence: {
@@ -86,23 +86,23 @@ module.exports = {
 				"less": "^2.7.1",
 				"html-minifier": "^3.5.6"
 			},
-			maker: require("./lib/maker/lessmaker")
+			maker: "./maker/lessmaker"
 		},
 		json: {
 			dependence: {},
-			maker: require("./lib/maker/jsonmaker")
+			maker: "./maker/jsonmaker"
 		},
 		html: {
 			dependence: {
 				"html-minifier": "^3.5.6"
 			},
-			maker: require("./lib/maker/htmlmaker")
+			maker: "./maker/htmlmaker"
 		},
 		icon: {
 			dependence: {
 				"html-minifier": "^3.5.6"
 			},
-			maker: require("./lib/maker/iconmaker")
+			maker: "./maker/iconmaker"
 		},
 		ts: {
 			dependence: {
@@ -126,7 +126,7 @@ module.exports = {
 				"@babel/register": "^7.0.0",
 				"@babel/runtime": "^7.0.0",
 			},
-			maker: require("./lib/maker/tsmaker")
+			maker: "./lib/maker/tsmaker"
 		}
 	},
 	compiler: {
