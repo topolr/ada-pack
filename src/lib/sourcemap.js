@@ -202,6 +202,8 @@ class SourceMap {
 							this._entries = entries;
 						});
 					});
+				}else{
+					this._entries = entries;
 				}
 				ps = ps.then(() => {
 					return entries.reduce((a, entry) => {
@@ -209,7 +211,7 @@ class SourceMap {
 							return SourceMap.mapEntity.call(this, entry);
 						});
 					}, Promise.resolve()).then(() => {
-						this.entries.forEach(entry => {
+						entries.forEach(entry => {
 							this._entryDependenceMap[entry] = [entry, ...SourceMap.getDependencesOf.call(this, entry)];
 						});
 						this.cleanUnuseSource();
