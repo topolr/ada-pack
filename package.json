@@ -1,7 +1,7 @@
 {
   "name": "ada-pack",
-  "version": "3.0.0",
-  "description": "Packer for adajs projects",
+  "version": "3.0.0-beta.1",
+  "description": "Project packer for adajs",
   "main": "index.js",
   "scripts": {},
   "repository": {
@@ -16,7 +16,10 @@
   "bin": {
     "ada-pack": "./bin/cli.js"
   },
-  "homepage": "https://github.com/topolr/ada-pack#readme",
+  "engines": {
+    "node": ">=6.9.0"
+  },
+  "homepage": "https://adajs.io/adapack.html",
   "dependencies": {
     "ada-util": "git+https://github.com/topolr/ada-util.git",
     "chokidar": "^1.7.0",
