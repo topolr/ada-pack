@@ -15,8 +15,11 @@ module.exports = function (hooker) {
 	}).hook("beforeInstall", (name) => {
 		installSpinner = ora({color: "yellow", text: "INSTALL " + name}).start();
 	}).hook("afterInstall", (name) => {
-		installSpinner && installSpinner.succeed();
+		installSpinner && installSpinner.stop();
+		console.log(`[ADA-PACK]`.grey, `INSTALL`.green, `|`.green, name);
 	}).hook("installError", (name) => {
+		installSpinner && installSpinner.stop();
+		console.log(`[ADA-PACK]`.grey, `INSTALL`.red, `|`.green, name);
 	}).hook("beforeMap", () => {
 		mapTime = new Date().getTime();
 		mapSpinner = ora({color: "yellow", text: "MAP SOURCE"}).start();
