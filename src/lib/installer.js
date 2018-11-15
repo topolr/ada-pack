@@ -32,7 +32,9 @@ class Installer {
 		let result = [];
 		return names.reduce((a, name) => {
 			return a.then(() => {
-				return detectInstalled(name).then(exists => {
+				return detectInstalled(name, {
+					local: true
+				}).then(exists => {
 					if (!exists) {
 						if (result.indexOf(name) === -1) {
 							result.push(name);
