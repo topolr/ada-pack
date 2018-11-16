@@ -38,16 +38,16 @@ module.exports = {
 		if (appInfo.ssr.output) {
 			tryKillProcess(appInfo.server.port).then(() => {
 				const distPath = Path.resolve(appInfo.projectPath, appInfo.ssr.output);
-				console.log('[SSR] START TO PUBLISH PROJECT'.green);
+				console.log('[SSR]'.grey, 'START TO PUBLISH PROJECT'.green);
 				Packer.publish(appInfo, false).then(() => {
-					console.log('[SSR] PUBLISH PROJECT DONE,START SERVER'.green);
+					console.log('[SSR]'.grey, 'PUBLISH PROJECT DONE,START SERVER'.green);
 					let server = childProcess.spawn("node", [Path.resolve(__dirname, "./../lib/process.js")], {
 						cwd: process.cwd(),
 						stdio: ['inherit', 'inherit', 'inherit', 'ipc']
 					});
 					server.on("message", a => {
 						if (a.type === 'done') {
-							console.log('[SSR] SERVER STARTED,START SSR'.green);
+							console.log('[SSR]'.grey, 'SERVER STARTED,START SSR'.green);
 							let renderer = new DistRenderer({
 								origin: "http://localhost:8080",
 								distPath: appInfo.distPath
@@ -58,7 +58,7 @@ module.exports = {
 									return a.then(() => new File(Path.resolve(distPath, `.${path === '/' ? '/index.html' : path}`)).make().then(file => file.write(results[path])));
 								}, Promise.resolve());
 							}).then(() => {
-								console.log(`[SSR] ALL DONE IN ${new Date().getTime() - startTime}ms`.green);
+								console.log(`[SSR]`.grey, `ALL DONE IN ${new Date().getTime() - startTime}ms`.green);
 								server.kill();
 							}).catch(e => {
 								console.log(e);
@@ -70,7 +70,7 @@ module.exports = {
 						server.kill();
 					});
 					server.on('close', () => {
-						console.log(`[SSR] SERVER HAS STOPPED`.green);
+						console.log(`[SSR]`.grey, `SERVER HAS STOPPED`.green);
 					});
 				});
 			});
