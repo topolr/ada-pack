@@ -21,7 +21,7 @@
   },
   "homepage": "https://adajs.io/adapack.html",
   "dependencies": {
-    "ada-util": "git+https://github.com/topolr/ada-util.git",
+    "ada-util": "^1.0.0-beta.1",
     "chokidar": "^1.7.0",
     "colors": "^1.1.2",
     "detect-installed": "^2.0.4",
