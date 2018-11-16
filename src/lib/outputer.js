@@ -97,12 +97,13 @@ class Outputer {
 
     getLogInfo() {
         return Reflect.ownKeys(this.sourceMap._map).filter(key => !!this.sourceMap._map[key].errorLog).map(key => {
-            let entity = this.sourceMap._map[key];
+            let entity = this.sourceMap._map[key], errorInfo = serializeError(entity.errorLog);
+            errorInfo.message = Anser.ansiToHtml(errorInfo.message);
+            errorInfo.stack = Anser.ansiToHtml(errorInfo.stack);
             return {
                 name: entity.mapName,
                 error: entity.errorLog,
-                info: serializeError(entity.errorLog),
-                note: Anser.ansiToHtml(serializeError(entity.errorLog).message)
+                info: errorInfo
             };
         });
     }

@@ -5,7 +5,6 @@ class BinaryEntity extends BaseEntity {
 	reset() {
 		this.state = ENTITYREADY;
 		this.output = false;
-		this.errorLog = null;
 	}
 }
 

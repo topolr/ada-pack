@@ -9,7 +9,7 @@ class StyleEntity extends TextEntity {
         if (this.state === ENTITYNONE) {
             let config = this.sourceMap.config;
             if (config.ignore.ignores("./" + this.path.substring(config.sourcePath.length))) {
-                return new File(this.path).read().then(content=>this.content=content).then(()=>this.dependence);
+                return new File(this.path).read().then(content => this.content = content).then(() => this.dependence);
             } else {
                 let config = this.sourceMap.config;
                 return new Promise(resolve => {
@@ -40,9 +40,10 @@ class StyleEntity extends TextEntity {
                                 });
                                 resolve(this.dependence);
                             });
-                        }).catch(e => {
+                        }, e => {
                             this.errorLog = e;
                             this.content = "";
+                            this.state = ENTITYNONE;
                             config.hooker.excute("errorMake", this).then(() => {
                                 resolve(this.dependence);
                             });

@@ -148,6 +148,7 @@ class ExcutorEntity extends TextEntity {
 						}, e => {
 							this.errorLog = e;
 							this.content = "";
+                            this.state = ENTITYNONE;
 							config.hooker.excute("errorMake", this).then(() => {
 								resolve(this.dependence);
 							});
