@@ -7,6 +7,7 @@ let Path = require("path");
 let util = require("./../util/helper");
 let BinaryEntity = require("./entity/binary");
 let serializeError = require('serialize-error');
+let Anser = require("anser");
 
 class Pack {
 	constructor(sourceMap, name, files) {
@@ -100,7 +101,8 @@ class Outputer {
 			return {
 				name: entity.mapName,
 				error: entity.errorLog,
-				info: serializeError(entity.errorLog)
+				info: serializeError(entity.errorLog),
+				note: Anser.ansiToHtml(serializeError(entity.errorLog).message)
 			};
 		});
 	}
