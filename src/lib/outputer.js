@@ -6,6 +6,7 @@ let {File, clone} = require("ada-util");
 let Path = require("path");
 let util = require("./../util/helper");
 let BinaryEntity = require("./entity/binary");
+let serializeError = require('serialize-error');
 
 class Pack {
 	constructor(sourceMap, name, files) {
@@ -98,7 +99,8 @@ class Outputer {
 			let entity = this.sourceMap._map[key];
 			return {
 				name: entity.mapName,
-				error: entity.errorLog
+				error: entity.errorLog,
+				info: serializeError(entity.errorLog)
 			};
 		});
 	}
