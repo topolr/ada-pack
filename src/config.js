@@ -56,7 +56,7 @@ module.exports = {
 				"@babel/preset-typescript": "^7.1.0",
 				"@babel/register": "^7.0.0",
 				"@babel/runtime": "^7.0.0",
-				"express":""
+				"express": ""
 			},
 			maker: "./maker/jsmaker"
 		},
@@ -166,5 +166,9 @@ module.exports = {
 		serverPath: "./server.js",
 		proxy: null
 	},
-	hook: []
+	hook: [],
+	ssr: {
+		urls: [],
+		output: ""
+	}
 };
