@@ -35,7 +35,7 @@ module.exports = {
         let port = appInfo.server.port;
         return require("../../index").develop(appInfo, ({type, files, map, log}) => {
             messageQueue.add({type, files, map, log});
-        }).then((info) => {
+        }).then((packer) => {
             new DevServer(appInfo).start().then(app => {
                 app.use("/ada/sse", (req, res) => {
                     connected = true;
@@ -46,7 +46,7 @@ module.exports = {
                         'Cache-Control': 'no-cache'
                     });
                     res.write(`retry: 2000\n`);
-                    res.write("id: " + id + "\ndata:" + JSON.stringify(info) + "\n\n");
+                    res.write("id: " + id + "\ndata:" + JSON.stringify(packer.getCurrentState("start")) + "\n\n");
                     req.on("close", function () {
                         messageQueue.unsubscribe(id);
                     });

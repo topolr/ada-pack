@@ -56,41 +56,27 @@ module.exports = {
                         if (times > 0) {
                             if (a.add) {
                                 packer.sourceMap.addFiles(a.add).then((info) => {
-                                    fn && fn({
-                                        type: packer.sourceMap.outputer.rebuild ? "reload" : "add",
+                                    fn && fn(Object.assign({
                                         files: a.add.map(a => a.substring(Path.resolve(basePath, config.sourcePath).length + 1).replace(/\\/g, "/")),
-                                        map: packer.sourceMap.outputer.getSourceMap(),
-                                        log: packer.sourceMap.outputer.getLogInfo()
-                                    });
+                                    }, packer.getCurrentState("edit")));
                                 });
                             } else if (a.edit) {
                                 packer.sourceMap.editFiles(a.edit).then((info) => {
-                                    fn && fn({
-                                        type: packer.sourceMap.outputer.rebuild ? "reload" : "edit",
+                                    fn && fn(Object.assign({
                                         files: a.edit.map(a => a.substring(Path.resolve(basePath, config.sourcePath).length + 1).replace(/\\/g, "/")),
-                                        map: packer.sourceMap.outputer.getSourceMap(),
-                                        log: packer.sourceMap.outputer.getLogInfo()
-                                    });
+                                    }, packer.getCurrentState("edit")));
                                 });
                             } else if (a.remove) {
                                 packer.sourceMap.editFiles(a.remove).then((info) => {
-                                    fn && fn({
-                                        type: packer.sourceMap.outputer.rebuild ? "reload" : "remove",
+                                    fn && fn(Object.assign({
                                         files: a.remove.map(a => a.substring(Path.resolve(basePath, config.sourcePath).length + 1).replace(/\\/g, "/")),
-                                        map: packer.sourceMap.outputer.getSourceMap(),
-                                        log: packer.sourceMap.outputer.getLogInfo()
-                                    });
+                                    }, packer.getCurrentState("edit")));
                                 });
                             }
                         }
                     });
                 });
-                resolve({
-                    type: "start",
-                    files: [],
-                    map: packer.sourceMap.outputer.getSourceMap(),
-                    log: packer.sourceMap.outputer.getLogInfo()
-                });
+                resolve(packer);
             }, (e) => {
                 reject(e);
             });
