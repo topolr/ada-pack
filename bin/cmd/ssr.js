@@ -47,7 +47,7 @@ module.exports = {
                     server.on("message", a => {
                         if (a.type === 'done') {
                             console.log('[SSR]'.grey, 'SERVER STARTED,START SSR'.green);
-                            let {DistRenderer} = require(Path.resolve(process.cwd(), "./adajs/server"));
+                            let {DistRenderer} = require(Path.resolve(process.cwd(), "./node_modules/adajs/server"));
                             let renderer = new DistRenderer({
                                 origin: "http://localhost:8080",
                                 distPath: appInfo.distPath
