@@ -76,19 +76,24 @@ class SourceMap {
     setEntity(path) {
         if (!this.hasEntity(path)) {
             let entity = null;
-            if (!isbinaryfile.sync(path)) {
-                let suffix = Path.extname(path);
-                if ([".js", ".ts"].indexOf(suffix) !== -1) {
-                    entity = new ExcutorEntity(this, path);
-                } else if ([".css", ".less", ".scss"].indexOf(suffix) !== -1) {
-                    entity = new StyleEntity(this, path);
-                } else if ([".html"].indexOf(suffix) !== -1) {
-                    entity = new HtmlEntity(this, path);
+            try {
+                if (!isbinaryfile.sync(path)) {
+                    let suffix = Path.extname(path);
+                    if ([".js", ".ts"].indexOf(suffix) !== -1) {
+                        entity = new ExcutorEntity(this, path);
+                    } else if ([".css", ".less", ".scss"].indexOf(suffix) !== -1) {
+                        entity = new StyleEntity(this, path);
+                    } else if ([".html"].indexOf(suffix) !== -1) {
+                        entity = new HtmlEntity(this, path);
+                    } else {
+                        entity = new TextEntity(this, path);
+                    }
                 } else {
-                    entity = new TextEntity(this, path);
+                    entity = new BinaryEntity(this, path);
                 }
-            } else {
-                entity = new BinaryEntity(this, path);
+            } catch (e) {
+                entity = new TextEntity(this, path);
+                entity.errorLog = e;
             }
             this._map[this.getMapName(path)] = entity;
             return entity;
