@@ -1,6 +1,7 @@
 let {File} = require("ada-util");
 let Path = require("path");
 let ora = require('ora');
+let detectInstalled = require("detect-installed");
 
 class DevServer {
     constructor(appInfo) {
@@ -15,33 +16,30 @@ class DevServer {
         let appInfo = this._appInfo;
         let express = require(Path.resolve(appInfo.projectPath, "./node_modules/express"));
         let ps = Promise.resolve();
-        if (appInfo.proxy && appInfo.proxy.server) {
-            let proxy = new File(Path.resolve(appInfo.projectPath, "./node_modules/http-proxy-middleware"));
-            if (!proxy.exist) {
-                ps = ps.then(() => {
-                    return new Promise((resolve, reject) => {
-                        let name = "http-proxy-middleware";
-                        let spinner = ora({
-                            color: "yellow",
-                            text: `INSTALL MODULE [ ${name} ]`
-                        }).start();
-                        let args = ["install", name, "--save-dev"];
-                        require("child_process").exec(`npm ${args.join(" ")}`, {
-                            encoding: "utf-8",
-                            cwd: projectPath
-                        }, (error, stdout, stderr) => {
-                            if (error) {
-                                spinner.fail(`INSTALL MODULE [ ${name} ]`);
-                                console.log(`Please run > npm install`.red, `${name}`.white, `to install the module`.red);
-                                reject(name);
-                            } else {
-                                spinner.succeed(`INSTALL MODULE [ ${name} ]`);
-                                resolve(name);
-                            }
-                        });
-                    });
+        if (appInfo.server && appInfo.server.proxy) {
+            let name = "http-proxy-middleware";
+            ps = ps.then(() => {
+                return detectInstalled(name, {
+                    local: true
+                }).then(exists => {
+                    if (!exists) {
+                        let installSpinner = ora({color: "yellow", text: "INSTALL " + name}).start();
+                        return new Promise((resolve, reject) => {
+                            let args = ["install", name, "--save-dev"];
+                            require("child_process").exec(`npm ${args.join(" ")}`, {
+                                encoding: "utf-8",
+                                cwd: appInfo.projectPath
+                            }, (error, stdout, stderr) => {
+                                if (error) {
+                                    reject(name);
+                                } else {
+                                    resolve(name);
+                                }
+                            });
+                        }).then(() => installSpinner.stop(), () => installSpinner.stop());
+                    }
                 });
-            }
+            });
         }
         return ps.then(() => {
             if (!appInfo.server) {
@@ -73,7 +71,7 @@ class DevServer {
                     proxies = appInfo.server.proxy;
                 }
                 proxies.forEach(proxy => {
-                    app.use(proxyMiddleWare(proxy));
+                    app.use(proxy.path, proxyMiddleWare(proxy.option));
                 });
             }
             return app;
