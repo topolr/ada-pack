@@ -62,6 +62,13 @@ class DevServer {
             app.get("/", (req, res) => {
                 res.send(require("fs").readFileSync(Path.resolve(distPath, "./index.html"), "utf-8"));
             });
+            if (appInfo.indexPaths) {
+                appInfo.indexPaths().forEach(path => {
+                    app.get(path, (req, res) => {
+                        res.send(require("fs").readFileSync(Path.resolve(distPath, "./index.html"), "utf-8"));
+                    });
+                });
+            }
             if (appInfo.server.proxy) {
                 let proxyMiddleWare = require(Path.resolve(appInfo.projectPath, "./node_modules/http-proxy-middleware"));
                 let proxies = [];
