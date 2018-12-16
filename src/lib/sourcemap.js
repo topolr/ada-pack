@@ -202,41 +202,36 @@ class SourceMap {
 						return new File(this.config.entryPath).getAllSubFilePaths().then(paths => paths.filter(path => {
 							let suffix = Path.extname(path);
 							return suffix === ".js" || suffix === ".ts";
-						}).map(path => path.replace(/\\/g, "/").replace(/[\/]+/g, "/"))).then(a => {
-							if (this.config.entryModules) {
-								let em = this.config.entryModules(this.config);
-								if (em.then) {
-									return em.then(names => {
-										if (Array.isArray(names)) {
-											return names.map(name => Path.resolve(this.config.sourcePath, name)).map(path => path.replace(/\\/g, "/").replace(/[\/]+/g, "/"));
-										} else {
-											console.log(`[ADA-PACK]`.grey, `config.entryModules() must return an array`.yellow);
-											return null;
-										}
-									}).then(b => {
-										if (b) {
-											entries = entries.concat(b);
-											this._entries = entries;
-										}
-									});
-								} else {
-									if (Array.isArray(em)) {
-										let c = em.map(name => Path.resolve(this.config.sourcePath, name)).map(path => path.replace(/\\/g, "/").replace(/[\/]+/g, "/"));
-										entries = entries.concat(c);
-										this._entries = entries;
-									} else {
-										console.log(`[ADA-PACK]`.grey, `config.entryModules() must return an array`.yellow);
+						}));
+					});
+				}
+				if (this.config.entryFiles) {
+					ps = ps.then(a => {
+						let result = a || [];
+						return Promise.resolve().then(() => this.config.entryFiles(this.config)).then(names => {
+							if (Array.isArray(names)) {
+								names.forEach(name => {
+									if (result.indexOf(name) === -1) {
+										result.push(name);
 									}
-								}
+								});
 							} else {
-								entries = entries.concat(a);
-								this._entries = entries;
+								console.log(`[ADA-PACK]`.grey, `config.entryModules() must return an array`.yellow);
 							}
+							return result;
 						});
 					});
-				} else {
-					this._entries = entries;
 				}
+				ps = ps.then(a => {
+					if (a) {
+						a.map(path => path.replace(/\\/g, "/").replace(/[\/]+/g, "/")).forEach(path => {
+							if (entries.indexOf(path) === -1) {
+								entries.push(path);
+							}
+						});
+					}
+					this._entries = entries;
+				});
 				ps = ps.then(() => {
 					return entries.reduce((a, entry) => {
 						return a.then(() => {

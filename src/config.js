@@ -12,7 +12,7 @@ module.exports = {
 	},
 	entryPath: "./src/entries",
 	staticPath: "./src/static",
-	entryModules() {
+	entryFiles() {
 		return [];
 	},
 	ignore: [],
