@@ -7,7 +7,7 @@ class AdaPacker extends EntryPacker {
             path = path.replace(/\\/g, "/");
             this.time = new Date().getTime();
             return this.getCodeMap(path).then(() => {
-                let packageInfo = require(Path.resolve(this.config.projectPath, "./package.json"));
+                let packageInfo = require(Path.resolve(this.config.nmodulePath, "./adajs", "./package.json"));
                 let veison = packageInfo.version;
                 this.resultmap.push(path);
                 let result = this.resultmap.map(path => {
