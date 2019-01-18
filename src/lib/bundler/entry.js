@@ -38,6 +38,13 @@ class EntryPacker {
 						if (__code.trim().length === 0) {
 							resolve("module.exports={};");
 						} else {
+							if (this.config.develop === false && path.indexOf("node_modules/adajs/") !== -1) {
+								__code = __code.replace(/this\.context\.logger\./g, () => {
+									return "//this.content.logger.";
+								}).replace(/context\.logger\./g, () => {
+									return "//content.logger.";
+								});
+							}
 							resolve(this.maker.babelCode(__code, path));
 						}
 					}
