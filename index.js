@@ -20,10 +20,10 @@ module.exports = {
                     if (this._data[type].indexOf(path) === -1) {
                         this._data[type].push(path);
                     }
-                    if (this.tid !== null) {
-                        clearTimeout(this.tid);
+                    if (this._tid !== null) {
+                        clearTimeout(this._tid);
                     }
-                    setTimeout(() => {
+                    this._tid = setTimeout(() => {
                         let _has = false;
                         for (let i in this._data) {
                             _has = true;
