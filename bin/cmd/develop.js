@@ -28,15 +28,16 @@ let messageQueue = {
 module.exports = {
     command: "dev",
     desc: "develop",
-    paras: [],
-    fn: function () {
+    paras: ["[name]"],
+    fn: function (params) {
+        let name = params[0];
         let waitTime = 5000;
-        let appInfo = helper.getAppInfo(process.cwd(), true);
-        let port = appInfo.server.port;
+        let appInfo = helper.getAppInfo(process.cwd(), name, true);
+        let config = Array.isArray(appInfo) ? appInfo[0] : appInfo, port = config.server.port;
         return require("../../index").develop(appInfo, ({type, files, map, log}) => {
             messageQueue.add({type, files, map, log});
-        }).then((packer) => {
-            new DevServer(appInfo).start().then(app => {
+        }).then((packers) => {
+            new DevServer(config).start().then(app => {
                 app.use("/ada/sse", (req, res) => {
                     connected = true;
                     let id = randomid(20);
@@ -46,7 +47,7 @@ module.exports = {
                         'Cache-Control': 'no-cache'
                     });
                     res.write(`retry: 2000\n`);
-                    res.write("id: " + id + "\ndata:" + JSON.stringify(packer.getCurrentState("start")) + "\n\n");
+                    res.write("id: " + id + "\ndata:" + JSON.stringify(packers[0].getCurrentState("start")) + "\n\n");
                     req.on("close", function () {
                         messageQueue.unsubscribe(id);
                     });

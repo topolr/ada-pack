@@ -247,7 +247,8 @@ class SourceMap {
                         return this.config.hooker.excute("afterMap", {
                             map: this._map,
                             entry: this._entries,
-                            entryDependenceMap: this._entryDependenceMap
+                            entryDependenceMap: this._entryDependenceMap,
+                            name: this.config.name
                         }).then(() => {
                             return this._outputer.output(files);
                         });

@@ -31,12 +31,13 @@ function tryKillProcess(port) {
 module.exports = {
     command: "ssr",
     desc: "out put static files by ssr",
-    paras: [],
-    fn: function () {
-        let appInfo = helper.getAppInfo(process.cwd(), true);
-        if (appInfo.ssr.output) {
-            tryKillProcess(appInfo.server.port).then(() => {
-                const distPath = Path.resolve(appInfo.projectPath, appInfo.ssr.output);
+    paras: ["[name]"],
+    fn: function (params) {
+        let name = params[0];
+        let appInfo = helper.getAppInfo(process.cwd(), name, true);
+        let config = Array.isArray(appInfo) ? appInfo[0] : appInfo;
+        if (config.ssr.output) {
+            tryKillProcess(config.server.port).then(() => {
                 console.log('[SSR]'.grey, 'START TO PUBLISH PROJECT'.green);
                 Packer.publish(appInfo, false).then(() => {
                     console.log('[SSR]'.grey, 'PUBLISH PROJECT DONE,START SERVER'.green);
@@ -48,16 +49,25 @@ module.exports = {
                         if (a.type === 'done') {
                             console.log('[SSR]'.grey, 'SERVER STARTED,START SSR'.green);
                             let {DistRenderer} = require(Path.resolve(process.cwd(), "./node_modules/adajs/server"));
-                            let renderer = new DistRenderer({
-                                origin: "http://localhost:8080",
-                                distPath: appInfo.distPath
-                            });
+                            let appInfos = appInfo;
+                            if (!Array.isArray(appInfo)) {
+                                appInfos = [appInfo];
+                            }
                             let startTime = new Date().getTime();
-                            renderer.outputURLs(appInfo.ssr.urls).then(results => {
-                                Reflect.ownKeys(results).reduce((a, path) => {
-                                    return a.then(() => new File(Path.resolve(distPath, `.${path === '/' ? '/index.html' : path}`)).make().then(file => file.write(results[path])));
-                                }, Promise.resolve());
-                            }).then(() => {
+                            appInfos.reduce((a, appInfo) => {
+                                return a.then(() => {
+                                    const distPath = Path.resolve(appInfo.projectPath, appInfo.ssr.output);
+                                    let renderer = new DistRenderer({
+                                        origin: "http://localhost:8080",
+                                        distPath: appInfo.distPath
+                                    });
+                                    return renderer.outputURLs(appInfo.ssr.urls).then(results => {
+                                        Reflect.ownKeys(results).reduce((a, path) => {
+                                            return a.then(() => new File(Path.resolve(distPath, `.${path === '/' ? '/index.html' : path}`)).make().then(file => file.write(results[path])));
+                                        }, Promise.resolve());
+                                    });
+                                });
+                            }, Promise.resolve()).then(() => {
                                 console.log(`[SSR]`.grey, `ALL DONE IN ${new Date().getTime() - startTime}ms`.green);
                                 server.kill();
                             }).catch(e => {
