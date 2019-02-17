@@ -190,7 +190,13 @@ class Outputer {
                 if (file.exist) {
                     return file.getAllSubFilePaths().then(paths => paths.reduce((a, path) => {
                         return a.then(() => {
-                            return new File(path).copyTo(config.distPath + path.substring(config.sourcePath.length));
+                            let r = "";
+                            if (path.indexOf("node_modules/") === -1) {
+                                r = config.distPath + path.substring(config.sourcePath.length);
+                            } else {
+                                r = config.distPath + `node_modules/` + path.substring(config.nmodulePath.length);
+                            }
+                            return new File(path).copyTo(r);
                         });
                     }, Promise.resolve()));
                 } else {
