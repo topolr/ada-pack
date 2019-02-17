@@ -4,24 +4,36 @@ let Path = require("path");
 let {File} = require("ada-util");
 
 class ExcutorEntity extends TextEntity {
+    constructor(sourceMap, path) {
+        super(sourceMap, path);
+        this.assets = [];
+    }
+
     getRootDependence(content) {
         let config = this.sourceMap.config;
         this.content = content.replace(/_adajs.root\)\([\d\D]*?\)/g, str => {
             let map = str.substring(13, str.length - 1);
             if (map) {
-                map = map.replace(/['|"][\s\S]+?['|"]/g, str => {
-                    if (str.indexOf("./") !== -1 || str.indexOf("/") !== -1) {
-                        let value = str.substring(1, str.length - 1),
+                map = map.replace(/[a-z]+\:[\s]+['|"][\s\S]+?['|"]/g, str => {
+                    let _a = str.split(":"), key = _a[0].trim(), keyValue = _a[1].trim();
+                    if (keyValue.indexOf("./") !== -1 || keyValue.indexOf("/") !== -1) {
+                        let value = keyValue.substring(1, keyValue.length - 1),
                             path = Path.join(this.path, "./../", value).replace(/\\/g, "/");
                         if (path.indexOf("node_modules") === -1) {
                             value = path.substring(this.sourceMap.config.sourcePath.length);
                         } else {
                             value = `${THRIDPARTFOLDER}/${path.substring(this.sourceMap.config.nmodulePath.length)}`;
                         }
-                        if (this.dependence.indexOf(path) === -1) {
-                            this.dependence.push(path);
+                        if (['template', 'style'].indexOf(key) !== -1) {
+                            if (this.dependence.indexOf(path) === -1) {
+                                this.dependence.push(path);
+                            }
+                        } else if (key === 'asset') {
+                            if (this.assets.indexOf(path) === -1) {
+                                this.assets.push(path);
+                            }
                         }
-                        return `"${value}"`;
+                        return `${key}:"${value}"`;
                     } else {
                         return str;
                     }
@@ -42,19 +54,26 @@ class ExcutorEntity extends TextEntity {
         this.content = content.replace(/_adajs.view\)\(\{[\d\D]*?\)/g, str => {
             let map = str.substring(13, str.length - 1);
             if (map) {
-                map = map.replace(/['|"][\s\S]+?['|"]/g, str => {
-                    if (str.indexOf("./") !== -1 || str.indexOf("/") !== -1) {
-                        let value = str.substring(1, str.length - 1),
+                map = map.replace(/[a-z]+\:[\s]+['|"][\s\S]+?['|"]/g, str => {
+                    let _a = str.split(":"), key = _a[0].trim(), keyValue = _a[1].trim();
+                    if (keyValue.indexOf("./") !== -1 || keyValue.indexOf("/") !== -1) {
+                        let value = keyValue.substring(1, keyValue.length - 1),
                             path = Path.join(this.path, "./../", value).replace(/\\/g, "/");
                         if (path.indexOf("node_modules") === -1) {
                             value = path.substring(config.sourcePath.length);
                         } else {
                             value = `${THRIDPARTFOLDER}/${path.substring(this.sourceMap.config.nmodulePath.length)}`;
                         }
-                        if (this.dependence.indexOf(path) === -1) {
-                            this.dependence.push(path);
+                        if (['template', 'style'].indexOf(key) !== -1) {
+                            if (this.dependence.indexOf(path) === -1) {
+                                this.dependence.push(path);
+                            }
+                        } else if (key === 'asset') {
+                            if (this.assets.indexOf(path) === -1) {
+                                this.assets.push(path);
+                            }
                         }
-                        return `"${value}"`;
+                        return `${key}:"${value}"`;
                     } else {
                         return str;
                     }
@@ -159,6 +178,10 @@ class ExcutorEntity extends TextEntity {
         } else {
             return Promise.resolve(this.dependence);
         }
+    }
+
+    getAssetPaths() {
+        return this.assets;
     }
 }
 

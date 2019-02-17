@@ -6,6 +6,7 @@ let {File, clone} = require("ada-util");
 let Path = require("path");
 let util = require("./../util/helper");
 let BinaryEntity = require("./entity/binary");
+let ExcutorEntity = require("./entity/excutor");
 let serializeError = require('serialize-error');
 let Anser = require("anser");
 
@@ -174,16 +175,29 @@ class Outputer {
     }
 
     outputStatic() {
-        let config = this.config, file = new File(config.staticPath);
-        if (file.exist) {
-            return file.getAllSubFilePaths().then(paths => paths.reduce((a, path) => {
-                return a.then(() => {
-                    return new File(path).copyTo(config.distPath + path.substring(config.sourcePath.length));
+        let paths = new Set(), config = this.config;
+        Reflect.ownKeys(this.sourceMap._map).forEach(key => {
+            let entity = this.sourceMap._map[key];
+            if (entity instanceof ExcutorEntity) {
+                entity.getAssetPaths().forEach(path => {
+                    paths.add(path);
                 });
-            }, Promise.resolve()));
-        } else {
-            return Promise.resolve();
-        }
+            }
+        });
+        return [...paths, config.staticPath].reduce((a, path) => {
+            return a.then(() => {
+                let file = new File(path);
+                if (file.exist) {
+                    return file.getAllSubFilePaths().then(paths => paths.reduce((a, path) => {
+                        return a.then(() => {
+                            return new File(path).copyTo(config.distPath + path.substring(config.sourcePath.length));
+                        });
+                    }, Promise.resolve()));
+                } else {
+                    return Promise.resolve();
+                }
+            });
+        }, Promise.resolve());
     }
 
     outputFiles() {
