@@ -272,7 +272,7 @@ class SourceMap {
                                 type: "local",
                                 required: entry.substring(this.config.sourcePath.length),
                                 distPath: Path.resolve(this.config.distPath, entry.substring(this.config.sourcePath.length))
-                            }
+                            };
                             return SourceMap.mapEntity.call(this, entry, info);
                         });
                     }, Promise.resolve()).then(() => {
