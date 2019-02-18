@@ -48,13 +48,13 @@ class SourceMap {
         return [...result];
     }
 
-    static mapEntity(path) {
-        let entity = this.setEntity(path);
+    static mapEntity(path, info) {
+        let entity = this.setEntity(path, info);
         if (entity instanceof TextEntity) {
             return entity.getDependenceInfo().then(dependences => {
                 return dependences.reduce((a, dependence) => {
                     return a.then(() => {
-                        return SourceMap.mapEntity.call(this, dependence);
+                        return SourceMap.mapEntity.call(this, dependence.path, dependence);
                     });
                 }, Promise.resolve());
             });
@@ -64,6 +64,9 @@ class SourceMap {
     }
 
     getMapName(path) {
+        if (path.path) {
+            path = path.path;
+        }
         let str = "", config = this.config;
         path = path.replace(/\\/g, "/");
         if (path.indexOf("node_modules/") === -1) {
@@ -74,26 +77,26 @@ class SourceMap {
         return str;
     }
 
-    setEntity(path) {
+    setEntity(path, info) {
         if (!this.hasEntity(path)) {
             let entity = null;
             try {
                 if (!isbinaryfile.sync(path)) {
                     let suffix = Path.extname(path);
                     if ([".js", ".ts"].indexOf(suffix) !== -1) {
-                        entity = new ExcutorEntity(this, path);
+                        entity = new ExcutorEntity(this, path, info);
                     } else if ([".css", ".less", ".scss"].indexOf(suffix) !== -1) {
-                        entity = new StyleEntity(this, path);
+                        entity = new StyleEntity(this, path, info);
                     } else if ([".html"].indexOf(suffix) !== -1) {
-                        entity = new HtmlEntity(this, path);
+                        entity = new HtmlEntity(this, path, info);
                     } else {
-                        entity = new TextEntity(this, path);
+                        entity = new TextEntity(this, path, info);
                     }
                 } else {
-                    entity = new BinaryEntity(this, path);
+                    entity = new BinaryEntity(this, path, info);
                 }
             } catch (e) {
-                entity = new TextEntity(this, path);
+                entity = new TextEntity(this, path, info);
                 entity.errorLog = e;
             }
             this._map[this.getMapName(path)] = entity;
@@ -111,7 +114,7 @@ class SourceMap {
         return !!this._map[this.getMapName(path)];
     }
 
-    getTargetPath(filePath, path) {
+    getTargetPath(filePath, path, info) {
         let checkPath = function (current) {
             let file = new SyncFile(current);
             if (file.exist) {
@@ -143,13 +146,41 @@ class SourceMap {
                 }
             }
         };
-        let result = "";
+        let result = "",
+            type = "",
+            moduleName = "",
+            distPath = "",
+            required = "";
         if (path.startsWith("./") || path.startsWith("../") || path.startsWith("/")) {
+            type = "local";
             result = checkPath(Path.resolve(filePath, path)).replace(/\\/g, "/");
+            required = result.substring(this.config.sourcePath.length);
         } else {
-            result = checkPath(Path.resolve(this.config.nmodulePath, path)).replace(/\\/g, "/");
+            let name = path.split("/").shift(), target = this.config.moduleMap[name];
+            if (target) {
+                type = "module";
+                result = checkPath(Path.resolve(this.config.sourcePath, target)).replace(/\\/g, "/");
+                let k = result.substring(this.config.sourcePath.length).split("/");
+                k[0] = name;
+                moduleName = name;
+                required = k.join("/");
+            } else {
+                type = "nodeModule";
+                result = checkPath(Path.resolve(this.config.nmodulePath, path)).replace(/\\/g, "/");
+                required = name + "/" + result.substring(this.config.sourcePath.length);
+                moduleName = "node_modules/" + name;
+            }
         }
-        return result;
+        if (info.type === "module" && result.indexOf(filePath) === 0) {
+            type = "module";
+            moduleName = info.name;
+            let k = required.split("/");
+            k[0] = moduleName;
+            required = k.join("/");
+            distPath = this.config.distPath + required;
+        }
+        distPath = Path.resolve(this.config.distPath, required);
+        return {path: result, type, required, distPath, name: moduleName};
     }
 
     editFiles(files) {
@@ -236,7 +267,13 @@ class SourceMap {
                 ps = ps.then(() => {
                     return entries.reduce((a, entry) => {
                         return a.then(() => {
-                            return SourceMap.mapEntity.call(this, entry);
+                            let info = {
+                                path: entry,
+                                type: "local",
+                                required: entry.substring(this.config.sourcePath.length),
+                                distPath: Path.resolve(this.config.distPath, entry.substring(this.config.sourcePath.length))
+                            }
+                            return SourceMap.mapEntity.call(this, entry, info);
                         });
                     }, Promise.resolve()).then(() => {
                         entries.forEach(entry => {

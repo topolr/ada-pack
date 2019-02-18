@@ -1,39 +1,33 @@
 let TextEntity = require("./text");
-let {ENTITYNONE, ENTITYREADY, THRIDPARTFOLDER, IGNOREMODULES} = require("./const");
+let {ENTITYNONE, ENTITYREADY, IGNOREMODULES} = require("./const");
 let Path = require("path");
 let {File} = require("ada-util");
 
 class ExcutorEntity extends TextEntity {
-    constructor(sourceMap, path) {
-        super(sourceMap, path);
+    constructor(sourceMap, path, info) {
+        super(sourceMap, path, info);
         this.assets = [];
     }
 
     getRootDependence(content) {
-        let config = this.sourceMap.config;
         this.content = content.replace(/_adajs.root\)\([\d\D]*?\)/g, str => {
             let map = str.substring(13, str.length - 1);
             if (map) {
                 map = map.replace(/[a-z]+\:[\s]+['|"][\s\S]+?['|"]/g, str => {
                     let _a = str.split(":"), key = _a[0].trim(), keyValue = _a[1].trim();
                     if (keyValue.indexOf("./") !== -1 || keyValue.indexOf("/") !== -1) {
-                        let value = keyValue.substring(1, keyValue.length - 1),
-                            path = Path.join(this.path, "./../", value).replace(/\\/g, "/");
-                        if (path.indexOf("node_modules") === -1) {
-                            value = path.substring(this.sourceMap.config.sourcePath.length);
-                        } else {
-                            value = `${THRIDPARTFOLDER}/${path.substring(this.sourceMap.config.nmodulePath.length)}`;
-                        }
+                        let value = keyValue.substring(1, keyValue.length - 1);
+                        let m = this.sourceMap.getTargetPath(Path.resolve(this.path, "./../"), value, this.info);
                         if (['template', 'style'].indexOf(key) !== -1) {
-                            if (this.dependence.indexOf(path) === -1) {
-                                this.dependence.push(path);
+                            if (!this.dependence.find(a => a.path === m.path)) {
+                                this.dependence.push(m);
                             }
                         } else if (key === 'asset') {
                             if (this.assets.indexOf(path) === -1) {
                                 this.assets.push(path);
                             }
                         }
-                        return `${key}:"${value}"`;
+                        return `${key}:"${m.required}"`;
                     } else {
                         return str;
                     }
@@ -41,67 +35,51 @@ class ExcutorEntity extends TextEntity {
             } else {
                 map = "{root:true}";
             }
-            let __path = this.path.replace(/\\/g, "/"),
-                module = __path.substring(config.sourcePath.length);
             let t = map.replace(/\n/g, "").replace(/\r/g, "").trim();
-            map = t.substring(0, t.length - 1) + `,module:"${module}"}`;
+            map = t.substring(0, t.length - 1) + `,module:"${this.info.required}"}`;
             return `_adajs.root)(${map})`;
         });
     }
 
     getViewDependence(content) {
-        let config = this.sourceMap.config;
         this.content = content.replace(/_adajs.view\)\(\{[\d\D]*?\)/g, str => {
             let map = str.substring(13, str.length - 1);
             if (map) {
                 map = map.replace(/[a-z]+\:[\s]+['|"][\s\S]+?['|"]/g, str => {
                     let _a = str.split(":"), key = _a[0].trim(), keyValue = _a[1].trim();
                     if (keyValue.indexOf("./") !== -1 || keyValue.indexOf("/") !== -1) {
-                        let value = keyValue.substring(1, keyValue.length - 1),
-                            path = Path.join(this.path, "./../", value).replace(/\\/g, "/");
-                        if (path.indexOf("node_modules") === -1) {
-                            value = path.substring(config.sourcePath.length);
-                        } else {
-                            value = `${THRIDPARTFOLDER}/${path.substring(this.sourceMap.config.nmodulePath.length)}`;
-                        }
+                        let value = keyValue.substring(1, keyValue.length - 1);
+                        let m = this.sourceMap.getTargetPath(Path.resolve(this.path, "./../"), value, this.info);
                         if (['template', 'style'].indexOf(key) !== -1) {
-                            if (this.dependence.indexOf(path) === -1) {
-                                this.dependence.push(path);
+                            if (!this.dependence.find(a => a.path === m.path)) {
+                                this.dependence.push(m);
                             }
                         } else if (key === 'asset') {
                             if (this.assets.indexOf(path) === -1) {
                                 this.assets.push(path);
                             }
                         }
-                        return `${key}:"${value}"`;
+                        return `${key}:"${m.required}"`;
                     } else {
                         return str;
                     }
                 });
             }
-            let __path = this.path.replace(/\\/g, "/"),
-                module = __path.indexOf("node_modules/") === -1 ? __path.substring(config.sourcePath.length) : __path.substring(config.projectPath.length);
             let t = map.replace(/\n/g, "").replace(/\r/g, "").trim();
-            map = t.substring(0, t.length - 1) + `,module:"${module}"}`;
+            map = t.substring(0, t.length - 1) + `,module:"${this.info.required}"}`;
             return `_adajs.view)(${map})`;
         });
     }
 
     getRequireDenpendence(content) {
-        let config = this.sourceMap.config;
         this.content = content.replace(/require\(.*?\)/g, (str) => {
             let a = str.substring(8, str.length - 1).replace(/['|"|`]/g, "").trim();
             if (IGNOREMODULES.indexOf(a) === -1) {
-                let m = this.sourceMap.getTargetPath(Path.resolve(this.path, "./../"), a);
-                if (this.dependence.indexOf(m) === -1) {
+                let m = this.sourceMap.getTargetPath(Path.resolve(this.path, "./../"), a, this.info);
+                if (!this.dependence.find(a => a.path === m.path)) {
                     this.dependence.push(m);
                 }
-                if (m.indexOf("node_modules") === -1) {
-                    return `require("${m.substring(config.sourcePath.length)}")`;
-                } else {
-                    let name = `${THRIDPARTFOLDER}/${m.substring(config.nmodulePath.length)}`;
-                    return `require("${name}")`;
-                }
+                return `require("${m.required}")`;
             } else {
                 if (a !== "adajs") {
                     console.log("[ada-pack] unsupport nodejs built-in modules [" + a + "]");
@@ -112,28 +90,19 @@ class ExcutorEntity extends TextEntity {
     }
 
     getImportDenpendence(content) {
-        let config = this.sourceMap.config;
         this.content = content.replace(/import\(.*?\)/g, (str) => {
             let a = str.substring(7, str.length - 1);
             if (IGNOREMODULES.indexOf(a) === -1) {
                 if (a.startsWith("\"") || a.startsWith("'") || a.startsWith("`")) {
                     a = a.replace(/['|"|`]/g, "").trim();
-                    let m = this.sourceMap.getTargetPath(Path.resolve(this.path, "./../"), a);
-                    if (this.dependence.indexOf(m) === -1) {
+                    let m = this.sourceMap.getTargetPath(Path.resolve(this.path, "./../"), a, this.info);
+                    if (!this.dependence.find(a => a.path === m.path)) {
                         this.dependence.push(m);
                     }
-                    if (this.sourceMap.entries.indexOf(m) === -1) {
-                        this.sourceMap.entries.push(m);
+                    if (this.sourceMap.entries.indexOf(m.path) === -1) {
+                        this.sourceMap.entries.push(m.path);
                     }
-                    let name = "", value = "";
-                    if (m.indexOf("node_modules") === -1) {
-                        name = m.substring(config.sourcePath.length);
-                        value = `imports("${name}")`;
-                    } else {
-                        name = `${THRIDPARTFOLDER}/${m.substring(config.nmodulePath.length)}`;
-                        value = `imports("${name}")`;
-                    }
-                    return value;
+                    return `imports("${m.required}")`;
                 } else {
                     return `imports(${a})`;
                 }
@@ -152,7 +121,7 @@ class ExcutorEntity extends TextEntity {
                 return new Promise(resolve => {
                     let config = this.sourceMap.config;
                     config.hooker.excute("beforeMake", this).then(() => {
-                        this.sourceMap.maker.make(this.path).then(content => {
+                        this.sourceMap.maker.make(this.path, this.info).then(content => {
                             this.errorLog = null;
                             this.output = false;
                             this.content = content;

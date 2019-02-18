@@ -1,22 +1,16 @@
-let {ENTITYNONE, ENTITYREADY, THRIDPARTFOLDER} = require("./const");
+let {ENTITYNONE, ENTITYREADY} = require("./const");
 let {SyncFile} = require("ada-util");
-let Path = require("path");
 let util = require("./../../util/helper");
 
 class BaseEntity {
-    constructor(sourceMap, path) {
+    constructor(sourceMap, path, info) {
         this.sourceMap = sourceMap;
         this.path = path;
         this.state = ENTITYREADY;
         this.output = false;
         this.errorLog = null;
-        let str = "";
-        if (this.path.indexOf("node_modules/") === -1) {
-            str = this.path.substring(this.sourceMap.config.sourcePath.length);
-        } else {
-            str = "node_modules/" + this.path.substring(this.sourceMap.config.nmodulePath.length);
-        }
-        this.mapName = str;
+        this.info = info;
+        this.mapName = this.info.required;
     }
 
     getHash() {
@@ -32,17 +26,7 @@ class BaseEntity {
     }
 
     getDistPath() {
-        let r = "";
-        if (this.path.indexOf("node_modules/") === -1) {
-            r = this.sourceMap.config.distPath + this.path.substring(this.sourceMap.config.sourcePath.length);
-        } else {
-            r = this.sourceMap.config.distPath + `${THRIDPARTFOLDER}/` + this.path.substring(this.sourceMap.config.nmodulePath.length);
-        }
-        if (!this.sourceMap.config.develop) {
-            let suffix = Path.extname(r);
-            r = Path.resolve(r, "./../", `${this.getHash()}${suffix}`);
-        }
-        return r;
+        return this.info.distPath;
     }
 }
 

@@ -14,28 +14,22 @@ class StyleEntity extends TextEntity {
                 let config = this.sourceMap.config;
                 return new Promise(resolve => {
                     config.hooker.excute("beforeMake", this).then(() => {
-                        this.sourceMap.maker.make(this.path).then(content => {
+                        this.sourceMap.maker.make(this.path,this.info).then(content => {
                             this.content = content;
                             this.state = ENTITYREADY;
                             this.errorLog = null;
                             this.output = false;
                             config.hooker.excute("afterMake", this).then(() => {
                                 this.content = util.replacePaths(this.content, (_path) => {
-                                    let r = "";
-                                    let o = Path.resolve(this.path, "./../", _path).replace(/\\/g, "/");
-                                    if (o.indexOf("node_modules") === -1) {
-                                        r = Path.resolve(this.path, "./../", _path).substring(this.sourceMap.config.sourcePath.length).replace(/\\/g, "/");
-                                    } else {
-                                        r = "node_modules/" + Path.resolve(this.path, "./../", _path).substring(this.sourceMap.config.nmodulePath.length).replace(/\\/g, "/");
-                                    }
-                                    if (this.dependence.indexOf(o) === -1) {
-                                        this.dependence.push(o);
+                                    let m = this.sourceMap.getTargetPath(Path.resolve(this.path, "./../"), _path, this.info);
+                                    if (!this.dependence.indexOf(a => a.path === this.info.path)) {
+                                        this.dependence.push(m);
                                     }
                                     if (this.sourceMap.config.develop) {
-                                        return this.sourceMap.config.siteURL + r;
+                                        return this.sourceMap.config.siteURL + m.required;
                                     } else {
-                                        let hash = new File(o).transform().hash().substring(0, 8);
-                                        return this.sourceMap.config.siteURL + util.getHashPath(r, hash);
+                                        let hash = new File(m.path).transform().hash().substring(0, 8);
+                                        return this.sourceMap.config.siteURL + util.getHashPath(m.required, hash);
                                     }
                                 });
                                 resolve(this.dependence);

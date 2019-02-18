@@ -5,8 +5,8 @@ let gzipSize = require('gzip-size');
 let util = require("./../../util/helper");
 
 class TextEntity extends BaseEntity {
-    constructor(sourceMap, path) {
-        super(sourceMap, path);
+    constructor(sourceMap, path, info) {
+        super(sourceMap, path, info);
         this.content = null;
         this.dependence = [];
         this.state = ENTITYNONE;
@@ -17,7 +17,7 @@ class TextEntity extends BaseEntity {
             let config = this.sourceMap.config;
             return new Promise(resolve => {
                 config.hooker.excute("beforeMake", this).then(() => {
-                    this.sourceMap.maker.make(this.path).then(content => {
+                    this.sourceMap.maker.make(this.path,this.info).then(content => {
                         this.state = ENTITYREADY;
                         this.content = content;
                         this.errorLog = null;
