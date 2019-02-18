@@ -175,27 +175,24 @@ class Outputer {
     }
 
     outputStatic() {
-        let paths = new Set(), config = this.config;
+        let paths = [], config = this.config;
         Reflect.ownKeys(this.sourceMap._map).forEach(key => {
             let entity = this.sourceMap._map[key];
             if (entity instanceof ExcutorEntity) {
-                entity.getAssetPaths().forEach(path => {
-                    paths.add(path);
+                entity.getAssetPaths().forEach(info => {
+                    if (!paths.find(a => a.path === info.path)) {
+                        paths.push(info);
+                    }
                 });
             }
         });
-        return [...paths, config.staticPath].reduce((a, path) => {
+        return paths.reduce((a, info) => {
             return a.then(() => {
-                let file = new File(path);
+                let file = new File(info.path);
                 if (file.exist) {
                     return file.getAllSubFilePaths().then(paths => paths.reduce((a, path) => {
                         return a.then(() => {
-                            let r = "";
-                            if (path.indexOf("node_modules/") === -1) {
-                                r = config.distPath + path.substring(config.sourcePath.length);
-                            } else {
-                                r = config.distPath + `node_modules/` + path.substring(config.nmodulePath.length);
-                            }
+                            let r = (info.distPath + "/" + path.substring(info.path.length)).replace(/[\/]+/g, "/");
                             return new File(path).copyTo(r);
                         });
                     }, Promise.resolve()));

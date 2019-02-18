@@ -23,8 +23,8 @@ class ExcutorEntity extends TextEntity {
                                 this.dependence.push(m);
                             }
                         } else if (key === 'asset') {
-                            if (this.assets.indexOf(path) === -1) {
-                                this.assets.push(path);
+                            if (!this.assets.find(a => a.path === m.path)) {
+                                this.assets.push(m);
                             }
                         }
                         return `${key}:"${m.required}"`;
@@ -55,8 +55,8 @@ class ExcutorEntity extends TextEntity {
                                 this.dependence.push(m);
                             }
                         } else if (key === 'asset') {
-                            if (this.assets.indexOf(path) === -1) {
-                                this.assets.push(path);
+                            if (!this.assets.find(a => a.path === m.path)) {
+                                this.assets.push(m);
                             }
                         }
                         return `${key}:"${m.required}"`;

@@ -14,15 +14,15 @@ class StyleEntity extends TextEntity {
                 let config = this.sourceMap.config;
                 return new Promise(resolve => {
                     config.hooker.excute("beforeMake", this).then(() => {
-                        this.sourceMap.maker.make(this.path,this.info).then(content => {
+                        this.sourceMap.maker.make(this.path, this.info).then(content => {
                             this.content = content;
                             this.state = ENTITYREADY;
                             this.errorLog = null;
                             this.output = false;
                             config.hooker.excute("afterMake", this).then(() => {
                                 this.content = util.replacePaths(this.content, (_path) => {
-                                    let m = this.sourceMap.getTargetPath(Path.resolve(this.path, "./../"), _path, this.info);
-                                    if (!this.dependence.indexOf(a => a.path === this.info.path)) {
+                                    let m = this.sourceMap.getTargetPath(Path.resolve(this.path, "./../"), "./" + _path, this.info);
+                                    if (!this.dependence.find(a => a.path === this.info.path)) {
                                         this.dependence.push(m);
                                     }
                                     if (this.sourceMap.config.develop) {

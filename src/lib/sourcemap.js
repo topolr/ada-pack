@@ -127,6 +127,8 @@ class SourceMap {
                         } else {
                             return Path.resolve(checkPaths[3], "./../", require(checkPaths[3]).main);
                         }
+                    } else {
+                        return current;
                     }
                 } else {
                     return current;
@@ -154,33 +156,37 @@ class SourceMap {
         if (path.startsWith("./") || path.startsWith("../") || path.startsWith("/")) {
             type = "local";
             result = checkPath(Path.resolve(filePath, path)).replace(/\\/g, "/");
-            required = result.substring(this.config.sourcePath.length);
+            if (result.indexOf("node_modules/") !== -1) {
+                required = "node_modules/" + result.substring(this.config.nmodulePath.length);
+            } else {
+                required = result.substring(this.config.sourcePath.length);
+            }
         } else {
             let name = path.split("/").shift(), target = this.config.moduleMap[name];
             if (target) {
                 type = "module";
                 result = checkPath(Path.resolve(this.config.sourcePath, target)).replace(/\\/g, "/");
-                let k = result.substring(this.config.sourcePath.length).split("/");
+                let k = result.substring(Path.resolve(this.config.sourcePath, target).length).split("/");
                 k[0] = name;
                 moduleName = name;
                 required = k.join("/");
             } else {
                 type = "nodeModule";
                 result = checkPath(Path.resolve(this.config.nmodulePath, path)).replace(/\\/g, "/");
-                required = name + "/" + result.substring(this.config.sourcePath.length);
+                required = "node_modules/" + result.substring(this.config.nmodulePath.length);
                 moduleName = "node_modules/" + name;
             }
         }
         if (info.type === "module" && result.indexOf(filePath) === 0) {
             type = "module";
             moduleName = info.name;
-            let k = required.split("/");
+            let target = this.config.moduleMap[info.name];
+            let k = result.substring(Path.resolve(this.config.sourcePath, target).length).split("/");
             k[0] = moduleName;
             required = k.join("/");
-            distPath = this.config.distPath + required;
         }
         distPath = Path.resolve(this.config.distPath, required);
-        return {path: result, type, required, distPath, name: moduleName};
+        return {path: result, type, required, distPath, name: moduleName, distMap: {}};
     }
 
     editFiles(files) {
@@ -270,6 +276,7 @@ class SourceMap {
                             let info = {
                                 path: entry,
                                 type: "local",
+                                moduleName: "",
                                 required: entry.substring(this.config.sourcePath.length),
                                 distPath: Path.resolve(this.config.distPath, entry.substring(this.config.sourcePath.length))
                             };
