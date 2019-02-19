@@ -34,8 +34,8 @@ module.exports = {
         let waitTime = 5000;
         let appInfo = helper.getAppInfo(process.cwd(), name, true);
         let config = Array.isArray(appInfo) ? appInfo[0] : appInfo, port = config.server.port;
-        return require("../../index").develop(appInfo, ({type, files, map, log}) => {
-            messageQueue.add({type, files, map, log});
+        return require("../../index").develop(appInfo, ({type, files, map, log, name}) => {
+            messageQueue.add({type, files, map, log, name});
         }).then((packers) => {
             new DevServer(config).start().then(app => {
                 app.use("/ada/sse", (req, res) => {

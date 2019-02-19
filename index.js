@@ -60,26 +60,11 @@ module.exports = {
                             waiter.setHandler((a, times) => {
                                 if (times > 0) {
                                     if (a.add) {
-                                        packer.sourceMap.addFiles(a.add).then(() => {
-                                            fn && fn(Object.assign({
-                                                files: packer.getChangedModule(a.add),
-                                                name: packer.config.name
-                                            }, packer.getCurrentState("edit")));
-                                        });
+                                        packer.sourceMap.addFiles(a.add).then(() => fn && fn(packer.getCurrentState("edit", a.add)));
                                     } else if (a.edit) {
-                                        packer.sourceMap.editFiles(a.edit).then(() => {
-                                            fn && fn(Object.assign({
-                                                files: packer.getChangedModule(a.edit),
-                                                name: packer.config.name
-                                            }, packer.getCurrentState("edit")));
-                                        });
+                                        packer.sourceMap.editFiles(a.edit).then(() => fn && fn(packer.getCurrentState("edit", a.edit)));
                                     } else if (a.remove) {
-                                        packer.sourceMap.editFiles(a.remove).then(() => {
-                                            fn && fn(Object.assign({
-                                                files: packer.getChangedModule(a.remove),
-                                                name: packer.config.name
-                                            }, packer.getCurrentState("edit")));
-                                        });
+                                        packer.sourceMap.editFiles(a.remove).then(() => fn && fn(packer.getCurrentState("edit", a.remove)));
                                     }
                                 }
                             });

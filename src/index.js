@@ -21,11 +21,13 @@ class Packer {
         return this._sourceMap;
     }
 
-    getCurrentState(type) {
+    getCurrentState(type, files = []) {
         return {
             type: this.sourceMap.outputer.rebuild ? "reload" : type,
             map: this.sourceMap.outputer.getSourceMap(),
-            log: this.sourceMap.outputer.getLogInfo()
+            log: this.sourceMap.outputer.getLogInfo(),
+            name: this.sourceMap.config.name,
+            files: this.getChangedModule(files)
         };
     }
 

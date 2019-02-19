@@ -281,6 +281,7 @@ class Outputer {
             basePath: config.siteURL,
             develop: config.develop,
             map: this.getSourceMap(),
+            name: config.name,
             root: config.mainEntryPath.substring(config.sourcePath.length)
         };
         let manifest = {};
