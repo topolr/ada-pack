@@ -1,7 +1,5 @@
 let colors = require("colors");
-let path = require("path");
 let chokidar = require('chokidar');
-let Path = require("path");
 let Packer = require("./src/index");
 
 class Waiter {
@@ -57,27 +55,29 @@ module.exports = {
                 return aa.then(() => {
                     let packer = new Packer(Object.assign(config, {develop: true}));
                     return packer.pack().then(() => {
-                        let basePath = config.basePath, sourcePath = config.sourcePath;
                         let waiter = new Waiter();
-                        chokidar.watch(path.resolve(basePath, config.sourcePath), {ignored: /[\/\\]\./}).on('change', (path) => waiter.add("edit", path)).on('add', (path) => waiter.add("add", path)).on('unlink', (path) => waiter.add("remove", path)).on("ready", () => {
+                        chokidar.watch(packer.getWatchPaths(), {ignored: /[\/\\]\./}).on('change', (path) => waiter.add("edit", path)).on('add', (path) => waiter.add("add", path)).on('unlink', (path) => waiter.add("remove", path)).on("ready", () => {
                             waiter.setHandler((a, times) => {
                                 if (times > 0) {
                                     if (a.add) {
-                                        packer.sourceMap.addFiles(a.add).then((info) => {
+                                        packer.sourceMap.addFiles(a.add).then(() => {
                                             fn && fn(Object.assign({
-                                                files: a.add.map(a => a.substring(Path.resolve(basePath, sourcePath).length + 1).replace(/\\/g, "/")),
+                                                files: packer.getChangedModule(a.add),
+                                                name: packer.config.name
                                             }, packer.getCurrentState("edit")));
                                         });
                                     } else if (a.edit) {
-                                        packer.sourceMap.editFiles(a.edit).then((info) => {
+                                        packer.sourceMap.editFiles(a.edit).then(() => {
                                             fn && fn(Object.assign({
-                                                files: a.edit.map(a => a.substring(Path.resolve(basePath, sourcePath).length + 1).replace(/\\/g, "/")),
+                                                files: packer.getChangedModule(a.edit),
+                                                name: packer.config.name
                                             }, packer.getCurrentState("edit")));
                                         });
                                     } else if (a.remove) {
-                                        packer.sourceMap.editFiles(a.remove).then((info) => {
+                                        packer.sourceMap.editFiles(a.remove).then(() => {
                                             fn && fn(Object.assign({
-                                                files: a.remove.map(a => a.substring(Path.resolve(basePath, sourcePath).length + 1).replace(/\\/g, "/")),
+                                                files: packer.getChangedModule(a.remove),
+                                                name: packer.config.name
                                             }, packer.getCurrentState("edit")));
                                         });
                                     }

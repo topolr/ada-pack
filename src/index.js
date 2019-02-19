@@ -2,6 +2,7 @@ let {File} = require("ada-util");
 let SourceMap = require("./lib/sourcemap");
 let Hook = require("./lib/hook");
 let defaultHooker = require("./hooker");
+let Path = require("path");
 
 class Packer {
     constructor(config) {
@@ -26,6 +27,21 @@ class Packer {
             map: this.sourceMap.outputer.getSourceMap(),
             log: this.sourceMap.outputer.getLogInfo()
         };
+    }
+
+    getChangedModule(files) {
+        return files.map(file => {
+            let key = Reflect.ownKeys(this.sourceMap._map).find(a => this.sourceMap._map[a].path === file);
+            if (key) {
+                return this.sourceMap._map[key].info.required;
+            }
+        }).filter(a => a !== undefined);
+    }
+
+    getWatchPaths() {
+        return [this.config.sourcePath, ...Reflect.ownKeys(this.config.moduleMap).map(key => {
+            return Path.resolve(this.config.sourcePath, this.config.moduleMap[key]);
+        })];
     }
 
     pack() {
