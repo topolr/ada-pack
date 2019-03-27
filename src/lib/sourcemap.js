@@ -115,6 +115,8 @@ class SourceMap {
     }
 
     getTargetPath(filePath, path, info) {
+        filePath = filePath.replace(/\\/g, '/');
+        path = path.replace(/\\/g, '/');
         let checkPath = function (current) {
             let file = new SyncFile(current);
             if (file.exist) {
