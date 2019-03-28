@@ -384,11 +384,7 @@ class Outputer {
 			return ps.then(() => {
 				return this.config.hooker.excute("afterOutput");
 			}).then(() => {
-				if (this._initerBundler.rebuild || this._workerBundler.rebuild) {
-					this.rebuild = true;
-				} else {
-					this.rebuild = false;
-				}
+				this.rebuild = this._initerBundler.rebuild || this._workerBundler.rebuild;
 			});
 		});
 	}
