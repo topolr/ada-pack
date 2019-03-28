@@ -194,7 +194,7 @@ class Outputer {
 	}
 
 	outputStatic() {
-		let paths = [], config = this.config;
+		let paths = [], config = this.config, ps = Promise.resolve();
 		Reflect.ownKeys(this.sourceMap._map).forEach(key => {
 			let entity = this.sourceMap._map[key];
 			if (entity instanceof ExcutorEntity) {
@@ -206,18 +206,12 @@ class Outputer {
 			}
 		});
 		if (config.staticPath) {
-			paths.push({
-				path: config.staticPath,
-				distPath: config.distPath + config.staticPath.substring(config.sourcePath.length)
-			});
-		}
-		return paths.reduce((a, info) => {
-			return a.then(() => {
-				let file = new File(info.path);
+			ps = ps.then(() => {
+				let file = new File(config.staticPath);
 				if (file.exist) {
 					return file.getAllSubFilePaths().then(paths => paths.reduce((a, path) => {
 						return a.then(() => {
-							let r = (info.distPath + "/" + path.substring(info.path.length)).replace(/[\/]+/g, "/");
+							let r = Path.resolve(config.distPath, './', './' + path.substring(config.staticPath.length));
 							return new File(path).copyTo(r);
 						});
 					}, Promise.resolve()));
@@ -225,7 +219,24 @@ class Outputer {
 					return Promise.resolve();
 				}
 			});
-		}, Promise.resolve());
+		}
+		return ps.then(() => {
+			return paths.reduce((a, info) => {
+				return a.then(() => {
+					let file = new File(info.path);
+					if (file.exist) {
+						return file.getAllSubFilePaths().then(paths => paths.reduce((a, path) => {
+							return a.then(() => {
+								let r = (info.distPath + "/" + path.substring(info.path.length)).replace(/[\/]+/g, "/");
+								return new File(path).copyTo(r);
+							});
+						}, Promise.resolve()));
+					} else {
+						return Promise.resolve();
+					}
+				});
+			}, Promise.resolve());
+		});
 	}
 
 	outputFiles() {
