@@ -2,6 +2,7 @@ let hash = require("ada-util/src/md5");
 let gzipSize = require('gzip-size');
 let AdaBundler = require("./bundler/ada");
 let EntryBundler = require("./bundler/entry");
+let SingleBundler = require("./bundler/single");
 let {File, clone} = require("ada-util");
 let Path = require("path");
 let util = require("./../util/helper");
@@ -137,6 +138,24 @@ class Outputer {
 		} else {
 			return Promise.resolve();
 		}
+	}
+
+	outputSingles() {
+		let config = this.config;
+		if (config.singleFiles) {
+			return this.config.hooker.excute("beforeSingle").then(() => {
+				return config.singleFiles(config).reduce((a, {path, dist}) => {
+					return a.then(() => {
+						return new SingleBundler(config, this._sourceMap.maker).getBundleCode(path).then(code => {
+							return new File(dist).write(code);
+						});
+					});
+				}, Promise.resolve());
+			}).then(() => {
+				return this.config.hooker.excute("afterSingle", this._adaBunlder);
+			});
+		}
+		return Promise.resolve();
 	}
 
 	outputIniter(files) {
@@ -350,6 +369,7 @@ class Outputer {
 			if (outputMap.staticFiles) {
 				ps = ps.then(() => this.outputStatic());
 			}
+			ps = ps.then(() => this.outputSingles());
 			return ps.then(() => {
 				return this.config.hooker.excute("afterOutput");
 			}).then(() => {
