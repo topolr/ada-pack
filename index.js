@@ -49,7 +49,7 @@ module.exports = {
             if (!Array.isArray(config)) {
                 configs = [config];
             }
-            console.log(` ADA-PACK `.yellow, `${(configs[0].develop ? 'DEVELOP' : 'PUBLISH')}`, `|`.yellow, `${require("./package").version}`.magenta);
+            console.log(` ADA-PACK `.yellow, `DEVELOP`, `|`.yellow, `${require("./package").version}`.magenta);
             let packers = [];
             return configs.reduce((aa, config) => {
                 return aa.then(() => {
@@ -82,7 +82,7 @@ module.exports = {
         if (!Array.isArray(config)) {
             configs = [config];
         }
-        console.log(` ADA-PACK `.yellow, `${(configs[0].develop ? 'DEVELOP' : 'PUBLISH')}`, `|`.yellow, `${require("./package").version}`.magenta);
+        console.log(` ADA-PACK `.yellow, `PUBLISH`, `|`.yellow, `${require("./package").version}`.magenta);
         return configs.reduce((a, config) => {
             return a.then(() => {
                 return new Packer(Object.assign(config, {develop: false})).pack();

@@ -39,6 +39,13 @@ module.exports = {
         style: [],
         script: []
     },
+	output: {
+		ada: true,
+		files: true,
+		packFiles: true,
+		indexPage: true,
+		staticFiles: true
+	},
     dependence: {
         js: {
             dependence: {
@@ -164,6 +171,7 @@ module.exports = {
         typescript: ["--target ESNext", "--noEmit", "--pretty", "--skipLibCheck", "--experimentalDecorators"]
     },
     server: {
+        enable:true,
         protocol: "http",
         host: "localhost",
         port: "8080",
