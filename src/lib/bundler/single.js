@@ -10,7 +10,7 @@ class SingleFilePacker extends EntryPacker {
 				let result = this.resultmap.map(path => {
 					return `function(module,exports,require){${this.resultmapcode[path]}}`;
 				});
-				let code = `(function (map) {var Installed={};var requireModule = function (index) {if (Installed[index]) {return Installed[index].exports;}var module = Installed[index] = {exports: {}};map[index].call(module.exports, module, module.exports, requireModule);return module.exports;};})([${result.join(",")}]);`;
+				let code = `(function (map) {var Installed={};var requireModule = function (index) {if (Installed[index]) {return Installed[index].exports;}var module = Installed[index] = {exports: {}};map[index].call(module.exports, module, module.exports, requireModule);return module.exports;};requireModule(map.length-1);})([${result.join(",")}]);`;
 				this.content = `${code}`;
 				this.ready = true;
 				this.time = new Date().getTime() - this.time;
