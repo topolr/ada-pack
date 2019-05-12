@@ -1,4 +1,4 @@
-let {File} = require("ada-util");
+let { File } = require("ada-util");
 let Path = require("path");
 let detectInstalled = require("detect-installed");
 
@@ -47,15 +47,20 @@ class Installer {
 
 	getUnInstallModules() {
 		let map = this.config.dependence, target = [];
-		return this.getFileTypesOfProject().then(types => types.filter(type => {
-			return !!map[type];
-		}).forEach(type => {
-			Reflect.ownKeys(map[type].dependence).forEach(name => {
-				if (target.indexOf(name) === -1) {
-					target.push(name);
-				}
+		return this.getFileTypesOfProject().then(types => {
+			if (types.length === 0) {
+				types = ["js"];
+			}
+			types.filter(type => {
+				return !!map[type];
+			}).forEach(type => {
+				Reflect.ownKeys(map[type].dependence).forEach(name => {
+					if (target.indexOf(name) === -1) {
+						target.push(name);
+					}
+				});
 			});
-		})).then(() => {
+		}).then(() => {
 			return this.checkInstallModules(target);
 		});
 	}

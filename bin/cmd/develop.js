@@ -1,6 +1,7 @@
 let helper = require("../../src/util/helper");
 let DevServer = require("./../lib/server");
-let {randomid} = require("ada-util");
+let { randomid } = require("ada-util");
+const PassThrough = require('stream').PassThrough;
 let ora = require('ora');
 let opn = require("opn");
 
@@ -8,7 +9,7 @@ let connected = false;
 let messageQueue = {
 	listeners: [],
 	subscribe(id, fn) {
-		this.listeners.push({id, fn});
+		this.listeners.push({ id, fn });
 		return this;
 	},
 	unsubscribe(id) {
@@ -34,29 +35,34 @@ module.exports = {
 		let waitTime = 5000;
 		let appInfo = helper.getAppInfo(process.cwd(), name, true);
 		let config = Array.isArray(appInfo) ? appInfo[0] : appInfo, port = config.server.port;
-		return require("../../index").develop(appInfo, ({type, files, map, log, name}) => {
+		return require("../../index").develop(appInfo, ({ type, files, map, log, name }) => {
 			if (config.server.enable) {
-				messageQueue.add({type, files, map, log, name});
+				messageQueue.add({ type, files, map, log, name });
 			}
 		}).then((packers) => {
 			if (config.server.enable) {
 				new DevServer(config).start().then(app => {
-					app.use("/ada/sse", (req, res) => {
-						connected = true;
-						let id = randomid(20);
-						res.writeHead(200, {
-							'Connection': 'keep-alive',
-							'Content-Type': 'text/event-stream',
-							'Cache-Control': 'no-cache'
-						});
-						res.write(`retry: 2000\n`);
-						res.write("id: " + id + "\ndata:" + JSON.stringify(packers[0].getCurrentState("start")) + "\n\n");
-						req.on("close", function () {
-							messageQueue.unsubscribe(id);
-						});
-						messageQueue.subscribe(id, (id, info) => {
-							res.write("id: " + id + "\ndata: " + JSON.stringify(info) + "\n\n");
-						});
+					app.use((context, next) => {
+						if (context.request.path === "/ada/sse") {
+							connected = true;
+							const stream = new PassThrough();
+							let id = randomid(20);
+							context.res.writeHead(200, {
+								'Connection': 'keep-alive',
+								'Content-Type': 'text/event-stream',
+								'Cache-Control': 'no-cache'
+							});
+							stream.write("id: " + id + "\ndata:" + JSON.stringify(packers[0].getCurrentState("start")) + "\n\n");
+							messageQueue.subscribe(id, (id, info) => {
+								stream.write("id: " + id + "\ndata: " + JSON.stringify(info) + "\n\n");
+							});
+							context.req.on("close", function () {
+								messageQueue.unsubscribe(id);
+							});
+							context.body = stream;
+						} else {
+							return next();
+						}
 					});
 				}).then(() => {
 					let spinner = ora({
@@ -68,7 +74,7 @@ module.exports = {
 						num += 1;
 						if (connected) {
 							clearInterval(intevalId);
-							messageQueue.add({type: "reload"});
+							messageQueue.add({ type: "reload" });
 							spinner.stop();
 						} else if (num === count) {
 							clearInterval(intevalId);
