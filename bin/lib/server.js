@@ -85,7 +85,7 @@ class DevServer {
             app.use(require('koa-static')(distPath));
             app.use((context, next) => {
                 if (context.request.path === '/') {
-                    context.response.body = res.send(require("fs").readFileSync(Path.resolve(distPath, "./index.html"), "utf-8"));
+                    context.response.body = require("fs").readFileSync(Path.resolve(distPath, "./index.html"), "utf-8");
                 } else {
                     return next();
                 }
@@ -94,7 +94,7 @@ class DevServer {
                 let paths = appInfo.indexPaths() || [];
                 app.use((context, next) => {
                     if (paths.indexOf(context.request.path) !== -1) {
-                        context.response.body = res.send(require("fs").readFileSync(Path.resolve(distPath, "./index.html"), "utf-8"));
+                        context.response.body = require("fs").readFileSync(Path.resolve(distPath, "./index.html"), "utf-8");
                     } else {
                         return next();
                     }
