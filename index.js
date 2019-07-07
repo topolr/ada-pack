@@ -53,10 +53,15 @@ module.exports = {
             let packers = [];
             return configs.reduce((aa, config) => {
                 return aa.then(() => {
-                    let packer = new Packer(Object.assign(config, {develop: true}));
+                    let packer = new Packer(Object.assign(config, { develop: true }));
                     return packer.pack().then(() => {
                         let waiter = new Waiter();
-                        chokidar.watch(packer.getWatchPaths(), {ignored: /[\/\\]\./}).on('change', (path) => waiter.add("edit", path)).on('add', (path) => waiter.add("add", path)).on('unlink', (path) => waiter.add("remove", path)).on("ready", () => {
+                        let paths = packer.getWatchPaths(), pathSet = new Set();
+                        paths.forEach(a => pathSet.add(a));
+                        if (config.watchNodeModules) {
+                            pathSet.add(config.nmodulePath);
+                        }
+                        chokidar.watch([...pathSet], { ignored: /[\/\\]\./ }).on('change', (path) => waiter.add("edit", path)).on('add', (path) => waiter.add("add", path)).on('unlink', (path) => waiter.add("remove", path)).on("ready", () => {
                             waiter.setHandler((a, times) => {
                                 if (times > 0) {
                                     if (a.add) {
@@ -85,7 +90,7 @@ module.exports = {
         console.log(` ADA-PACK `.yellow, `PUBLISH`, `|`.yellow, `${require("./package").version}`.magenta);
         return configs.reduce((a, config) => {
             return a.then(() => {
-                return new Packer(Object.assign(config, {develop: false})).pack();
+                return new Packer(Object.assign(config, { develop: false })).pack();
             });
         }, Promise.resolve());
     }

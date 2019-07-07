@@ -13,6 +13,7 @@ module.exports = {
 	entryPath: "./src/entries",
 	staticPath: "./src/static",
 	moduleMap: {},
+	watchNodeModules:false,
 	entryFiles() {
 		return [];
 	},
