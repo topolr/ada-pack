@@ -1,7 +1,8 @@
 let jsmaker = require("./jsmaker");
 let Path = require("path");
-module.exports = function ({content, path, option}) {
+module.exports = function ({ content, path, option }) {
     let config = option;
+    content = content.replace(/import\(.*?\)/g, (str) => `_import(${str.substring(7, str.length - 1)})`);
     return new Promise((resolve, reject) => {
         let file = path.substring(config.source_path.length);
         let args = config.compiler.typescript || ["--target ES6", "--noEmit", "--pretty", "--skipLibCheck", "--experimentalDecorators"];
@@ -13,7 +14,7 @@ module.exports = function ({content, path, option}) {
                 error.message = stdout || stderr;
                 reject(error);
             } else {
-                jsmaker({content, path, option: config}).then((content) => {
+                jsmaker({ content, path, option: config }).then((content) => {
                     resolve(content);
                 }, (e) => {
                     reject(e);

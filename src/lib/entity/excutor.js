@@ -1,7 +1,7 @@
 let TextEntity = require("./text");
-let {ENTITYNONE, ENTITYREADY, IGNOREMODULES} = require("./const");
+let { ENTITYNONE, ENTITYREADY, IGNOREMODULES } = require("./const");
 let Path = require("path");
-let {File} = require("ada-util");
+let { File } = require("ada-util");
 
 class ExcutorEntity extends TextEntity {
     constructor(sourceMap, path, info) {
@@ -90,8 +90,8 @@ class ExcutorEntity extends TextEntity {
     }
 
     getImportDenpendence(content) {
-        this.content = content.replace(/import\(.*?\)/g, (str) => {
-            let a = str.substring(7, str.length - 1);
+        this.content = content.replace(/_import\(.*?\)/g, (str) => {
+            let a = str.substring(8, str.length - 1);
             if (IGNOREMODULES.indexOf(a) === -1) {
                 if (a.startsWith("\"") || a.startsWith("'") || a.startsWith("`")) {
                     a = a.replace(/['|"|`]/g, "").trim();

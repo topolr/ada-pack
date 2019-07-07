@@ -1,10 +1,11 @@
 let babel = require("@babel/core");
 let UglifyJS = require("uglify-es");
 let classPropertiesPollyfill = require("../../pollyfills/class-properties");
-let {File} = require("ada-util");
+let { File } = require("ada-util");
 let Path = require("path");
 
-module.exports = function ({content, path, option, fileInfo}) {
+module.exports = function ({ content, path, option, fileInfo }) {
+    content = content.replace(/import\(.*?\)/g, (str) => `_import(${str.substring(7, str.length - 1)})`);
     return new Promise((resolve, reject) => {
         try {
             if (option.develop) {
