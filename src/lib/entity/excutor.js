@@ -96,9 +96,9 @@ class ExcutorEntity extends TextEntity {
                 if (a.startsWith("\"") || a.startsWith("'") || a.startsWith("`")) {
                     a = a.replace(/['|"|`]/g, "").trim();
                     let m = this.sourceMap.getTargetPath(Path.resolve(this.path, "./../"), a, this.info);
-                    if (!this.dependence.find(a => a.path === m.path)) {
-                        this.dependence.push(m);
-                    }
+                    // if (!this.dependence.find(a => a.path === m.path)) {
+                    //     this.dependence.push(m);
+                    // }
                     if (this.sourceMap.entries.indexOf(m.path) === -1) {
                         this.sourceMap.entries.push(m.path);
                     }
