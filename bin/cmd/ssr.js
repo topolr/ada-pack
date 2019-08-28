@@ -1,6 +1,6 @@
 let colors = require("colors");
 let Path = require("path");
-let {File} = require("ada-util");
+let { File } = require("ada-util");
 let Packer = require("./../../index");
 let helper = require("../../src/util/helper");
 let os = require("os");
@@ -30,25 +30,25 @@ function tryKillProcess(port) {
 
 module.exports = {
     command: "ssr",
-    desc: "out put static files by ssr",
+    desc: "out put static files by SSR",
     paras: ["[name]"],
     fn: function (params) {
         let name = params[0];
-        let appInfo = helper.getAppInfo(process.cwd(), name, true);
+        let appInfo = helper.getAppInfo(process.cwd(), name, false);
         let config = Array.isArray(appInfo) ? appInfo[0] : appInfo;
         if (config.ssr.output) {
             tryKillProcess(config.server.port).then(() => {
-                console.log('[SSR]'.grey, 'START TO PUBLISH PROJECT'.green);
+                console.log('[SSR]'.grey, 'START TO PUBLISH PROJECT'.cyan);
                 Packer.publish(appInfo, false).then(() => {
-                    console.log('[SSR]'.grey, 'PUBLISH PROJECT DONE,START SERVER'.green);
+                    console.log('[SSR]'.grey, 'PUBLISH PROJECT DONE,START SERVER'.cyan);
                     let server = childProcess.spawn("node", [Path.resolve(__dirname, "./../lib/process.js")], {
                         cwd: process.cwd(),
                         stdio: ['inherit', 'inherit', 'inherit', 'ipc']
                     });
                     server.on("message", a => {
                         if (a.type === 'done') {
-                            console.log('[SSR]'.grey, 'SERVER STARTED,START SSR'.green);
-                            let {DistRenderer} = require(Path.resolve(process.cwd(), "./node_modules/adajs/server"));
+                            console.log('[SSR]'.grey, 'SERVER STARTED,START SSR'.cyan);
+                            let { DistRenderer } = require(Path.resolve(process.cwd(), "./node_modules/adajs/server"));
                             let appInfos = appInfo;
                             if (!Array.isArray(appInfo)) {
                                 appInfos = [appInfo];
@@ -68,7 +68,7 @@ module.exports = {
                                     });
                                 });
                             }, Promise.resolve()).then(() => {
-                                console.log(`[SSR]`.grey, `ALL DONE IN ${new Date().getTime() - startTime}ms`.green);
+                                console.log(`[SSR]`.grey, `ALL DONE IN ${new Date().getTime() - startTime}ms`.cyan);
                                 server.kill();
                             }).catch(e => {
                                 console.log(e);
@@ -80,7 +80,11 @@ module.exports = {
                         server.kill();
                     });
                     server.on('close', () => {
-                        console.log(`[SSR]`.grey, `SERVER HAS STOPPED`.green);
+                        console.log(`[SSR]`.grey, `SERVER STOPPED`.green);
+                    });
+                    process.on('unhandledRejection', (err) => {
+                        console.log(err);
+                        server.kill();
                     });
                 });
             });

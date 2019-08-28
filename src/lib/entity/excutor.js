@@ -13,7 +13,7 @@ class ExcutorEntity extends TextEntity {
         this.content = content.replace(/_adajs.root\)\([\d\D]*?\)/g, str => {
             let map = str.substring(13, str.length - 1);
             if (map) {
-                map = map.replace(/[a-z]+\:[\s]+['|"][\s\S]+?['|"]/g, str => {
+                map = map.replace(/[a-z]+\:[\s]*['|"][\s\S]+?['|"]/g, str => {
                     let _a = str.split(":"), key = _a[0].trim(), keyValue = _a[1].trim();
                     if (keyValue.indexOf("./") !== -1 || keyValue.indexOf("/") !== -1) {
                         let value = keyValue.substring(1, keyValue.length - 1);
@@ -45,7 +45,7 @@ class ExcutorEntity extends TextEntity {
         this.content = content.replace(/_adajs.view\)\(\{[\d\D]*?\)/g, str => {
             let map = str.substring(13, str.length - 1);
             if (map) {
-                map = map.replace(/[a-z]+\:[\s]+['|"][\s\S]+?['|"]/g, str => {
+                map = map.replace(/[a-z]+\:[\s]*['|"][\s\S]+?['|"]/g, str => {
                     let _a = str.split(":"), key = _a[0].trim(), keyValue = _a[1].trim();
                     if (keyValue.indexOf("./") !== -1 || keyValue.indexOf("/") !== -1) {
                         let value = keyValue.substring(1, keyValue.length - 1);
