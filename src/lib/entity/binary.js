@@ -1,5 +1,5 @@
 let BaseEntity = require("./base");
-let {ENTITYREADY} = require("./const");
+let { ENTITYREADY } = require("./const");
 
 class BinaryEntity extends BaseEntity {
 	reset() {

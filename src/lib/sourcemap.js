@@ -1,4 +1,4 @@
-let {File, SyncFile} = require("ada-util");
+let { File, SyncFile } = require("ada-util");
 let Path = require("path");
 let ignore = require('ignore');
 let Outputer = require("./outputer");
@@ -84,19 +84,19 @@ class SourceMap {
                 if (!isbinaryfile.sync(path)) {
                     let suffix = Path.extname(path);
                     if ([".js", ".ts"].indexOf(suffix) !== -1) {
-                        entity = new ExcutorEntity(this, path, info);
+                        entity = new ExcutorEntity(this, path, info, this.config);
                     } else if ([".css", ".less", ".scss"].indexOf(suffix) !== -1) {
-                        entity = new StyleEntity(this, path, info);
+                        entity = new StyleEntity(this, path, info, this.config);
                     } else if ([".html"].indexOf(suffix) !== -1) {
-                        entity = new HtmlEntity(this, path, info);
+                        entity = new HtmlEntity(this, path, info, this.config);
                     } else {
-                        entity = new TextEntity(this, path, info);
+                        entity = new TextEntity(this, path, info, this.config);
                     }
                 } else {
-                    entity = new BinaryEntity(this, path, info);
+                    entity = new BinaryEntity(this, path, info, this.config);
                 }
             } catch (e) {
-                entity = new TextEntity(this, path, info);
+                entity = new TextEntity(this, path, info, this.config);
                 entity.errorLog = e;
             }
             this._map[this.getMapName(path)] = entity;
@@ -188,7 +188,7 @@ class SourceMap {
             required = k.join("/");
         }
         distPath = Path.resolve(this.config.distPath, required);
-        return {path: result, type, required, distPath, name: moduleName, distMap: {}};
+        return { path: result, type, required, distPath, name: moduleName, distMap: {} };
     }
 
     editFiles(files) {

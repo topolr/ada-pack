@@ -10,7 +10,7 @@ module.exports = {
         let appInfo = helper.getAppInfo(process.cwd(), type);
         let config = Array.isArray(appInfo) ? appInfo[0] : appInfo;
         new DevServer(config).start().then(() => {
-            process.send({type: "done"});
+            process.send && process.send({ type: "done" });
         });
     }
 };
