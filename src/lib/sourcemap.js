@@ -84,19 +84,19 @@ class SourceMap {
                 if (!isbinaryfile.sync(path)) {
                     let suffix = Path.extname(path);
                     if ([".js", ".ts"].indexOf(suffix) !== -1) {
-                        entity = new ExcutorEntity(this, path, info, this.config);
+                        entity = new ExcutorEntity(this, path, info);
                     } else if ([".css", ".less", ".scss"].indexOf(suffix) !== -1) {
-                        entity = new StyleEntity(this, path, info, this.config);
+                        entity = new StyleEntity(this, path, info);
                     } else if ([".html"].indexOf(suffix) !== -1) {
-                        entity = new HtmlEntity(this, path, info, this.config);
+                        entity = new HtmlEntity(this, path, info);
                     } else {
-                        entity = new TextEntity(this, path, info, this.config);
+                        entity = new TextEntity(this, path, info);
                     }
                 } else {
-                    entity = new BinaryEntity(this, path, info, this.config);
+                    entity = new BinaryEntity(this, path, info);
                 }
             } catch (e) {
-                entity = new TextEntity(this, path, info, this.config);
+                entity = new TextEntity(this, path, info);
                 entity.errorLog = e;
             }
             this._map[this.getMapName(path)] = entity;

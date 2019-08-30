@@ -4,7 +4,7 @@ let util = require("./../../util/helper");
 let path = require("path");
 
 class BaseEntity {
-    constructor(sourceMap, path, info, config) {
+    constructor(sourceMap, path, info) {
         this.sourceMap = sourceMap;
         this.path = path;
         this.state = ENTITYREADY;
@@ -12,7 +12,7 @@ class BaseEntity {
         this.errorLog = null;
         this.info = info;
         this.mapName = this.info.required;
-        this.config = config;
+        this.config = sourceMap.config;
     }
 
     getHash() {
