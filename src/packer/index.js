@@ -1,14 +1,14 @@
+let Path = require("path");
 let { File } = require("ada-util");
 let SourceMap = require("./sourcemap");
-let Hook = require("./../hooker");
+let Hooker = require("./../hooker");
 let defaultHooker = require("../config/hooker");
-let Path = require("path");
 
 class Packer {
     constructor(config) {
         this._config = config;
         this._sourceMap = new SourceMap(config);
-        this._config.hooker = new Hook(this._sourceMap);
+        this._config.hooker = new Hooker(this._sourceMap);
         this._config.hook.unshift(defaultHooker);
         this._config.hook.forEach(hook => hook(config.hooker));
     }

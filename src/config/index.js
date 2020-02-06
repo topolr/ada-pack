@@ -25,10 +25,8 @@ const appConfig = {
     },
     ignore: [],
     output: {
-        // ada: true,
         files: true,
         packFiles: true,
-        // indexPage: true,
         staticFiles: true
     },
     hook: [],
@@ -199,6 +197,7 @@ const config = {
         urls: [],
         output: ""
     },
+    hook: [],
     indexPaths() {
         return []
     }

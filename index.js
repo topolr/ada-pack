@@ -83,13 +83,10 @@ const queue = new Queue();
 
 module.exports = {
     develop(fn) {
-        console.log(` ADA-PACK `.yellow, `DEVELOP`, `|`.yellow, `${require("./package").version}`.magenta);
+        console.log(`[ADA-PACK]`.yellow, `DEVELOP`, `|`.yellow, `${require("./package").version}`.magenta);
         let pager = new Pager(), packers = [];
-        return Promise.resolve().then(() => {
-            return pager.outputAda();
-        }).then(() => {
-            let targets = config.apps.filter(app => !app.host);
-            return targets.reduce((a, b) => {
+        return Promise.resolve().then(() => pager.outputAda()).then(() => {
+            return config.apps.filter(app => !app.host).reduce((a, b) => {
                 return a.then(() => {
                     let packer = new Packer(b);
                     packers.push(packer);
@@ -128,57 +125,15 @@ module.exports = {
                     });
                 });
             }, Promise.resolve());
-        }).then(() => {
-            return pager.outputIndex();
-        }).then(() => packers);
-
-
-        // let configs = config;
-        // if (!Array.isArray(config)) {
-        //     configs = [config];
-        // }
-        // let packers = [];
-        // return configs.reduce((aa, config) => {
-        //     return aa.then(() => {
-        //         let packer = new Packer(Object.assign(config, { develop: true }));
-        //         return packer.pack().then(() => {
-        //             let waiter = new Waiter();
-        //             let paths = packer.getWatchPaths(), pathSet = new Set();
-        //             paths.forEach(a => pathSet.add(a));
-        //             if (config.watchNodeModules) {
-        //                 pathSet.add(config.nmodulePath);
-        //             }
-        //             chokidar.watch([...pathSet], { ignored: /[\/\\]\./ }).on('change', (path) => waiter.add("edit", path)).on('add', (path) => waiter.add("add", path)).on('unlink', (path) => waiter.add("remove", path)).on("ready", () => {
-        //                 waiter.setHandler((a, times) => {
-        //                     if (times > 0) {
-        //                         if (a.add) {
-        //                             packer.sourceMap.addFiles(a.add).then(() => fn && fn(packer.getCurrentState("edit", a.add)));
-        //                         } else if (a.edit) {
-        //                             packer.sourceMap.editFiles(a.edit).then(() => fn && fn(packer.getCurrentState("edit", a.edit)));
-        //                         } else if (a.remove) {
-        //                             packer.sourceMap.editFiles(a.remove).then(() => fn && fn(packer.getCurrentState("edit", a.remove)));
-        //                         }
-        //                     }
-        //                 });
-        //             });
-        //             packers.push(packer);
-        //         });
-        //     });
-        // }, Promise.resolve()).then(() => {
-        //     resolve(packers);
-        // });
-        // });
+        }).then(() => pager.outputIndex()).then(() => packers);
     },
-    publish(config) {
-        let configs = config;
-        if (!Array.isArray(config)) {
-            configs = [config];
-        }
-        console.log(` ADA-PACK `.yellow, `PUBLISH`, `|`.yellow, `${require("./package").version}`.magenta);
-        return configs.reduce((a, config) => {
-            return a.then(() => {
-                return new Packer(Object.assign(config, { develop: false })).pack();
-            });
-        }, Promise.resolve());
+    publish() {
+        console.log(`[ADA-PACK]`.yellow, `PUBLISH`, `|`.yellow, `${require("./package").version}`.magenta);
+        let pager = new Pager();
+        return Promise.resolve().then(() => pager.outputAda()).then(() => {
+            return config.apps.filter(app => !app.host).reduce((a, b) => {
+                return a.then(() => new Packer(b).pack());
+            }, Promise.resolve());
+        }).then(() => pager.outputIndex());
     }
 };

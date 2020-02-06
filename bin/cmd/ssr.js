@@ -1,10 +1,10 @@
 let colors = require("colors");
+let os = require("os");
 let Path = require("path");
 let { File } = require("ada-util");
 let Packer = require("./../../index");
-let helper = require("../../src/util/helper");
-let os = require("os");
 let childProcess = require('child_process');
+let config = require("./../../src/config/index");
 
 function tryKillProcess(port) {
     return new Promise((resolve, reject) => {
@@ -31,15 +31,12 @@ function tryKillProcess(port) {
 module.exports = {
     command: "ssr",
     desc: "out put static files by SSR",
-    paras: ["[name]"],
-    fn: function (params) {
-        let name = params[0];
-        let appInfo = helper.getAppInfo(process.cwd(), name, false);
-        let config = Array.isArray(appInfo) ? appInfo[0] : appInfo;
+    paras: [],
+    fn: function () {
         if (config.ssr.output) {
             tryKillProcess(config.server.port).then(() => {
                 console.log('[SSR]'.grey, 'START TO PUBLISH PROJECT'.cyan);
-                Packer.publish(appInfo, false).then(() => {
+                Packer.publish(config).then(() => {
                     console.log('[SSR]'.grey, 'PUBLISH PROJECT DONE,START SERVER'.cyan);
                     let server = childProcess.spawn("node", [Path.resolve(__dirname, "./../lib/process.js")], {
                         cwd: process.cwd(),
@@ -49,12 +46,8 @@ module.exports = {
                         if (a.type === 'done') {
                             console.log('[SSR]'.grey, 'SERVER STARTED,START SSR'.cyan);
                             let { DistRenderer } = require(Path.resolve(process.cwd(), "./node_modules/adajs/server"));
-                            let appInfos = appInfo;
-                            if (!Array.isArray(appInfo)) {
-                                appInfos = [appInfo];
-                            }
                             let startTime = new Date().getTime();
-                            appInfos.reduce((a, appInfo) => {
+                            config.apps.reduce((a, appInfo) => {
                                 return a.then(() => {
                                     const distPath = Path.resolve(appInfo.projectPath, appInfo.ssr.output);
                                     let renderer = new DistRenderer({

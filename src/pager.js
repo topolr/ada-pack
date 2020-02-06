@@ -3,30 +3,42 @@ const config = require("./config/index");
 const Maker = require("./packer/maker");
 const Path = require("path");
 const { File, clone } = require("ada-util");
-let hash = require("ada-util/src/md5");
+const hash = require("ada-util/src/md5");
+const Hooker = require("./hooker");
+const defaultHooker = require("./config/hooker");
 
 class Pager {
     constructor() {
         this._adaURL = '';
         this._adaBunlder = new AdaBundler(config, new Maker(config));
+        this.hooker = new Hooker({});
+        [defaultHooker, ...config.hook].forEach(hook => hook(this.hooker));
     }
 
     outputAda() {
         if (!this._adaBunlder.ready) {
-            if (config.develop) {
-                return this._adaBunlder.getBundleCode(Path.resolve(config.nmodulePath, "./adajs/develop.js")).then(code => {
-                    let path = Path.resolve(config.distPath, "./ada.js");
-                    this._adaURL = config.siteURL + "ada.js";
-                    return new File(path).write(this._adaBunlder.getContent());
-                });
-            } else {
-                return this._adaBunlder.getBundleCode(Path.resolve(config.nmodulePath, "./adajs/index.js")).then(code => {
-                    let h = hash.md5(code).substring(0, 8);
-                    let path = Path.resolve(config.distPath, `./ada.${h}.js`);
-                    this._adaURL = config.siteURL + `ada.${h}.js`;
-                    return new File(path).write(this._adaBunlder.getContent());
-                });
-            }
+            return this.hooker.excute("beforeAda").then(() => {
+                if (config.develop) {
+                    return this._adaBunlder.getBundleCode(Path.resolve(config.nmodulePath, "./adajs/develop.js")).then(code => {
+                        let url = config.siteURL + "ada.js";
+                        let path = Path.resolve(config.distPath, "./ada.js");
+                        return this.hooker.excute("afterAda", this._adaBunlder).then(() => {
+                            this._adaURL = url;
+                            return new File(path).write(this._adaBunlder.getContent());
+                        });
+                    });
+                } else {
+                    return this._adaBunlder.getBundleCode(Path.resolve(config.nmodulePath, "./adajs/index.js")).then(code => {
+                        let h = hash.md5(code).substring(0, 8);
+                        let url = config.siteURL + `ada.${h}.js`;
+                        let path = Path.resolve(config.distPath, `./ada.${h}.js`);
+                        return this.hooker.excute("afterAda", this._adaBunlder).then(() => {
+                            this._adaURL = url;
+                            return new File(path).write(this._adaBunlder.getContent());
+                        });
+                    });
+                }
+            });
         } else {
             return Promise.resolve();
         }

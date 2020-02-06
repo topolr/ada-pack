@@ -23,7 +23,9 @@
   "dependencies": {
     "ada-util": "^1.0.0-beta.2",
     "anser": "^1.4.7",
+    "chalk": "^3.0.0",
     "chokidar": "^1.7.0",
+    "cliui": "^6.0.0",
     "colors": "^1.1.2",
     "detect-installed": "^2.0.4",
     "gzip-size": "^4.1.0",

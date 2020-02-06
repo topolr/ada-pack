@@ -198,13 +198,13 @@ class SourceMap {
                 et.reset();
             }
         });
-        return this.config.hooker.excute("fileEdit", files).then(() => {
+        return this.config.hooker.excute("fileEdit", { files, config: this.config }).then(() => {
             return this.map(files);
         });
     }
 
     addFiles(files) {
-        return this.config.hooker.excute("fileAdd", files).then(() => {
+        return this.config.hooker.excute("fileAdd", { files, config: this.config }).then(() => {
             return this.map();
         });
     }
@@ -213,7 +213,7 @@ class SourceMap {
         files.forEach(file => {
             delete this._map[this.getMapName(file)];
         });
-        return this.config.hooker.excute("fileRemove", files).then(() => {
+        return this.config.hooker.excute("fileRemove", { files, config: this.config }).then(() => {
             return this.map(files);
         });
     }

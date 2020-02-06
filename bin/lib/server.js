@@ -127,7 +127,7 @@ class DevServer {
                 return ps.then(() => {
                     return new Promise(resolve => {
                         app.listen(port, () => {
-                            console.log(`[ADA-PACK]`.grey, `RUN SERVER PORT [`.green, port, `]`.green);
+                            console.log(`[ADA-PACK]`.grey, `RUN SERVER [`.green, `http://localhost:${port}`, `]`.green);
                             resolve();
                         });
                     });
