@@ -27,7 +27,11 @@ class ExcutorEntity extends TextEntity {
                                 this.assets.push(m);
                             }
                         }
-                        return `${key}:"${m.required}"`;
+                        if(key!=='asset'){
+                            return `${key}:{path:"${m.required}"}`;
+                        }else{
+                            return `${key}:"${m.required}"`;
+                        }
                     } else {
                         return str;
                     }
@@ -59,7 +63,11 @@ class ExcutorEntity extends TextEntity {
                                 this.assets.push(m);
                             }
                         }
-                        return `${key}:"${m.required}"`;
+                        if(key!=='asset'){
+                            return `${key}:{path:"${m.required}"}`;
+                        }else{
+                            return `${key}:"${m.required}"`;
+                        }
                     } else {
                         return str;
                     }

@@ -2,7 +2,7 @@ let {ENTITYNONE, ENTITYREADY} = require("./const");
 let hash = require("ada-util/src/md5");
 let BaseEntity = require("./base");
 let gzipSize = require('gzip-size');
-let util = require("./../../util/helper");
+let util = require("../../util/helper");
 
 class TextEntity extends BaseEntity {
     constructor(sourceMap, path, info) {

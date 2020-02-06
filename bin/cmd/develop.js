@@ -1,9 +1,9 @@
-let helper = require("../../src/util/helper");
 let DevServer = require("./../lib/server");
 let { randomid } = require("ada-util");
 const PassThrough = require('stream').PassThrough;
 let ora = require('ora');
 let opn = require("opn");
+let config = require("./../../src/config/index");
 
 let connected = false;
 let messageQueue = {
@@ -31,13 +31,12 @@ module.exports = {
 	desc: "develop",
 	paras: ["[name]"],
 	fn: function (params) {
-		let name = params[0];
 		let waitTime = 5000;
-		let appInfo = helper.getAppInfo(process.cwd(), name, true);
-		let config = Array.isArray(appInfo) ? appInfo[0] : appInfo, port = config.server.port;
-		return require("../../index").develop(appInfo, ({ type, files, map, log, name }) => {
+		let port = config.server.port;
+		config.develop = true;
+		return require("../../index").develop(({ type, files, map, log, name,app }) => {
 			if (config.server.enable) {
-				messageQueue.add({ type, files, map, log, name });
+				messageQueue.add({ type, files, map, log, name,app });
 			}
 		}).then((packers) => {
 			if (config.server.enable) {

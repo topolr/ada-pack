@@ -1,6 +1,6 @@
 {
   "name": "ada-pack",
-  "version": "3.0.2",
+  "version": "4.0.0",
   "description": "Project packer for adajs",
   "main": "index.js",
   "scripts": {},
@@ -55,8 +55,10 @@
     "autoprefixer": "^8.6.2",
     "express": "^4.16.2",
     "html-minifier": "^3.5.17",
+    "koa": "^2.11.0",
+    "koa-static": "^5.0.0",
     "less": "^3.0.4",
-    "node-sass": "^4.9.0",
+    "node-sass": "^4.13.1",
     "uglify-es": "^3.3.9",
     "uglifycss": "0.0.29"
   }

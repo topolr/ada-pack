@@ -1,7 +1,7 @@
 let colors = require("colors");
 let {SyncFile} = require("ada-util");
 let Path = require("path");
-let Config = require("./../config");
+let Config = require("../config");
 
 let util = {
     isObject(obj) {
