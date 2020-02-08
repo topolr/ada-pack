@@ -1,9 +1,11 @@
 let map = require("./../../package.json");
+let chalk = require('chalk');
+
 module.exports = {
 	command: "version",
-	desc: "version",
+	desc: map.version,
 	paras: [],
 	fn: function () {
-		console.log(` version ${map.version}`.yellow);
+		console.log(chalk(` version ${map.version}`).yellow);
 	}
 };

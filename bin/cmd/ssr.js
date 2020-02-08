@@ -1,10 +1,11 @@
-let colors = require("colors");
+let os = require("os");
 let Path = require("path");
 let { File } = require("ada-util");
 let Packer = require("./../../index");
-let helper = require("../../src/util/helper");
-let os = require("os");
 let childProcess = require('child_process');
+let config = require("./../../src/config/index");
+let ora = require('ora');
+let chalk = require('chalk');
 
 function tryKillProcess(port) {
     return new Promise((resolve, reject) => {
@@ -30,47 +31,40 @@ function tryKillProcess(port) {
 
 module.exports = {
     command: "ssr",
-    desc: "out put static files by SSR",
-    paras: ["[name]"],
-    fn: function (params) {
-        let name = params[0];
-        let appInfo = helper.getAppInfo(process.cwd(), name, false);
-        let config = Array.isArray(appInfo) ? appInfo[0] : appInfo;
+    desc: "out put static files",
+    paras: [],
+    fn: function () {
         if (config.ssr.output) {
             tryKillProcess(config.server.port).then(() => {
-                console.log('[SSR]'.grey, 'START TO PUBLISH PROJECT'.cyan);
-                Packer.publish(appInfo, false).then(() => {
-                    console.log('[SSR]'.grey, 'PUBLISH PROJECT DONE,START SERVER'.cyan);
+                console.log(chalk(`ADAPACK`).yellow, chalk(`|`).green, `PUBLISH`, chalk(`|`).yellow, chalk(`${require("./../../package").version}`).magenta);
+                console.log(chalk('--------|'.padEnd(25, '-')).rainbow);
+                console.log(chalk(`    SSR`).green, chalk(`|`).green, chalk('PUBLISH PROJECT').cyan);
+                Packer.publish(true).then(() => {
+                    console.log(chalk(`    SSR`).green, chalk(`|`).green, chalk('STARTE SERVER').cyan);
                     let server = childProcess.spawn("node", [Path.resolve(__dirname, "./../lib/process.js")], {
                         cwd: process.cwd(),
                         stdio: ['inherit', 'inherit', 'inherit', 'ipc']
                     });
                     server.on("message", a => {
                         if (a.type === 'done') {
-                            console.log('[SSR]'.grey, 'SERVER STARTED,START SSR'.cyan);
-                            let { DistRenderer } = require(Path.resolve(process.cwd(), "./node_modules/adajs/server"));
-                            let appInfos = appInfo;
-                            if (!Array.isArray(appInfo)) {
-                                appInfos = [appInfo];
-                            }
+                            let { DistRenderer } = require('/Users/wangjinliang/ada/ada/server');
                             let startTime = new Date().getTime();
-                            appInfos.reduce((a, appInfo) => {
-                                return a.then(() => {
-                                    const distPath = Path.resolve(appInfo.projectPath, appInfo.ssr.output);
-                                    let renderer = new DistRenderer({
-                                        origin: "http://localhost:8080",
-                                        distPath: appInfo.distPath
-                                    });
-                                    return renderer.outputURLs(appInfo.ssr.urls).then(results => {
-                                        Reflect.ownKeys(results).reduce((a, path) => {
-                                            return a.then(() => new File(Path.resolve(distPath, `.${path === '/' ? '/index.html' : path}`)).make().then(file => file.write(results[path])));
-                                        }, Promise.resolve());
-                                    });
-                                });
-                            }, Promise.resolve()).then(() => {
-                                console.log(`[SSR]`.grey, `ALL DONE IN ${new Date().getTime() - startTime}ms`.cyan);
+                            const distPath = Path.resolve(config.projectPath, config.ssr.output);
+                            let renderer = new DistRenderer({
+                                origin: "http://localhost:8080",
+                                distPath: config.distPath
+                            });
+                            let spinner = ora({ color: "yellow", text: "SERVER RENDER PAGE" }).start();
+                            return renderer.outputURLs(config.ssr.urls).then(results => {
+                                Reflect.ownKeys(results).reduce((a, path) => {
+                                    return a.then(() => new File(Path.resolve(distPath, `.${path === '/' ? '/index.html' : path}`)).make().then(file => file.write(results[path])));
+                                }, Promise.resolve());
+                            }).then(() => {
+                                spinner.stop();
+                                console.log(chalk(`    SSR`).green, chalk(`|`).green, chalk(`RENDER DONE IN ${new Date().getTime() - startTime}ms`).cyan);
                                 server.kill();
                             }).catch(e => {
+                                spinner.stop();
                                 console.log(e);
                                 server.kill();
                             });
@@ -80,7 +74,7 @@ module.exports = {
                         server.kill();
                     });
                     server.on('close', () => {
-                        console.log(`[SSR]`.grey, `SERVER STOPPED`.green);
+                        console.log(chalk(`    SSR`).green, chalk(`|`).green, chalk('SERVER STOPPED').cyan);
                     });
                     process.on('unhandledRejection', (err) => {
                         console.log(err);
@@ -89,7 +83,7 @@ module.exports = {
                 });
             });
         } else {
-            console.log(`[SSR] Error output path can not empty in config file`.red);
+            console.log(chalk(`[SSR] Error output path can not empty in config file`).red);
         }
     }
 };

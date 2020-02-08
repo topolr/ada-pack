@@ -1,14 +1,14 @@
-let {File} = require("ada-util");
-let SourceMap = require("./lib/sourcemap");
-let Hook = require("./lib/hook");
-let defaultHooker = require("./hooker");
 let Path = require("path");
+let { File } = require("ada-util");
+let SourceMap = require("./sourcemap");
+let Hooker = require("./../hooker");
+let defaultHooker = require("../config/hooker");
 
 class Packer {
     constructor(config) {
         this._config = config;
         this._sourceMap = new SourceMap(config);
-        this._config.hooker = new Hook(this._sourceMap);
+        this._config.hooker = new Hooker(this._sourceMap);
         this._config.hook.unshift(defaultHooker);
         this._config.hook.forEach(hook => hook(config.hooker));
     }
@@ -22,12 +22,17 @@ class Packer {
     }
 
     getCurrentState(type, files = []) {
+        type = this.sourceMap.outputer.rebuild ? "reload" : type;
+        if (type === 'reload') {
+            this.sourceMap.outputer.rebuild = false;
+        }
         return {
-            type: this.sourceMap.outputer.rebuild ? "reload" : type,
+            type,
             map: this.sourceMap.outputer.getSourceMap(),
             log: this.sourceMap.outputer.getLogInfo(),
             name: this.sourceMap.config.name,
-            files: this.getChangedModule(files)
+            files: this.getChangedModule(files),
+            app: this._config.name
         };
     }
 

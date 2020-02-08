@@ -1,7 +1,7 @@
-let util = require("./../../util/helper");
+let util = require("../util/helper");
 let {File} = require("ada-util");
 let Path = require("path");
-let queue = require("../../util/queue");
+let queue = require("../util/queue");
 let gzipSize = require('gzip-size');
 
 class EntryPacker {

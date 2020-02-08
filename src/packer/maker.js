@@ -1,6 +1,7 @@
 let Installer = require("./installer");
 let Path = require("path");
 let {File} = require("ada-util");
+let Config=require("./../config/index");
 
 class Maker {
     constructor(config) {
@@ -19,9 +20,9 @@ class Maker {
     make(path, info) {
         let type = Path.extname(path).substring(1);
         return new File(path).read().then(content => {
-            if (this.config.dependence[type]) {
+            if (Config.dependence[type]) {
                 return this.installer.readyTypeModules(type).then(() => {
-                    let makers = this.config.dependence[type].maker;
+                    let makers = Config.dependence[type].maker;
                     if (!Array.isArray(makers)) {
                         makers = [makers];
                     }
@@ -42,21 +43,20 @@ class Maker {
 
     babelCode(code, path) {
         let config = this.config;
-        let ops = Object.assign({}, config.compiler.babel, {filename: path});
+        let ops = Object.assign({}, Config.compiler.babel, {filename: path});
         let content = require("@babel/core").transform(code, ops).code;
         try {
-            content = require("uglify-es").minify(content, Object.assign({}, config.compiler.uglify)).code;
+            content = require("uglify-es").minify(content, Object.assign({}, Config.compiler.uglify)).code;
         } catch (e) {
         }
         return content;
     }
 
     minifyCode(code) {
-        let config = this.config;
         return this.installer.readyTypeModules("js").then(() => {
             let content = code;
             try {
-                content = require("uglify-es").minify(content, Object.assign({}, config.compiler.uglify)).code;
+                content = require("uglify-es").minify(content, Object.assign({}, Config.compiler.uglify)).code;
             } catch (e) {
             }
             return content;

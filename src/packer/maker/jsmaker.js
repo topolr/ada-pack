@@ -1,6 +1,6 @@
 let babel = require("@babel/core");
 let UglifyJS = require("uglify-es");
-let classPropertiesPollyfill = require("../../pollyfills/class-properties");
+let classPropertiesPollyfill = require("../pollyfills/class-properties");
 let { File } = require("ada-util");
 let Path = require("path");
 
@@ -15,6 +15,7 @@ module.exports = function ({ content, path, option, fileInfo }) {
                     sourceMaps: true
                 }, option.compiler.babel));
                 info.map.sources = [`${option.siteURL + filename}`];
+                info.map.sourcesContent = info.map.sourcesContent.map(a => `\n${a}`);
                 content = info.code;
                 content = classPropertiesPollyfill(content);
                 content = content + `\n//# sourceMappingURL=${filename}.map`;

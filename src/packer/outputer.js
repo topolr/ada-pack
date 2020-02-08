@@ -1,21 +1,22 @@
 let hash = require("ada-util/src/md5");
 let gzipSize = require('gzip-size');
-let AdaBundler = require("./bundler/ada");
-let EntryBundler = require("./bundler/entry");
-let SingleBundler = require("./bundler/single");
-let {File, clone} = require("ada-util");
+let EntryBundler = require("../bundler/entry");
+let SingleBundler = require("../bundler/single");
+let WorkerBundler = require("../bundler/worker");
+let { File } = require("ada-util");
 let Path = require("path");
-let util = require("./../util/helper");
+let util = require("../util/helper");
 let BinaryEntity = require("./entity/binary");
 let ExcutorEntity = require("./entity/excutor");
 let serializeError = require('serialize-error');
 let Anser = require("anser");
 
 class Pack {
-	constructor(sourceMap, name, files) {
+	constructor({ sourceMap, name, files, appName }) {
 		this._sourceMap = sourceMap;
 		this._files = files;
 		this._name = name;
+		this._appName = appName;
 		this._packName = "package-" + this._name.substring(this._sourceMap.config.sourcePath.length).replace(/\//g, "-").replace(/\\/g, "-");
 		this._result = "";
 		this.getContent();
@@ -37,7 +38,7 @@ class Pack {
 					}
 				}
 			});
-			this._result = `Ada.unpack(${JSON.stringify(this._content)})`;
+			this._result = `Ada.unpack("${this._appName}",${JSON.stringify(this._content)})`;
 		}
 		return this._result;
 	}
@@ -66,9 +67,8 @@ class Pack {
 class Outputer {
 	constructor(config, sourceMap) {
 		this._sourceMap = sourceMap;
-		this._initerBundler = new EntryBundler(config, this._sourceMap.maker);
-		this._workerBundler = new EntryBundler(config, this._sourceMap.maker);
-		this._adaBunlder = new AdaBundler(config, this._sourceMap.maker);
+		this._hookerBundler = new EntryBundler(config, this._sourceMap.maker);
+		this._workerBundler = new WorkerBundler(config, this._sourceMap.maker);
 		this._packs = {};
 		this._adaURL = "";
 		this._workerURL = "";
@@ -83,7 +83,7 @@ class Outputer {
 	}
 
 	getSourceMap() {
-		let map = {packages: {}};
+		let map = { packages: {} };
 		Reflect.ownKeys(this.sourceMap._map).forEach(key => {
 			let entity = this.sourceMap._map[key];
 			map[entity.getMapName()] = entity.getHash();
@@ -103,6 +103,7 @@ class Outputer {
 			errorInfo.message = Anser.ansiToHtml(errorInfo.message);
 			errorInfo.stack = Anser.ansiToHtml(errorInfo.stack);
 			return {
+				app: this.config.name,
 				name: entity.mapName,
 				error: entity.errorLog,
 				info: errorInfo
@@ -110,33 +111,18 @@ class Outputer {
 		});
 	}
 
-	outputAda() {
+	outputHooker(files) {
 		let config = this.config;
-		if (!this._adaBunlder.ready) {
-			return this.config.hooker.excute("beforeAda").then(() => {
-				if (config.develop) {
-					return this._adaBunlder.getBundleCode(Path.resolve(config.nmodulePath, "./adajs/develop.js")).then(code => {
-						let url = config.siteURL + "ada.js";
-						let path = Path.resolve(config.distPath, "./ada.js");
-						return this.config.hooker.excute("afterAda", this._adaBunlder).then(() => {
-							this._adaURL = url;
-							return new File(path).write(this._adaBunlder.getContent());
-						});
+		if (!this._hookerBundler.check(files)) {
+			return config.hooker.excute("beforeHooker").then(() => {
+				return this._hookerBundler.getBundleCode(config.hookerPath).then(() => {
+					return config.hooker.excute("afterHooker", this._hookerBundler).then(() => {
+						return this._hookerBundler.getContent();
 					});
-				} else {
-					return this._adaBunlder.getBundleCode(Path.resolve(config.nmodulePath, "./adajs/index.js")).then(code => {
-						let h = hash.md5(code).substring(0, 8);
-						let url = config.siteURL + `ada.${h}.js`;
-						let path = Path.resolve(config.distPath, `./ada.${h}.js`);
-						return this.config.hooker.excute("afterAda", this._adaBunlder).then(() => {
-							this._adaURL = url;
-							return new File(path).write(this._adaBunlder.getContent());
-						});
-					});
-				}
+				});
 			});
 		} else {
-			return Promise.resolve();
+			return Promise.resolve(this._hookerBundler.getContent());
 		}
 	}
 
@@ -144,7 +130,7 @@ class Outputer {
 		let config = this.config;
 		if (config.singleFiles) {
 			return this.config.hooker.excute("beforeSingle").then(() => {
-				return config.singleFiles(config).reduce((a, {path, dist}) => {
+				return config.singleFiles(config).reduce((a, { path, dist }) => {
 					return a.then(() => {
 						return new SingleBundler(config, this._sourceMap.maker).getBundleCode(path).then(code => {
 							return new File(dist).write(code);
@@ -152,25 +138,10 @@ class Outputer {
 					});
 				}, Promise.resolve());
 			}).then(() => {
-				return this.config.hooker.excute("afterSingle", this._adaBunlder);
+				return this.config.hooker.excute("afterSingle");
 			});
 		}
 		return Promise.resolve();
-	}
-
-	outputIniter(files) {
-		let config = this.config;
-		if (!this._initerBundler.check(files)) {
-			return config.hooker.excute("beforeIniter").then(() => {
-				return this._initerBundler.getBundleCode(config.initerPath).then(() => {
-					return config.hooker.excute("afterIniter", this._initerBundler).then(() => {
-						return this._initerBundler.getContent();
-					});
-				});
-			});
-		} else {
-			return Promise.resolve(this._initerBundler.getContent());
-		}
 	}
 
 	outputWorker(files) {
@@ -179,7 +150,7 @@ class Outputer {
 			return config.hooker.excute("beforeWorker").then(() => {
 				return this._workerBundler.getBundleCode(config.workerPath).then(code => {
 					let h = hash.md5(code).substring(0, 8);
-					let url = config.siteURL + config.develop ? "service.worker.js" : `service.worker.${h}.js`;
+					let url = config.siteURL + (config.develop ? "service.worker.js" : `service.worker.${h}.js`);
 					let path = Path.resolve(config.distPath, config.develop ? "./service.worker.js" : `./service.worker.${h}.js`);
 					return config.hooker.excute("afterWorker", this._workerBundler).then(() => {
 						this._workerURL = url;
@@ -263,101 +234,56 @@ class Outputer {
 	outputPackFiles() {
 		let config = this.config, entryDependenceMap = this.sourceMap._entryDependenceMap;
 		Reflect.ownKeys(entryDependenceMap).forEach(key => {
-			this._packs[key] = new Pack(this.sourceMap, key, entryDependenceMap[key]);
-		});
-		return Reflect.ownKeys(this._packs).reduce((a, key) => {
-			return a.then(() => {
-				let pack = this._packs[key];
-				return this.config.hooker.excute("outputPack", pack).then(() => {
-					if (config.develop) {
-						return new File(Path.resolve(config.distPath, `./${pack.getMapName()}.js`)).write(pack.getContent());
-					} else {
-						return new File(Path.resolve(config.distPath, `./${pack.getHash()}.js`)).write(pack.getContent());
-					}
-				});
+			this._packs[key] = new Pack({
+				sourceMap: this.sourceMap,
+				name: key,
+				files: entryDependenceMap[key],
+				appName: this.config.name
 			});
-		}, Promise.resolve());
+		});
+		return this.config.hooker.excute("beforeoutputPack", this._packs).then(() => {
+			return Reflect.ownKeys(this._packs).reduce((a, key) => {
+				return a.then(() => {
+					let pack = this._packs[key];
+					return this.config.hooker.excute("outputPack", pack).then(() => {
+						if (config.develop) {
+							return new File(Path.resolve(config.distPath, `./${pack.getMapName()}.js`)).write(pack.getContent());
+						} else {
+							return new File(Path.resolve(config.distPath, `./${pack.getHash()}.js`)).write(pack.getContent());
+						}
+					});
+				});
+			}, Promise.resolve());
+		});
 	}
 
-	outputIndex(files) {
+	outputManifest(files) {
 		let config = this.config;
-		let baseInfo = config.baseInfo;
-		let metaContent = baseInfo.meta.map(item => {
-			let props = Reflect.ownKeys(item).map(key => `${key}="${item[key]}"`).join(" ");
-			return `<meta ${props}>`;
-		}).join("");
-		let iconsContent = baseInfo.icons.map(info => {
-			return `<link rel="apple-touch-icon-precomposed" sizes="${info.sizes}" href="${config.siteURL + info.src}">`;
-		}).join("");
-		if (baseInfo.icons.length > 0) {
-			iconsContent += `<link rel="shortcut icon" href="${config.siteURL + baseInfo.icons[0].src}">`;
-		}
-		let linkContent = baseInfo.link.map(path => {
-			let props = Reflect.ownKeys(path).map(key => `${key}="${path[key]}"`).join(" ");
-			return `<link ${props}>`;
-		}).join("");
-		let styleContent = baseInfo.style.map(path => {
-			if (util.isObject(path)) {
-				path.rel = "stylesheet";
-				let props = Reflect.ownKeys(path).map(key => `${key}="${path[key]}"`).join(" ");
-				return `<link ${props}>`;
-			} else {
-				return `<link rel="stylesheet" href="${path}">`;
-			}
-		}).join("");
-		let scriptContent = baseInfo.script.map(path => {
-			if (util.isObject(path)) {
-				let props = Reflect.ownKeys(path).map(key => `${key}="${path[key]}"`).join(" ");
-				return `<script ${props}></script>`;
-			} else {
-				return `<script src="${path}"></script>`;
-			}
-		}).join("");
 		let bootMap = {
-			basePath: config.siteURL,
+			siteURL: config.siteURL,
 			develop: config.develop,
 			map: this.getSourceMap(),
 			name: config.name,
 			root: config.mainEntryPath.substring(config.sourcePath.length)
 		};
-		let manifest = {};
-		Reflect.ownKeys(baseInfo).forEach(key => {
-			if (["keywords", "meta", "link", "style", "script"].indexOf(key) === -1) {
-				manifest[key] = clone(baseInfo[key]);
-			}
-		});
-		let hookInfo = {
-			map: bootMap,
-			manifest
-		};
 		let ps = Promise.resolve();
 		if (config.workerPath) {
 			ps = ps.then(() => this.outputWorker(files));
 		}
-		if (config.initerPath) {
-			ps = ps.then(() => this.outputIniter(files));
+		if (config.hookerPath) {
+			ps = ps.then(() => this.outputHooker(files));
 		}
 		return ps.then(() => {
-			return this.config.hooker.excute("outputIndex", hookInfo).then(() => {
-				return Promise.all(baseInfo.icons.map(icon => {
-					return new File(Path.resolve(config.sourcePath, icon.src)).copyTo(Path.resolve(config.distPath, icon.src));
-				})).then(() => {
-					let workerCode = "", initer = this._initerBundler.getContent();
-					if (config.worker && config.worker.path) {
-						workerCode = `<script>if('serviceWorker' in navigator){navigator.serviceWorker.register('${this._workerURL}', { scope: '${config.worker.scope}' }).then(function(reg) {console.log('Registration succeeded. Scope is ' + reg.scope);}).catch(function(error) {console.log('Registration failed with ' + error);});}</script>`
-					}
-					let content = `<!DOCTYPE html><html><head><link rel="manifest" href="manifest.json"><meta charset="${baseInfo.charset}"><title>${baseInfo.name}</title>${metaContent}${iconsContent}${styleContent}${linkContent}${scriptContent}<script src="${this._adaURL}"></script><script>${initer ? "Ada.init(" + initer + ");" : ""}Ada.boot(${JSON.stringify(hookInfo.map)});</script>${workerCode ? workerCode : ''}</head><body></body></html>`;
-					if (hookInfo.manifest.icons) {
-						hookInfo.manifest.icons.forEach(icon => {
-							icon.src = config.siteURL + icon.src;
-						});
-					}
-					return Promise.all([
-						new File(Path.resolve(config.indexPath, "./manifest.json")).write(JSON.stringify(hookInfo.manifest)),
-						new File(Path.resolve(config.indexPath, "./index.html")).write(content)
-					]);
-				});
-			});
+			if (config.workerPath) {
+				bootMap.worker = {
+					url: this._workerURL,
+					scope: config.worker.scope
+				};
+			}
+			if (config.hookerPath) {
+				bootMap.hooker = this._hookerBundler.getContent();
+			}
+			return new File(Path.resolve(config.distPath, './manifest.json')).write(JSON.stringify(bootMap, null, 4));
 		});
 	}
 
@@ -365,26 +291,27 @@ class Outputer {
 		let outputMap = this.config.output;
 		return this.config.hooker.excute("beforeOutput").then(() => {
 			let ps = Promise.resolve();
-			if (outputMap.ada) {
-				ps = ps.then(() => this.outputAda());
-			}
 			if (outputMap.files) {
 				ps = ps.then(() => this.outputFiles());
 			}
 			if (outputMap.packFiles) {
 				ps = ps.then(() => this.outputPackFiles());
 			}
-			if (outputMap.indexPage) {
-				ps = ps.then(() => this.outputIndex(files));
-			}
 			if (outputMap.staticFiles) {
 				ps = ps.then(() => this.outputStatic());
 			}
+			ps = ps.then(() => this.outputManifest(files));
 			ps = ps.then(() => this.outputSingles());
 			return ps.then(() => {
 				return this.config.hooker.excute("afterOutput");
 			}).then(() => {
-				this.rebuild = this._initerBundler.rebuild || this._workerBundler.rebuild;
+				this.rebuild = this._hookerBundler.rebuild || this._workerBundler.rebuild;
+				if (this._hookerBundler.rebuild) {
+					this._hookerBundler.rebuild = false;
+				}
+				if (this._workerBundler.rebuild) {
+					this._workerBundler.rebuild = false;
+				}
 			});
 		});
 	}

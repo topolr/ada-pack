@@ -1,6 +1,6 @@
 let { ENTITYNONE, ENTITYREADY } = require("./const");
 let { SyncFile } = require("ada-util");
-let util = require("./../../util/helper");
+let util = require("../../util/helper");
 let path = require("path");
 
 class BaseEntity {
@@ -31,7 +31,7 @@ class BaseEntity {
         if (this.config.develop) {
             return this.info.distPath;
         } else {
-            let hash = new SyncFile(this.path).hash().substring(0, 8);
+            let hash = this.getHash();
             let suffix = path.extname(this.path);
             return path.resolve(this.info.distPath, './../', `./${hash}${suffix}`);
         }

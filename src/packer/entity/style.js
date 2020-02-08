@@ -1,6 +1,6 @@
 let TextEntity = require("./text");
 let {ENTITYNONE, ENTITYREADY} = require("./const");
-let util = require("./../../util/helper");
+let util = require("../../util/helper");
 let Path = require("path");
 let {File} = require("ada-util");
 
@@ -15,23 +15,21 @@ class StyleEntity extends TextEntity {
                 return new Promise(resolve => {
                     config.hooker.excute("beforeMake", this).then(() => {
                         this.sourceMap.maker.make(this.path, this.info).then(content => {
-                            this.errorLog = null;
-                            this.output = false;
                             this.content = content;
                             this.state = ENTITYREADY;
+                            this.errorLog = null;
+                            this.output = false;
                             config.hooker.excute("afterMake", this).then(() => {
                                 this.content = util.replacePaths(this.content, (_path) => {
                                     let m = this.sourceMap.getTargetPath(Path.resolve(this.path, "./../"), "./" + _path, this.info);
-                                    if (m.path.indexOf("{{") === -1) {
-                                        if (!this.dependence.find(a => a.path === this.info.path)) {
-                                            this.dependence.push(m);
-                                        }
-                                        if (config.develop) {
-                                            return config.siteURL + m.required;
-                                        } else {
-                                            let hash = new File(m.path).transform().hash().substring(0, 8);
-                                            return config.siteURL + util.getHashPath(m.required, hash);
-                                        }
+                                    if (!this.dependence.find(a => a.path === this.info.path)) {
+                                        this.dependence.push(m);
+                                    }
+                                    if (this.sourceMap.config.develop) {
+                                        return this.sourceMap.config.siteURL + m.required;
+                                    } else {
+                                        let hash = new File(m.path).transform().hash().substring(0, 8);
+                                        return this.sourceMap.config.siteURL + util.getHashPath(m.required, hash);
                                     }
                                 });
                                 resolve(this.dependence);
