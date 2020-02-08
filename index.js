@@ -83,7 +83,7 @@ const queue = new Queue();
 
 module.exports = {
     develop(fn) {
-        console.log(`[ADA-PACK]`.yellow, `DEVELOP`, `|`.yellow, `${require("./package").version}`.magenta);
+        console.log(`ADAPACK`.yellow, `|`.yellow, `DEVELOP`, `|`.yellow, `${require("./package").version}`.magenta);
         let pager = new Pager(), packers = [];
         return Promise.resolve().then(() => pager.outputAda()).then(() => {
             return config.apps.filter(app => !app.host).reduce((a, b) => {
@@ -128,7 +128,7 @@ module.exports = {
         }).then(() => pager.outputIndex()).then(() => packers);
     },
     publish() {
-        console.log(`[ADA-PACK]`.yellow, `PUBLISH`, `|`.yellow, `${require("./package").version}`.magenta);
+        console.log(`ADAPACK`.yellow, `|`.green, `PUBLISH`, `|`.yellow, `${require("./package").version}`.magenta);
         let pager = new Pager();
         return Promise.resolve().then(() => pager.outputAda()).then(() => {
             return config.apps.filter(app => !app.host).reduce((a, b) => {

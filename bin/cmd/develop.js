@@ -34,9 +34,10 @@ module.exports = {
 		let waitTime = 5000;
 		let port = config.server.port;
 		config.develop = true;
-		return require("../../index").develop(({ type, files, map, log, name,app }) => {
+		config.apps.forEach(a => a.develop = true);
+		return require("../../index").develop(({ type, files, map, log, name, app }) => {
 			if (config.server.enable) {
-				messageQueue.add({ type, files, map, log, name,app });
+				messageQueue.add({ type, files, map, log, name, app });
 			}
 		}).then((packers) => {
 			if (config.server.enable) {

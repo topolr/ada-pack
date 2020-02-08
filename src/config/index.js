@@ -8,10 +8,10 @@ const appConfig = {
     basePath: "./app/",
     sourcePath: "./src/",
     main: "./src/root.js",
-    initer: "",
+    hooker: "",
     worker: {
-        scope: "/",
-        path: ""
+        path: "",
+        scope: "/"
     },
     entryPath: "./src/entries",
     staticPath: "./src/static",
@@ -225,8 +225,8 @@ config.apps = config.apps.map(app => {
         // _config.indexPath = Path.join(basePath, _config.indexPath, "./../").replace(/\\/g, "/");
         _config.entryPath = Path.join(basePath, _config.entryPath).replace(/\\/g, "/");
         _config.mainEntryPath = Path.join(basePath, _config.main).replace(/\\/g, "/");
-        if (_config.initer) {
-            _config.initerPath = Path.join(basePath, _config.initer).replace(/\\/g, "/");
+        if (_config.hooker) {
+            _config.hookerPath = Path.join(basePath, _config.hooker).replace(/\\/g, "/");
         }
         if (_config.worker && _config.worker.path) {
             _config.workerPath = Path.join(basePath, _config.worker.path).replace(/\\/g, "/");

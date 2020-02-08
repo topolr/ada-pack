@@ -13,7 +13,7 @@ module.exports = function (hooker) {
 	let installSpinner = null;
 	hooker.hook("beforePack", (config) => {
 		// if (config.name) {
-		// 	console.log(`[ADA-PACK]`.grey, `PACKING`.green, `|`.green, config.name);
+		// 	console.log(`PACKING`.green, `|`.green, config.name);
 		// }
 		// console.log(chalk.blue(`[${config.name}]`));
 	}).hook("startInstall", (names) => {
@@ -21,10 +21,10 @@ module.exports = function (hooker) {
 		installSpinner = ora({ color: "yellow", text: "INSTALL " + name }).start();
 	}).hook("afterInstall", (name) => {
 		installSpinner && installSpinner.stop();
-		console.log(`[ADA-PACK]`.grey, `INSTALL`.green, `|`.green, name);
+		console.log(`INSTALL`.green, `|`.green, name);
 	}).hook("installError", (name) => {
 		installSpinner && installSpinner.stop();
-		console.log(`[ADA-PACK]`.grey, `INSTALL`.red, `|`.green, name);
+		console.log(`INSTALL`.red, `|`.green, name);
 	}).hook("beforeMap", () => {
 		mapTime = new Date().getTime();
 		mapSpinner = ora({ color: "yellow", text: "MAP SOURCE" }).start();
@@ -32,33 +32,85 @@ module.exports = function (hooker) {
 	}).hook("afterMake", (info) => {
 	}).hook("afterMap", ({ name }) => {
 		mapSpinner && mapSpinner.stop();
-		console.log(`[ADA-PACK]`.grey, `MAPPING`.green, `|`.green, `[${name}]`.blue, `|`.green, (new Date().getTime() - mapTime), `ms`.green);
+		let header = cliui();
+		header.div(
+			{ text: chalk.cyan('NAME'), width: 40 },
+			{ text: chalk.cyan('TIME'), width: 15 }
+		);
+		let ui = cliui();
+		ui.div(
+			{ text: chalk.blue(name), width: 40 },
+			{ text: chalk.green(`${(new Date().getTime() - mapTime)}ms`), width: 15 }
+		);
+		console.log(`MAPPING`.cyan, `|`.cyan, header.toString());
+		console.log(`       `.green, `|`.green, ui.toString());
 	}).hook("beforeOutput", () => {
 	}).hook("beforeAda", () => {
 		adaSpinner = ora({ color: "yellow", text: "BUNDLE ADA CORE" }).start();
 	}).hook("afterAda", bundler => {
 		adaSpinner && adaSpinner.stop();
+		let header = cliui();
+		header.div(
+			{ text: chalk.cyan('TIME'), width: 40 },
+			{ text: chalk.cyan('SIZE'), width: 15 },
+			{ text: chalk.cyan('GZIP'), width: 15 }
+		);
 		let ui = cliui();
 		ui.div(
-			{ text: chalk.green(`${bundler.time}ms`), width: 15 },
+			{ text: chalk.green(`${bundler.time}ms`), width: 40 },
 			{ text: chalk.green(bundler.getFileSize()), width: 15 },
 			{ text: chalk.green(bundler.getGzipSize()), width: 15 }
 		);
-		console.log(chalk.grey(`[ADA-PACK]`), chalk.green(`ADACORE`), `|`.green, ui.toString());
-	}).hook("beforeIniter", () => {
+		console.log(chalk.cyan(`ADACORE`), `|`.cyan, header.toString());
+		console.log(chalk.green(`       `), `|`.green, ui.toString());
+	}).hook("beforeHooker", () => {
 		initerSpinner = ora({ color: "yellow", text: "BUNDLE INITER CODE" }).start();
-	}).hook("afterIniter", (bundler) => {
+	}).hook("afterHooker", (bundler) => {
 		initerSpinner && initerSpinner.stop();
-		console.log(`[ADA-PACK]`.grey, `INITERC`.green, `|`.green, bundler.time, `ms |`.green, bundler.getFileSize(), `|`.cyan, bundler.getGzipSize());
+		let header = cliui();
+		header.div(
+			{ text: chalk.cyan('TIME'), width: 40 },
+			{ text: chalk.cyan('SIZE'), width: 15 },
+			{ text: chalk.cyan('GZIP'), width: 15 }
+		);
+		let ui = cliui();
+		ui.div(
+			{ text: chalk.green(`${bundler.time}ms`), width: 40 },
+			{ text: chalk.green(bundler.getFileSize()), width: 15 },
+			{ text: chalk.green(bundler.getGzipSize()), width: 15 }
+		);
+		console.log(chalk.cyan(`HOOKERC`), `|`.cyan, header.toString());
+		console.log(chalk.green(`       `), `|`.green, ui.toString());
 	}).hook("beforeWorker", () => {
 		workerSpinner = ora({ color: "yellow", text: "BUNDLE WORKER" }).start();
 	}).hook("afterWorker", (bundler) => {
-		workerSpinner && workerSpinner.succeed();
-		console.log(`[ADA-PACK]`.grey, `WORKERC`.green, `|`.green, bundler.getFileSize(), `|`.cyan, bundler.getGzipSize());
+		workerSpinner && workerSpinner.stop();
+		let header = cliui();
+		header.div(
+			{ text: chalk.cyan('FILE'), width: 40 },
+			{ text: chalk.cyan('SIZE'), width: 15 },
+			{ text: chalk.cyan('GZIP'), width: 15 }
+		);
+		let ui = cliui();
+		ui.div(
+			{ text: chalk.green('service.worker.js'), width: 40 },
+			{ text: chalk.green(bundler.getFileSize()), width: 15 },
+			{ text: chalk.green(bundler.getGzipSize()), width: 15 }
+		);
+		console.log(chalk.cyan(`WORKERC`), `|`.cyan, header.toString());
+		console.log(chalk.green(`       `), `|`.green, ui.toString());
 	}).hook("beforeSingle", () => {
 	}).hook("afterSingle", () => {
-		// console.log(`[ADA-PACK]`.grey, `SINGLES`.green);
+		// console.log(`SINGLES`.green);
 	}).hook().hook("outputFile", (entity) => {
+	}).hook('beforeoutputPack', () => {
+		let ui = cliui();
+		ui.div(
+			{ text: chalk.cyan('FILE'), width: 40 },
+			{ text: chalk.cyan('SIZE'), width: 15 },
+			{ text: chalk.cyan('GZIP'), width: 15 }
+		);
+		console.log(`PACKAGE`.cyan, `|`.cyan, ui.toString());
 	}).hook("outputPack", pack => {
 		let ui = cliui();
 		ui.div(
@@ -66,19 +118,22 @@ module.exports = function (hooker) {
 			{ text: chalk.green(pack.getFileSize()), width: 15 },
 			{ text: chalk.green(pack.getGzipSize()), width: 15 }
 		);
-		console.log(`[ADA-PACK]`.grey, `PACKAGE`.green, `|`.green, ui.toString());
+		console.log(`       `.green, `|`.green, ui.toString());
 	}).hook("outputIndex", () => {
 	}).hook("afterOutput", (info, sourceMap) => {
 		sourceMap.outputer.getLogInfo().forEach((info) => {
-			console.log(`[ADA-PACK]`.grey, `MAKE ERROR [`.red, info.name, `]`.red);
+			console.log(`MAKE ERROR [`.red, info.name, `]`.red);
 			console.log(info.error);
 		});
 	}).hook("afterPack", (info, sourceMap) => {
 	}).hook("fileEdit", () => {
-		console.log(`[ADA-PACK]`.grey, `EDIT FILE ${util.formatDate()}`.grey);
+		console.log('--------|'.padEnd(69, '-').grey);
+		console.log(`UPDATED`.cyan, `|`.cyan, `${util.formatDate()}                    [EDIT]`.green);
 	}).hook("fileAdd", () => {
-		console.log(`[ADA-PACK]`.grey, `ADD FILE ${util.formatDate()}`.grey);
+		console.log('--------|'.padEnd(69, '-').grey);
+		console.log(`UPDATED`.cyan, `|`.cyan, `${util.formatDate()}                    [ADD]`.green);
 	}).hook("fileRemove", () => {
-		console.log(`[ADA-PACK]`.grey, `REMOVE FILE ${util.formatDate()}`.grey);
+		console.log('--------|'.padEnd(69, '-').grey);
+		console.log(`UPDATED`.cyan, `|`.cyan, `${util.formatDate()}                    [REMOVE]`.green);
 	});
 };

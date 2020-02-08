@@ -105,11 +105,7 @@ class Pager {
                     return new File(Path.resolve(config.projectPath, icon.src)).copyTo(Path.resolve(config.distPath, './logos/', Path.basename(icon.src)));
                 });
             }, Promise.resolve()).then(() => {
-                let workerCode = "", initer = ""//, initer = this._initerBundler.getContent();
-                // if (config.worker && config.worker.path) {
-                //     workerCode = `<script>if('serviceWorker' in navigator){navigator.serviceWorker.register('${this._workerURL}', { scope: '${config.worker.scope}' }).then(function(reg) {console.log('Registration succeeded. Scope is ' + reg.scope);}).catch(function(error) {console.log('Registration failed with ' + error);});}</script>`
-                // }
-                let content = `<!DOCTYPE html><html><head><link rel="manifest" href="manifest.json"><meta charset="${baseInfo.charset}"><title>${baseInfo.name}</title>${metaContent}${iconsContent}${styleContent}${linkContent}${scriptContent}<script src="${this._adaURL}"></script><script>${initer ? "Ada.init(" + initer + ");" : ""}Ada.boot(${JSON.stringify(hookInfo.map)});</script>${workerCode ? workerCode : ''}</head><body></body></html>`;
+                let content = `<!DOCTYPE html><html><head><link rel="manifest" href="manifest.json"><meta charset="${baseInfo.charset}"><title>${baseInfo.name}</title>${metaContent}${iconsContent}${styleContent}${linkContent}${scriptContent}<script src="${this._adaURL}"></script><script>Ada.boot(${JSON.stringify(hookInfo.map)});</script></head><body></body></html>`;
                 if (hookInfo.manifest.icons) {
                     hookInfo.manifest.icons.forEach(icon => {
                         icon.src = config.siteURL + icon.src;

@@ -22,8 +22,12 @@ class Packer {
     }
 
     getCurrentState(type, files = []) {
+        type = this.sourceMap.outputer.rebuild ? "reload" : type;
+        if (type === 'reload') {
+            this.sourceMap.outputer.rebuild = false;
+        }
         return {
-            type: this.sourceMap.outputer.rebuild ? "reload" : type,
+            type,
             map: this.sourceMap.outputer.getSourceMap(),
             log: this.sourceMap.outputer.getLogInfo(),
             name: this.sourceMap.config.name,
