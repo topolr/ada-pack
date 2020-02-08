@@ -29,8 +29,8 @@ let messageQueue = {
 module.exports = {
 	command: "dev",
 	desc: "develop",
-	paras: ["[name]"],
-	fn: function (params) {
+	paras: [],
+	fn: function () {
 		let waitTime = 5000;
 		let port = config.server.port;
 		config.develop = true;

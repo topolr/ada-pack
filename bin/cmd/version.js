@@ -3,7 +3,7 @@ let chalk = require('chalk');
 
 module.exports = {
 	command: "version",
-	desc: "version",
+	desc: map.version,
 	paras: [],
 	fn: function () {
 		console.log(chalk(` version ${map.version}`).yellow);

@@ -31,7 +31,7 @@ function tryKillProcess(port) {
 
 module.exports = {
     command: "ssr",
-    desc: "out put static files by SSR",
+    desc: "out put static files",
     paras: [],
     fn: function () {
         if (config.ssr.output) {

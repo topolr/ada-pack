@@ -4,7 +4,7 @@ let config = require("./../../src/config/index");
 
 module.exports = {
     command: "start",
-    desc: "start server,mode[ develop | publish ]",
+    desc: "start server",
     paras: [],
     fn: function () {
         let port = config.server.port;
