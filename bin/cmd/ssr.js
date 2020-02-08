@@ -1,4 +1,3 @@
-let colors = require("colors");
 let os = require("os");
 let Path = require("path");
 let { File } = require("ada-util");
@@ -6,6 +5,7 @@ let Packer = require("./../../index");
 let childProcess = require('child_process');
 let config = require("./../../src/config/index");
 let ora = require('ora');
+let chalk = require('chalk');
 
 function tryKillProcess(port) {
     return new Promise((resolve, reject) => {
@@ -36,9 +36,11 @@ module.exports = {
     fn: function () {
         if (config.ssr.output) {
             tryKillProcess(config.server.port).then(() => {
-                console.log(`    SSR`.green, `|`.green, 'PUBLISH PROJECT'.cyan);
-                Packer.publish(config).then(() => {
-                    console.log(`    SSR`.green, `|`.green, 'STARTE SERVER'.cyan);
+                console.log(chalk(`ADAPACK`).yellow, chalk(`|`).green, `PUBLISH`, chalk(`|`).yellow, chalk(`${require("./../../package").version}`).magenta);
+                console.log(chalk('--------|'.padEnd(25, '-')).rainbow);
+                console.log(chalk(`    SSR`).green, chalk(`|`).green, chalk('PUBLISH PROJECT').cyan);
+                Packer.publish(true).then(() => {
+                    console.log(chalk(`    SSR`).green, chalk(`|`).green, chalk('STARTE SERVER').cyan);
                     let server = childProcess.spawn("node", [Path.resolve(__dirname, "./../lib/process.js")], {
                         cwd: process.cwd(),
                         stdio: ['inherit', 'inherit', 'inherit', 'ipc']
@@ -59,7 +61,7 @@ module.exports = {
                                 }, Promise.resolve());
                             }).then(() => {
                                 spinner.stop();
-                                console.log(`    SSR`.green, `|`.green, `RENDER DONE IN ${new Date().getTime() - startTime}ms`.cyan);
+                                console.log(chalk(`    SSR`).green, chalk(`|`).green, chalk(`RENDER DONE IN ${new Date().getTime() - startTime}ms`).cyan);
                                 server.kill();
                             }).catch(e => {
                                 spinner.stop();
@@ -72,7 +74,7 @@ module.exports = {
                         server.kill();
                     });
                     server.on('close', () => {
-                        console.log(`    SSR`.green, `|`.green, 'SERVER STOPPED'.cyan);
+                        console.log(chalk(`    SSR`).green, chalk(`|`).green, chalk('SERVER STOPPED').cyan);
                     });
                     process.on('unhandledRejection', (err) => {
                         console.log(err);
@@ -81,7 +83,7 @@ module.exports = {
                 });
             });
         } else {
-            console.log(`[SSR] Error output path can not empty in config file`.red);
+            console.log(chalk(`[SSR] Error output path can not empty in config file`).red);
         }
     }
 };

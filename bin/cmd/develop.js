@@ -1,8 +1,8 @@
-let DevServer = require("./../lib/server");
-let { randomid } = require("ada-util");
-const PassThrough = require('stream').PassThrough;
 let ora = require('ora');
 let opn = require("opn");
+let { randomid } = require("ada-util");
+let PassThrough = require('stream').PassThrough;
+let DevServer = require("./../lib/server");
 let config = require("./../../src/config/index");
 
 let connected = false;

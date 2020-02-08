@@ -1,8 +1,8 @@
-let colors = require("colors");
 let chokidar = require('chokidar');
 let config = require("./src/config/index");
 let Pager = require("./src/pager");
 let Packer = require("./src/packer");
+let chalk = require('chalk');
 
 class Waiter {
     constructor() {
@@ -83,7 +83,8 @@ const queue = new Queue();
 
 module.exports = {
     develop(fn) {
-        console.log(`ADAPACK`.yellow, `|`.yellow, `DEVELOP`, `|`.yellow, `${require("./package").version}`.magenta);
+        console.log(chalk(`ADAPACK`).yellow, chalk(`|`).yellow, `DEVELOP`, chalk(`|`).yellow, chalk(`${require("./package").version}`).magenta);
+        console.log(chalk('--------|'.padEnd(25, '-')).rainbow);
         let pager = new Pager(), packers = [];
         return Promise.resolve().then(() => pager.outputAda()).then(() => {
             return config.apps.filter(app => !app.host).reduce((a, b) => {
@@ -127,8 +128,11 @@ module.exports = {
             }, Promise.resolve());
         }).then(() => pager.outputIndex()).then(() => packers);
     },
-    publish() {
-        console.log(`ADAPACK`.yellow, `|`.green, `PUBLISH`, `|`.yellow, `${require("./package").version}`.magenta);
+    publish(isSSR = false) {
+        if (!isSSR) {
+            console.log(chalk(`ADAPACK`).yellow, chalk(`|`).green, `PUBLISH`, chalk(`|`).yellow, chalk(`${require("./package").version}`).magenta);
+            console.log(chalk('--------|'.padEnd(25, '-')).rainbow);
+        }
         let pager = new Pager();
         return Promise.resolve().then(() => pager.outputAda()).then(() => {
             return config.apps.filter(app => !app.host).reduce((a, b) => {

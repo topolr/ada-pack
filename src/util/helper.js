@@ -1,4 +1,3 @@
-let colors = require("colors");
 let {SyncFile} = require("ada-util");
 let Path = require("path");
 
