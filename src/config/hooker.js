@@ -36,6 +36,7 @@ module.exports = function (hooker) {
 			{ text: chalk(name).blue, width: 40 },
 			{ text: chalk(`${(new Date().getTime() - mapTime)}ms`).green, width: 15 }
 		);
+		console.log(chalk(('+ ' + util.formatDate('mm:ss') + ' +').padEnd(68, '-') + '+').gray);
 		console.log(chalk(`MAPPING`).cyan, chalk(`|`).cyan, header.toString());
 		console.log('       ', chalk(`|`).green, ui.toString());
 	}).hook("beforeOutput", () => {
@@ -114,18 +115,16 @@ module.exports = function (hooker) {
 	}).hook("outputIndex", () => {
 	}).hook("afterOutput", (info, sourceMap) => {
 		sourceMap.outputer.getLogInfo().forEach((info) => {
-			console.log(chalk(`MAKE ERROR [`).red, info.name, chalk(`]`).red);
+			// console.log(chalk(`MAKE ERROR [`).red, info.name, chalk(`]`).red);
+			console.log(chalk(`  ERROR`).red, chalk(`|`).red, chalk(info.name).red);
 			console.log(info.error);
 		});
 	}).hook("afterPack", (info, sourceMap) => {
 	}).hook("fileEdit", () => {
-		console.log(chalk('--------|'.padEnd(69, '-')).grey);
-		console.log(chalk(`UPDATED`).cyan, chalk(`|`).cyan, chalk(`${util.formatDate()}                    [EDIT]`).green);
+		// console.log(chalk(`UPDATED`).yellow, chalk(`|`).yellow, chalk(`${util.formatDate()}                    [EDIT]`).green);
 	}).hook("fileAdd", () => {
-		console.log(chalk('--------|'.padEnd(69, '-')).grey);
-		console.log(chalk(`UPDATED`).cyan, chalk(`|`).cyan, chalk(`${util.formatDate()}                    [ADD]`).green);
+		// console.log(chalk(`UPDATED`).yellow, chalk(`|`).yellow, chalk(`${util.formatDate()}                    [ADD]`).green);
 	}).hook("fileRemove", () => {
-		console.log(chalk('--------|'.padEnd(69, '-')).grey);
-		console.log(chalk(`UPDATED`).cyan, chalk(`|`).cyan, chalk(`${util.formatDate()}                    [REMOVE]`).green);
+		// console.log(chalk(`UPDATED`).yellow, chalk(`|`).yellow, chalk(`${util.formatDate()}                    [REMOVE]`).green);
 	});
 };

@@ -103,6 +103,7 @@ class Outputer {
 			errorInfo.message = Anser.ansiToHtml(errorInfo.message);
 			errorInfo.stack = Anser.ansiToHtml(errorInfo.stack);
 			return {
+				app: this.config.name,
 				name: entity.mapName,
 				error: entity.errorLog,
 				info: errorInfo
