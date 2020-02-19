@@ -1,4 +1,4 @@
-let sass = require('node-sass');
+let sass = require('sass');
 let maker = require("./cssmaker");
 let Path = require("path");
 let {File} = require("ada-util");

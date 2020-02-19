@@ -100,7 +100,7 @@ const config = {
                 "autoprefixer": "^7.1.6",
                 "postcss": "^5.2.5",
                 "uglifycss": "^0.0.25",
-                "node-sass": "^3.10.1",
+                "sass": "^1.25.0",
                 "html-minifier": "^3.5.6"
             },
             maker: "./maker/sassmaker"
