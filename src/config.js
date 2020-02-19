@@ -13,7 +13,7 @@ module.exports = {
 	entryPath: "./src/entries",
 	staticPath: "./src/static",
 	moduleMap: {},
-	watchNodeModules:false,
+	watchNodeModules: false,
 	entryFiles() {
 		return [];
 	},
@@ -30,14 +30,14 @@ module.exports = {
 		background_color: "#fff",
 		theme_color: "#fff",
 		description: "ada web framework.",
-		related_applications: [{"platform": "web"}],
+		related_applications: [{ "platform": "web" }],
 		keywords: "",
 		charset: "UTF-8",
 		meta: [
-			{name: 'viewport', content: "width=device-width, initial-scale=1.0, minimum-scale=1.0, user-scalable=no"},
-			{name: 'format_detection', content: "telephone=no"},
-			{name: 'apple_mobile_web_app_status_bar_style', content: "white"},
-			{name: 'apple_mobile_web_app_capable', content: "yes"}
+			{ name: 'viewport', content: "width=device-width, initial-scale=1.0, minimum-scale=1.0, user-scalable=no" },
+			{ name: 'format_detection', content: "telephone=no" },
+			{ name: 'apple_mobile_web_app_status_bar_style', content: "white" },
+			{ name: 'apple_mobile_web_app_capable', content: "yes" }
 		],
 		link: [],
 		style: [],
@@ -89,7 +89,7 @@ module.exports = {
 				"autoprefixer": "^7.1.6",
 				"postcss": "^5.2.5",
 				"uglifycss": "^0.0.25",
-				"node-sass": "^3.10.1",
+				"sass": "^1.25.0",
 				"html-minifier": "^3.5.6"
 			},
 			maker: "./maker/sassmaker"
@@ -148,15 +148,15 @@ module.exports = {
 	compiler: {
 		babel: {
 			presets: [
-				"@babel/typescript", ["@babel/env", {"targets": {"chrome": "59"}}]
+				"@babel/typescript", ["@babel/env", { "targets": { "chrome": "59" } }]
 			],
 			plugins: [
 				["@babel/plugin-transform-runtime", {
 					"helpers": false,
 					"regenerator": true
 				}],
-				["@babel/plugin-proposal-decorators", {"legacy": true}],
-				["@babel/plugin-proposal-class-properties", {"loose": true}],
+				["@babel/plugin-proposal-decorators", { "legacy": true }],
+				["@babel/plugin-proposal-class-properties", { "loose": true }],
 				"@babel/transform-async-to-generator",
 				"@babel/plugin-syntax-dynamic-import",
 				"@babel/plugin-proposal-function-bind",
@@ -168,7 +168,7 @@ module.exports = {
 		uglify: {},
 		uglifycss: {},
 		postcss: [
-			{autoprefixer: {}}
+			{ autoprefixer: {} }
 		],
 		sass: {},
 		minifier: {},

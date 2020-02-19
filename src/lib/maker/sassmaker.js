@@ -1,9 +1,9 @@
-let sass = require('node-sass');
+let sass = require('sass');
 let maker = require("./cssmaker");
 let Path = require("path");
-let {File} = require("ada-util");
+let { File } = require("ada-util");
 
-module.exports = function ({content, path, option, fileInfo}) {
+module.exports = function ({ content, path, option, fileInfo }) {
     return new Promise((resolve, reject) => {
         if (option.develop) {
             sass.render(Object.assign({
@@ -41,6 +41,6 @@ module.exports = function ({content, path, option, fileInfo}) {
             });
         }
     }).then(content => {
-        return maker({content, path, option});
+        return maker({ content, path, option });
     });
 };
